@@ -1,12 +1,13 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-200">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
+                        <img src="{{ asset('images/logo-smk8.png') }}" alt="Logo SMK 8" class="h-8 w-auto object-contain">
+                        <span class="font-bold text-xl text-gray-900 tracking-tight">SkillHub</span>
                     </a>
                 </div>
 
@@ -15,6 +16,16 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    
+                    <x-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')">
+                        {{ __('Marketplace') }}
+                    </x-nav-link>
+
+                    @auth
+                    <x-nav-link :href="route('services.create')" :active="request()->routeIs('services.create')">
+                        {{ __('Jual Jasa') }}
+                    </x-nav-link>
+                    @endauth
                 </div>
             </div>
 
@@ -35,7 +46,7 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
+                            {{ __('Profil') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -45,7 +56,7 @@
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                {{ __('Keluar') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -70,6 +81,16 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            
+            <x-responsive-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')">
+                {{ __('Marketplace') }}
+            </x-responsive-nav-link>
+
+            @auth
+            <x-responsive-nav-link :href="route('services.create')" :active="request()->routeIs('services.create')">
+                {{ __('Jual Jasa') }}
+            </x-responsive-nav-link>
+            @endauth
         </div>
 
         <!-- Responsive Settings Options -->
@@ -81,7 +102,7 @@
 
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
+                    {{ __('Profil') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
@@ -91,7 +112,7 @@
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                        {{ __('Keluar') }}
                     </x-responsive-nav-link>
                 </form>
             </div>

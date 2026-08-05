@@ -11,6 +11,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 // ================= HALAMAN PUBLIK (tidak perlu login) =================
@@ -53,6 +54,11 @@ Route::middleware('auth')->group(function () {
 
     // Laporan
     Route::post('/laporan', [ReportController::class, 'store'])->name('reports.store');
+
+    // Profil
+    Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profil', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 // ================= KHUSUS ADMIN =================
