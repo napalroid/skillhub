@@ -6,17 +6,30 @@
     <form method="POST" action="{{ route('register') }}" class="space-y-5">
         @csrf
 
-        <x-ui.input
-            label="Nama Lengkap"
-            name="name"
-            type="text"
-            value="{{ old('name') }}"
-            placeholder="Contoh: Ahmad Rizki"
-            required
-            autofocus
-            autocomplete="name"
-            :error="$errors->first('name')"
-        />
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <x-ui.input
+                label="Nama Depan"
+                name="first_name"
+                type="text"
+                value="{{ old('first_name') }}"
+                placeholder="Contoh: Ahmad"
+                required
+                autofocus
+                autocomplete="given-name"
+                :error="$errors->first('first_name')"
+            />
+
+            <x-ui.input
+                label="Nama Belakang"
+                name="last_name"
+                type="text"
+                value="{{ old('last_name') }}"
+                placeholder="Contoh: Rizki"
+                required
+                autocomplete="family-name"
+                :error="$errors->first('last_name')"
+            />
+        </div>
 
         <x-ui.input
             label="Email"

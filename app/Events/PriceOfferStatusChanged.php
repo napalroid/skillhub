@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Events;
+
+use App\Models\PriceOffer;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class PriceOfferStatusChanged implements ShouldBroadcastNow
+{
+    use Dispatchable, SerializesModels;
+
+    public function __construct(public PriceOffer $priceOffer)
+    {
+    }
+
+    public function broadcastOn(): array
+    {
+        return [new PrivateChannel('conversation.' . $this->priceOffer->conversation_id)];
+    }
+
+    public function broadcastAs(): string
+    {
+        return 'price-offer.status-changed';
+    }
+
+    public function broadcastWith(): array
+    {
+        return ['offer' => ['id' => $this->priceOffer->id, 'status' => $this->priceOffer->status->value]];
+    }
+}

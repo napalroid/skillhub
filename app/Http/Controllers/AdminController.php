@@ -2,53 +2,90 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Service;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Report;
-
+use App\Models\UserNotification;
+use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
+    // ==================== DASHBOARD ====================
     public function dashboard()
     {
-        $stats = [
-            'total_user' => User::where('role', 'user')->count(),
-            'jasa_pending' => Service::where('status', 'pending')->count(),
-            'pembayaran_pending' => Payment::where('status', 'pending')->count(),
-            'pesanan_berjalan' => Order::whereNotIn('status', ['selesai'])->count(),
-            'laporan_terbuka' => Report::where('status', 'open')->count(),
-        ];
+        // Statistik
+        $totalStudents = User::where('role', 'user')->count();
+        $totalServices = Service::where('status', 'approved')->count();
+        $pendingServices = Service::where('status', 'pending')->latest()->get();
+        $pendingCount = $pendingServices->count();
+        $totalOrders = Order::count();
+        $pendingPayments = Payment::where('status', 'pending')->count();
 
-        return view('admin.dashboard', compact('stats'));
+        return view('admin.dashboard', compact(
+            'totalStudents',
+            'totalServices',
+            'pendingServices',
+            'pendingCount',
+            'totalOrders',
+            'pendingPayments'
+        ));
     }
 
+    // ==================== APPROVE JASA ====================
     public function approveService(Service $service)
     {
+        if ($service->status !== 'pending') {
+            return back()->with('error', 'Jasa ini sudah diproses.');
+        }
         $service->update(['status' => 'approved']);
-        return back()->with('success', 'Jasa berhasil disetujui.');
+
+        UserNotification::create([
+            'user_id' => $service->user_id,
+            'service_id' => $service->id,
+            'type' => 'approved',
+            'title' => "Jasa disetujui ({$service->title})",
+            'message' => "Selamat! Jasa kamu \"{$service->title}\" telah disetujui dan tampil di marketplace.",
+            'is_read' => false,
+        ]);
+
+        return back()->with('success', 'Jasa berhasil disetujui dan dipublikasikan.');
     }
 
+    // ==================== REJECT JASA ====================
     public function rejectService(Service $service)
     {
+        if ($service->status !== 'pending') {
+            return back()->with('error', 'Jasa ini sudah diproses.');
+        }
         $service->update(['status' => 'rejected']);
-        return back()->with('success', 'Jasa ditolak.');
+
+        UserNotification::create([
+            'user_id' => $service->user_id,
+            'service_id' => $service->id,
+            'type' => 'rejected',
+            'title' => "Jasa ditolak ({$service->title})",
+            'message' => "Mohon maaf, jasa kamu \"{$service->title}\" ditolak admin. Kamu dapat mengajukan ulang.",
+            'is_read' => false,
+        ]);
+
+        return back()->with('success', 'Jasa ditolak. User dapat mengajukan ulang.');
     }
 
-
-public function releaseFunds(Order $order)
-{
-    if ($order->status !== 'selesai') {
-        return back()->with('error', 'Pesanan belum disetujui buyer, dana belum bisa dicairkan.');
+    // ==================== RELEASE DANA (ESCROW) ====================
+    public function releaseFunds(Order $order)
+    {
+        // Logika pencairan dana ke seller
+        if ($order->status !== 'completed') {
+            return back()->with('error', 'Pesanan belum selesai.');
+        }
+        // Misal kita ubah status payment menjadi 'released'
+        $payment = $order->payment;
+        if ($payment && $payment->status === 'verified') {
+            $payment->update(['status' => 'released']);
+            return back()->with('success', 'Dana berhasil dicairkan ke penjual.');
+        }
+        return back()->with('error', 'Pembayaran belum terverifikasi.');
     }
-
-    // Di dunia nyata, di sini bisa dicatat sebagai transaksi pencairan terpisah.
-    // Untuk MVP, kita tandai lewat kolom di payment.
-    $order->payment->update(['status' => 'verified']);
-
-    return back()->with('success', 'Dana berhasil dicairkan ke seller: ' . $order->service->seller->name);
-}
-
-}
+}   

@@ -31,7 +31,13 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
 
         if ($user && $user->isAdmin()) {
-            return redirect()->intended(route('admin.dashboard', absolute: false));
+            // Jangan memakai redirect()->intended() untuk admin: nilai
+            // "url.intended" di session (misalnya /dashboard atau /pesanan yang
+            // diset middleware auth saat guest) akan menyuruh admin ke halaman
+            // pengguna biasa. Paksa ke admin dashboard & bersihkan intended.
+            $request->session()->forget('url.intended');
+
+            return redirect()->route('admin.dashboard');
         }
 
         return redirect()->intended(route('dashboard', absolute: false));

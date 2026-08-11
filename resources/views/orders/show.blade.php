@@ -16,6 +16,9 @@
                 <p class="text-2xl font-bold text-blue-700 mt-4">
                     Rp{{ number_format($order->final_price, 0, ',', '.') }}
                 </p>
+                @if($isBuyer && $order->status === 'menunggu_pembayaran')
+                    <a href="{{ route('orders.payment.show', $order) }}" class="inline-block mt-4 bg-blue-600 px-4 py-2 text-sm font-bold text-white">Bayar Sekarang</a>
+                @endif
             </div>
 
             {{-- Negosiasi --}}

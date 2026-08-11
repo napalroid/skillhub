@@ -4,46 +4,65 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Service;
-use App\Models\User;
-use Illuminate\Http\Request;
+use App\Models\UserNotification;
+use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
+    /**
+     * Menampilkan landing page untuk pengguna yang telah masuk.
+     */
     public function index()
     {
-        $user = auth()->user();
-
-        if ($user->isAdmin()) {
-            return redirect()->route('admin.dashboard');
-        }
-
-        $stats = [
-            'jasa_aktif' => $user->services()->where('status', 'approved')->count(),
-            'jasa_pending' => $user->services()->where('status', 'pending')->count(),
-            'pesanan_berjalan' => $user->orders()->whereNotIn('status', ['selesai'])->count(),
-            'pesanan_selesai' => $user->orders()->where('status', 'selesai')->count(),
-        ];
-
-        $pesanan_terbaru = $user->orders()->with('service')->latest()->take(5)->get();
-
-        $jasa_saya = $user->services()->with(['subcategory.category'])->latest()->get();
-
-        // Statistik komunitas (angka real dari database)
-        $platformStats = [
-            'total_user' => User::count(),
-            'total_jasa' => Service::count(),
-            'total_jasa_aktif' => Service::where('status', 'approved')->count(),
-            'total_kategori' => Category::count(),
-        ];
-
-        // Rekomendasi jasa dari siswa lain (agar halaman selalu terisi)
-        $rekomendasi_jasa = Service::approved()
-            ->with(['seller', 'subcategory'])
-            ->where('user_id', '!=', $user->id)
+        $featuredServices = Service::approved()
+            ->with(['seller', 'subcategory.category'])
             ->latest()
-            ->take(3)
+            ->take(6)
             ->get();
 
-        return view('dashboard', compact('stats', 'pesanan_terbaru', 'jasa_saya', 'platformStats', 'rekomendasi_jasa'));
+        $mediaUrl = static function (?string $path): ?string {
+            if (! $path || ! Storage::disk('public')->exists($path)) {
+                return null;
+            }
+
+            return asset('storage/' . ltrim($path, '/'));
+        };
+
+        $featuredServiceCards = $featuredServices->map(function (Service $service) use ($mediaUrl) {
+            return [
+                'title' => $service->title,
+                'category' => $service->subcategory?->name ?? 'Jasa siswa',
+                'seller' => $service->seller?->name ?? 'Siswa SkillHub',
+                'price' => 'Rp' . number_format($service->price, 0, ',', '.'),
+                'url' => route('services.show', $service),
+                'image' => $mediaUrl($service->image) ?? asset('images/skillhub-hero.png'),
+                'portfolios' => collect($service->portfolio_images ?? [])
+                    ->map($mediaUrl)
+                    ->filter()
+                    ->values()
+                    ->all(),
+            ];
+        })->values();
+
+        $categories = Category::with(['subcategories'])
+            ->orderBy('name')
+            ->take(8)
+            ->get();
+
+        $accountNotifications = UserNotification::query()
+            ->where('user_id', auth()->id())
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn (UserNotification $notification) => [
+                'id' => $notification->id,
+                'title' => $notification->title,
+                'message' => $notification->message,
+                'is_read' => $notification->is_read,
+                'date' => $notification->created_at?->format('d M Y'),
+                'read_url' => route('notifications.read', $notification),
+            ])->values();
+
+        return view('dashboard', compact('featuredServices', 'featuredServiceCards', 'categories', 'accountNotifications'));
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -10,23 +12,44 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'service_id' => 'required|exists:services,id',
+            'message' => 'nullable|string|max:1000',
         ]);
 
-        $service = Service::findOrFail($validated['service_id']);
+        $service = Service::approved()->findOrFail($validated['service_id']);
 
         if ($service->user_id === auth()->id()) {
             abort(403, 'Anda tidak bisa memesan jasa milik sendiri.');
         }
 
-        $order = Order::create([
+        $order = null;
+
+        if (! empty($validated['message'])) {
+            $order = Order::query()
+                ->where('service_id', $service->id)
+                ->where('buyer_id', auth()->id())
+                ->whereNotIn('status', ['selesai'])
+                ->latest()
+                ->first();
+        }
+
+        $order ??= Order::create([
             'service_id' => $service->id,
             'buyer_id' => auth()->id(),
             'status' => 'menunggu_pembayaran',
             'final_price' => $service->price,
         ]);
 
+        if (! empty($validated['message'])) {
+            $order->messages()->create([
+                'sender_id' => auth()->id(),
+                'message' => $validated['message'],
+            ]);
+        }
+
         return redirect()->route('orders.show', $order)
-            ->with('success', 'Pesanan dibuat. Anda bisa negosiasi harga atau langsung bayar.');
+            ->with('success', ! empty($validated['message'])
+                ? 'Pesanmu sudah dikirim ke penyedia jasa.'
+                : 'Pesanan dibuat. Anda bisa negosiasi harga atau langsung bayar.');
     }
 
     public function show(Order $order)
