@@ -77,17 +77,13 @@
             <div class="bg-white rounded-xl border border-gray-100 p-6">
                 <h2 class="font-bold text-gray-800 mb-3">Pembayaran</h2>
 
-                @if ($order->payment)
-                    <p class="text-sm text-gray-600">Status: <strong>{{ $order->payment->status }}</strong></p>
-                    <img src="{{ Storage::url($order->payment->proof_file) }}" class="mt-3 rounded-lg w-full">
-                @elseif ($isBuyer)
-                    <form method="POST" action="{{ route('payments.store') }}" enctype="multipart/form-data" class="space-y-3">
-                        @csrf
-                        <input type="hidden" name="order_id" value="{{ $order->id }}">
-                        <input type="hidden" name="amount" value="{{ $order->final_price }}">
-                        <input type="file" name="proof_file" class="text-sm">
-                        <button class="w-full bg-blue-600 text-white text-sm py-2 rounded-lg">Upload Bukti Bayar</button>
-                    </form>
+                @if ($order->payment_status === 'paid')
+                    <p class="rounded-lg bg-emerald-50 p-3 text-sm font-semibold text-emerald-700">Pembayaran QRIS berhasil diterima.</p>
+                @elseif ($isBuyer && $order->status === 'menunggu_pembayaran')
+                    <p class="text-sm text-gray-600">Bayar aman melalui QRIS Midtrans Sandbox.</p>
+                    <a href="{{ route('orders.payment.show', $order) }}" class="mt-4 block w-full rounded-lg bg-blue-600 py-2.5 text-center text-sm font-bold text-white transition hover:bg-blue-700">Bayar dengan QRIS</a>
+                @elseif ($order->payment)
+                    <p class="text-sm text-gray-600">Status pembayaran: <strong>{{ $order->payment_status }}</strong></p>
                 @else
                     <p class="text-sm text-gray-500">Menunggu buyer melakukan pembayaran.</p>
                 @endif

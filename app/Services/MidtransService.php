@@ -19,6 +19,7 @@ class MidtransService
         Config::$isProduction = (bool) config('midtrans.is_production');
         Config::$isSanitized = true;
         Config::$is3ds = true;
+        Config::$overrideNotifUrl = config('midtrans.notification_url');
 
         $midtransOrderId = $order->midtrans_order_id ?: 'SKILLHUB-' . $order->id . '-' . now()->format('YmdHis');
         $response = CoreApi::charge([

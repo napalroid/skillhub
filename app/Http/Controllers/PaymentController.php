@@ -34,7 +34,13 @@ class PaymentController extends Controller
             $response = $midtrans->createQrisCharge($order);
         } catch (\Throwable $exception) {
             report($exception);
-            return back()->with('error', 'QRIS tidak dapat dibuat. Periksa kredensial Midtrans Sandbox.');
+
+            $isConnectionProblem = str_contains($exception->getMessage(), 'CURL Error')
+                || str_contains($exception->getMessage(), 'Could not connect');
+
+            return back()->with('error', $isConnectionProblem
+                ? 'QRIS belum dapat dibuat karena PHP tidak bisa terhubung ke server Midtrans. Periksa koneksi atau firewall komputer server.'
+                : 'Midtrans menolak pembuatan QRIS. Periksa kredensial Sandbox dan konfigurasi QRIS akun Midtrans.');
         }
 
         $qrisUrl = data_get(collect($response['actions'] ?? [])->firstWhere('name', 'generate-qr-code'), 'url');

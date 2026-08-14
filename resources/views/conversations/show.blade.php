@@ -1,6 +1,10 @@
 @php
     $partner = $conversation->buyer_id === auth()->id() ? $conversation->seller : $conversation->buyer;
     $isSeller = $conversation->seller_id === auth()->id();
+    $timeline = $conversation->messages->map(fn ($message) => (object) ['type' => 'message', 'item' => $message, 'created_at' => $message->created_at])
+        ->concat($conversation->priceOffers->map(fn ($offer) => (object) ['type' => 'offer', 'item' => $offer, 'created_at' => $offer->created_at]))
+        ->sortBy('created_at')
+        ->values();
 @endphp
 <!doctype html>
 <html lang="id">
@@ -39,15 +43,16 @@
 
         <section id="skillhub-chat" data-conversation-id="{{ $conversation->id }}" data-user-id="{{ auth()->id() }}" data-is-seller="{{ $isSeller ? '1' : '0' }}" class="mt-5 flex min-h-0 flex-1 flex-col">
             <div data-message-list class="flex max-h-[62vh] min-h-[48vh] flex-col gap-2 overflow-y-auto bg-[#161616] p-4 sm:p-6">
-                @foreach($conversation->messages as $message)
-                    <article data-message-id="{{ $message->id }}" class="chat-message {{ $message->sender_id === auth()->id() ? 'chat-message-own' : 'chat-message-other' }}">
-                        <span class="chat-message-name">{{ $message->sender_id === auth()->id() ? 'Kamu' : $message->sender->name }}</span>
-                        <p>{{ $message->message }}</p>
-                        <time>{{ $message->created_at->format('H:i') }}</time>
-                    </article>
-                @endforeach
-
-                @foreach($conversation->priceOffers as $offer)
+                @foreach($timeline as $timelineItem)
+                    @if($timelineItem->type === 'message')
+                        @php($message = $timelineItem->item)
+                        <article data-message-id="{{ $message->id }}" class="chat-message {{ $message->sender_id === auth()->id() ? 'chat-message-own' : 'chat-message-other' }}">
+                            <span class="chat-message-name">{{ $message->sender_id === auth()->id() ? 'Kamu' : $message->sender->name }}</span>
+                            <p>{{ $message->message }}</p>
+                            <time>{{ $message->created_at->format('H:i') }}</time>
+                        </article>
+                    @else
+                        @php($offer = $timelineItem->item)
                     <article data-offer-id="{{ $offer->id }}" class="my-3 border border-blue-300/50 bg-blue-50 p-4 text-[#101828] shadow-sm">
                         <div class="flex items-start justify-between gap-4"><div><p class="text-[10px] font-bold tracking-[.16em] text-blue-700">PENAWARAN HARGA</p><h2 class="mt-1 text-sm font-bold">{{ $conversation->service->title }}</h2></div><span data-offer-status class="border border-blue-200 bg-white px-2 py-1 text-[10px] font-bold uppercase text-blue-700">{{ $offer->status->value }}</span></div>
                         <dl class="mt-4 grid grid-cols-2 gap-3 text-xs"><div><dt class="text-black/50">Harga asli</dt><dd class="mt-1 font-bold">Rp{{ number_format($offer->original_price, 0, ',', '.') }}</dd></div><div><dt class="text-black/50">Harga kesepakatan</dt><dd class="mt-1 font-bold text-blue-700">Rp{{ number_format($offer->offer_price, 0, ',', '.') }}</dd></div></dl>
@@ -59,6 +64,7 @@
                             </div>
                         @endif
                     </article>
+                    @endif
                 @endforeach
             </div>
             <form action="{{ route('conversations.store', $conversation) }}" method="POST" class="mt-3 grid gap-2 bg-[#f6f6f6] p-3 sm:grid-cols-[1fr_auto]">

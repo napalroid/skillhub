@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "proxy:ngrok": "node scripts/ngrok-reverb-proxy.mjs"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
