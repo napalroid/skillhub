@@ -1,6 +1,6 @@
 <x-guest-layout
     variant="register"
-    title="Buat Akun SkillHub"
+    title="Buat Akun"
     subtitle="Daftar untuk mulai jual atau beli jasa di lingkungan sekolah."
 >
     <form method="POST" action="{{ route('register') }}" class="space-y-5">
@@ -43,12 +43,13 @@
         />
 
         <x-ui.input
-            label="Nomor Telepon (opsional)"
+            label="Nomor Telepon"
             name="phone"
             type="tel"
             value="{{ old('phone') }}"
             placeholder="08xxxxxxxxxx"
             autocomplete="tel"
+            required
             :error="$errors->first('phone')"
         />
 

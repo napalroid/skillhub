@@ -13,10 +13,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-    $middleware->alias([
-        $middleware->trustProxies(at: '*'),
-        'admin' => \App\Http\Middleware\AdminMiddleware::class,
-    ]);
+        // Midtrans sends a server-to-server POST, so it does not carry a
+        // browser CSRF token. The payment signature is verified separately
+        // by PaymentController before any order state is changed.
+        $middleware->validateCsrfTokens(except: [
+            'midtrans/notification',
+        ]);
+
+        $middleware->trustProxies(at: '*');
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        ]);
 
 })
 

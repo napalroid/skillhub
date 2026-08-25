@@ -8,6 +8,13 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
+    public function create(Service $service)
+    {
+        abort_unless($service->status === 'approved', 404, 'Jasa tidak tersedia.');
+
+        return view('orders.create', compact('service'));
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -70,7 +77,7 @@ class OrderController extends Controller
     {
         $orders = Order::where('buyer_id', auth()->id())
             ->orWhereHas('service', fn ($q) => $q->where('user_id', auth()->id()))
-            ->with('service')
+            ->with(['service.seller', 'buyer'])
             ->latest()
             ->paginate(10);
 

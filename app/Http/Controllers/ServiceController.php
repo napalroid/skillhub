@@ -64,7 +64,7 @@ class ServiceController extends Controller
             ->filter()
             ->all();
 
-        $heroImage = asset('images/skillhub-hero.png');
+        $heroImage = asset('images/skillhub-hero.jpg');
         if ($activeCategory) {
             $heroImage = $categoryImages[$activeCategory->id] ?? $heroImage;
         }
@@ -164,7 +164,6 @@ class ServiceController extends Controller
     {
         $services = Service::with(['subcategory.category'])
                             ->where('user_id', auth()->id())
-                            ->where('status', 'approved')
                             ->latest()
                             ->paginate(12);
         $categories = Category::with('subcategories')->get();

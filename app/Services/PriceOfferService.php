@@ -31,13 +31,15 @@ class PriceOfferService
         $originalPrice = round((float) $service->price, 2);
         $offerPrice = round($offerPrice, 2);
 
-        if ($offerPrice > $originalPrice) {
+        if ($offerPrice <= 0) {
             throw ValidationException::withMessages([
-                'offer_price' => 'Harga kesepakatan tidak boleh melebihi harga asli jasa.',
+                'offer_price' => 'Harga kesepakatan harus lebih dari 0.',
             ]);
         }
 
-        return DB::transaction(function () use ($conversation, $seller, $originalPrice, $offerPrice, $note) {
+        $expiresAt = now()->addHours(24);
+
+        return DB::transaction(function () use ($conversation, $seller, $originalPrice, $offerPrice, $note, $expiresAt) {
             $conversation->priceOffers()
                 ->where('status', PriceOfferStatus::Pending->value)
                 ->whereNotNull('expires_at')
@@ -57,6 +59,7 @@ class PriceOfferService
                 'offer_price' => $offerPrice,
                 'note' => $note,
                 'status' => PriceOfferStatus::Pending,
+                'expires_at' => $expiresAt,
             ]);
         });
     }
@@ -64,10 +67,13 @@ class PriceOfferService
     public function accept(PriceOffer $priceOffer, User $buyer): Order
     {
         return DB::transaction(function () use ($priceOffer, $buyer) {
-            $offer = PriceOffer::query()->lockForUpdate()->with('service')->findOrFail($priceOffer->id);
+            $offer = PriceOffer::query()->lockForUpdate()->with('service', 'conversation')->findOrFail($priceOffer->id);
 
-            if ($offer->buyer_id !== $buyer->id) {
-                throw new AuthorizationException('Hanya buyer penerima penawaran yang dapat menerimanya.');
+            $conversation = $offer->conversation;
+
+            // Hanya buyer yang bisa accept (seller yang buat penawaran)
+            if ($conversation->buyer_id !== $buyer->id) {
+                throw new AuthorizationException('Hanya buyer yang dapat menerima penawaran ini.');
             }
 
             if (! $offer->isPending() || $offer->isExpired()) {
@@ -105,10 +111,13 @@ class PriceOfferService
     public function reject(PriceOffer $priceOffer, User $buyer): PriceOffer
     {
         return DB::transaction(function () use ($priceOffer, $buyer) {
-            $offer = PriceOffer::query()->lockForUpdate()->findOrFail($priceOffer->id);
+            $offer = PriceOffer::query()->lockForUpdate()->with('conversation')->findOrFail($priceOffer->id);
 
-            if ($offer->buyer_id !== $buyer->id) {
-                throw new AuthorizationException('Hanya buyer penerima penawaran yang dapat menolaknya.');
+            $conversation = $offer->conversation;
+
+            // Hanya buyer yang bisa reject
+            if ($conversation->buyer_id !== $buyer->id) {
+                throw new AuthorizationException('Hanya buyer yang dapat menolak penawaran ini.');
             }
 
             if (! $offer->isPending() || $offer->isExpired()) {

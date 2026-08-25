@@ -1,28 +1,62 @@
-@extends('layouts.app')
+<x-layouts.admin>
+    {{-- HEADER --}}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8" data-stagger-item>
+        <div>
+            <h1 class="font-heading font-bold text-2xl text-black uppercase tracking-tight">Edit Subkategori</h1>
+            <p class="text-sm text-[#555555] mt-1">Perbarui informasi subkategori</p>
+        </div>
+        <a href="{{ route('admin.subcategories.index') }}" class="btn-ghost text-xs">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.5 19.5 3 12m0 0l7.5-7.5M3 12h18"/></svg>
+            Kembali
+        </a>
+    </div>
 
-@section('title', 'Edit Subkategori - Admin')
+    <div class="max-w-md">
+        {{-- FLASH MESSAGES --}}
+        @if (session('success'))
+            <div class="mb-4 rounded-sm border border-[#2C9F45]/20 bg-[#2C9F45]/5 px-4 py-3 text-sm text-[#2C9F45]">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="mb-4 rounded-sm border border-[#E4002B]/20 bg-[#E4002B]/5 px-4 py-3 text-sm text-[#E4002B]">
+                {{ session('error') }}
+            </div>
+        @endif
 
-@section('content')
-<div class="bg-white p-6 rounded shadow max-w-lg mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Edit Subkategori</h1>
-    <form method="POST" action="{{ route('admin.subcategories.update', $subcategory) }}">
-        @csrf @method('PUT')
-        <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">Nama Subkategori</label>
-            <input type="text" name="name" value="{{ old('name', $subcategory->name) }}" class="w-full border rounded p-2 focus:ring focus:ring-blue-200" required>
-        </div>
-        <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">Kategori</label>
-            <select name="category_id" class="w-full border rounded p-2" required>
-                @foreach($categories as $cat)
-                    <option value="{{ $cat->id }}" {{ $subcategory->category_id == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="flex gap-3">
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update</button>
-            <a href="{{ route('admin.subcategories.index') }}" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Batal</a>
-        </div>
-    </form>
-</div>
-@endsection
+        <form method="POST" action="{{ route('admin.subcategories.update', $subcategory) }}" class="space-y-6">
+            @csrf @method('PUT')
+            <div class="admin-card p-6 space-y-6">
+                <div>
+                    <label class="label-field" for="sub-name">Nama Subkategori <span class="text-[#E4002B] font-normal">*</span></label>
+                    <input type="text" id="sub-name" name="name" value="{{ $subcategory->name }}" required
+                        class="input-field">
+                    @error('name') <p class="mt-1 text-xs text-[#E4002B]">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label class="label-field" for="sub-category">Kategori Induk <span class="text-[#E4002B] font-normal">*</span></label>
+                    <select id="sub-category" name="category_id" required class="input-field">
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}" @selected($subcategory->category_id == $category->id)>{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('category_id') <p class="mt-1 text-xs text-[#E4002B]">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="flex justify-end gap-2 pt-4 border-t border-[#DDDDDD]">
+                    <a href="{{ route('admin.subcategories.index') }}" class="btn-outline text-xs px-4 py-2">Batal</a>
+                    <button type="submit" class="btn-primary text-xs px-4 py-2">Simpan Perubahan</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @section('scripts')
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    });
+    </script>
+    @endsection
+</x-layouts.admin>

@@ -47,6 +47,45 @@
             @endif
         </div>
 
+        <div>
+            <x-input-label for="phone" :value="__('Nomor Telepon')" />
+            <x-text-input id="phone" name="phone" type="tel" class="mt-1 block w-full" :value="old('phone', $user->phone)" required autocomplete="tel" />
+            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+        </div>
+
+        <div class="border-t border-gray-200 pt-6">
+            <h3 class="text-sm font-semibold text-gray-900">Data Pencairan Dana</h3>
+            <p class="mt-1 text-xs text-gray-500">Digunakan saat kamu menarik saldo dompet ke e-wallet atau rekening.</p>
+
+            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <x-input-label for="payout_type" :value="__('Aplikasi Tujuan')" />
+                    <select id="payout_type" name="payout_type"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">&mdash; Pilih &mdash;</option>
+                        <option value="dana" @selected(old('payout_type', $user->payout_type) === 'dana')>DANA</option>
+                        <option value="gopay" @selected(old('payout_type', $user->payout_type) === 'gopay')>GoPay</option>
+                        <option value="ovo" @selected(old('payout_type', $user->payout_type) === 'ovo')>OVO</option>
+                        <option value="shopeepay" @selected(old('payout_type', $user->payout_type) === 'shopeepay')>ShopeePay</option>
+                        <option value="bank" @selected(old('payout_type', $user->payout_type) === 'bank')>Transfer Bank</option>
+                    </select>
+                    <x-input-error class="mt-2" :messages="$errors->get('payout_type')" />
+                </div>
+
+                <div>
+                    <x-input-label for="payout_account" :value="__('Nomor / Rekening')" />
+                    <x-text-input id="payout_account" name="payout_account" type="text" class="mt-1 block w-full" :value="old('payout_account', $user->payout_account)" />
+                    <x-input-error class="mt-2" :messages="$errors->get('payout_account')" />
+                </div>
+
+                <div class="sm:col-span-2">
+                    <x-input-label for="payout_account_name" :value="__('Nama Pemilik')" />
+                    <x-text-input id="payout_account_name" name="payout_account_name" type="text" class="mt-1 block w-full" :value="old('payout_account_name', $user->payout_account_name)" />
+                    <x-input-error class="mt-2" :messages="$errors->get('payout_account_name')" />
+                </div>
+            </div>
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

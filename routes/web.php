@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\WalletController;
 use App\Http\Controllers\NegotiationController;
 use App\Http\Controllers\OrderMessageController;
 use App\Http\Controllers\OrderFileController;
@@ -16,7 +17,6 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\PriceOfferController;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,7 +29,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 // ==============================================
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/midtrans/notification', [PaymentController::class, 'notification'])
-    ->withoutMiddleware(VerifyCsrfToken::class)
     ->name('midtrans.notification');
 
 // [PERBAIKAN URUTAN] Halaman daftar jasa (INDEX) - PUBLIC
@@ -88,19 +87,26 @@ Route::middleware(['auth'])->group(function () {
 
     // --- FILE ---
     Route::post('/pesanan/{order}/files', [OrderFileController::class, 'store'])->name('order-files.store');
-    Route::post('/order-files/{file}/approve', [OrderFileController::class, 'approve'])->name('order-files.approve');
-    Route::post('/order-files/{file}/revision', [OrderFileController::class, 'requestRevision'])->name('order-files.revision');
+    Route::post('/order-files/{order}/approve', [OrderFileController::class, 'approve'])->name('order-files.approve');
+    Route::post('/order-files/{order}/revision', [OrderFileController::class, 'requestRevision'])->name('order-files.revision');
+    Route::post('/pesanan/{order}/start-work', [OrderFileController::class, 'startWork'])->name('orders.start-work');
 
     // --- PEMBAYARAN ---
     Route::post('/pesanan/{order}/payment', [PaymentController::class, 'store'])->name('payments.store');
     Route::get('/orders/{order}/payment', [PaymentController::class, 'showQris'])->name('orders.payment.show');
     Route::post('/orders/{order}/payment/qris', [PaymentController::class, 'createQris'])->name('orders.payment.qris');
+    Route::get('/orders/{order}/payment/check', [PaymentController::class, 'checkStatus'])->name('orders.payment.check');
 
     // --- REVIEW ---
     Route::post('/pesanan/{order}/review', [ReviewController::class, 'store'])->name('reviews.store');
 
     // --- LAPORAN ---
     Route::post('/laporan', [ReportController::class, 'store'])->name('reports.store');
+
+    // --- DOMPET / PENCARIAN DANA ---
+    Route::get('/dompet', [WalletController::class, 'index'])->name('wallet.index');
+    Route::get('/dompet/tarik', [WalletController::class, 'withdrawCreate'])->name('wallet.withdraw.create');
+    Route::post('/dompet/tarik', [WalletController::class, 'withdrawStore'])->name('wallet.withdraw.store');
 
     // --- PROFIL ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -114,21 +120,32 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    
+    // Services Management (ALL services)
+    Route::get('/services', [AdminController::class, 'servicesIndex'])->name('services.index');
     Route::get('/services/pending', [AdminController::class, 'pendingServices'])->name('services.pending');
     Route::post('/services/{service}/approve', [AdminController::class, 'approveService'])->name('services.approve');
     Route::post('/services/{service}/reject', [AdminController::class, 'rejectService'])->name('services.reject');
 
     Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
     Route::post('/payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
+    Route::post('/payments/{payment}/confirm-balance', [PaymentController::class, 'confirmBalance'])->name('payments.confirm-balance');
     Route::post('/payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
 
     Route::post('/orders/{order}/release', [AdminController::class, 'releaseFunds'])->name('orders.release');
+    Route::post('/orders/{order}/refund', [AdminController::class, 'refundOrder'])->name('orders.refund');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::post('/reports/{report}/resolve', [ReportController::class, 'resolve'])->name('reports.resolve');
 
+    // Pencairan dana (PAYOUT)
+    Route::get('/payouts', [AdminController::class, 'payoutIndex'])->name('payouts.index');
+    Route::post('/payouts/{payoutRequest}/process', [AdminController::class, 'payoutProcess'])->name('payouts.process');
+    Route::post('/payouts/{payoutRequest}/reject', [AdminController::class, 'payoutReject'])->name('payouts.reject');
+
     // Kelola Kategori
 Route::get('/categories', [App\Http\Controllers\AdminCategoryController::class, 'index'])->name('categories.index');
+Route::get('/categories/data', [App\Http\Controllers\AdminCategoryController::class, 'data'])->name('categories.data');
 Route::get('/categories/create', [App\Http\Controllers\AdminCategoryController::class, 'create'])->name('categories.create');
 Route::post('/categories', [App\Http\Controllers\AdminCategoryController::class, 'store'])->name('categories.store');
 Route::get('/categories/{category}/edit', [App\Http\Controllers\AdminCategoryController::class, 'edit'])->name('categories.edit');
@@ -137,6 +154,7 @@ Route::delete('/categories/{category}', [App\Http\Controllers\AdminCategoryContr
 
 // Kelola Subkategori
 Route::get('/subcategories', [App\Http\Controllers\AdminSubcategoryController::class, 'index'])->name('subcategories.index');
+Route::get('/subcategories/data', [App\Http\Controllers\AdminSubcategoryController::class, 'data'])->name('subcategories.data');
 Route::get('/subcategories/create', [App\Http\Controllers\AdminSubcategoryController::class, 'create'])->name('subcategories.create');
 Route::post('/subcategories', [App\Http\Controllers\AdminSubcategoryController::class, 'store'])->name('subcategories.store');
 Route::get('/subcategories/{subcategory}/edit', [App\Http\Controllers\AdminSubcategoryController::class, 'edit'])->name('subcategories.edit');

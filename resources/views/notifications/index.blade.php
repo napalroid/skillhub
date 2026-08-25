@@ -21,18 +21,29 @@
                     'approved' => ['text' => 'Disetujui', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500'],
                     'rejected' => ['text' => 'Ditolak', 'class' => 'bg-red-50 text-red-700 border-red-200', 'dot' => 'bg-red-500'],
                     'message'  => ['text' => 'Pesan Masuk', 'class' => 'bg-blue-50 text-blue-700 border-blue-200', 'dot' => 'bg-blue-500'],
+                    'payment_paid' => ['text' => 'Jasa Terbayarkan', 'class' => 'bg-black text-white border-black', 'dot' => 'bg-white'],
+                    'escrow_ready' => ['text' => 'Saldo Masuk — Kerjakan', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500'],
+                    'order_confirmed' => ['text' => 'Pesanan Dikonfirmasi', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500'],
+                    'order_escrow' => ['text' => 'Konfirmasi Admin', 'class' => 'bg-[#E4002B]/10 text-[#E4002B] border-[#E4002B]/20', 'dot' => 'bg-[#E4002B]'],
                     default   => ['text' => 'Menunggu Approval', 'class' => 'bg-amber-50 text-amber-700 border-amber-200', 'dot' => 'bg-amber-400'],
                 };
                 $icon = match ($notification->type) {
                     'approved' => '✓',
                     'rejected' => '✕',
                     'message'  => '✉',
+                    'payment_paid' => '₿',
+                    'escrow_ready' => '⚡',
+                    'order_confirmed' => '▶',
+                    'order_escrow' => '●',
                     default   => '•••',
                 };
 
-                $notificationLink = $notification->type === 'message' && $notification->conversation
-                    ? route('notifications.open', $notification)
-                    : null;
+                $notificationLink = null;
+                if ($notification->type === 'message' && $notification->conversation) {
+                    $notificationLink = route('notifications.open', $notification);
+                } elseif (in_array($notification->type, ['payment_paid', 'escrow_ready', 'order_escrow', 'order_confirmed'], true) && $notification->order) {
+                    $notificationLink = route('orders.show', $notification->order);
+                }
             @endphp
             @if ($notificationLink)
                 <a href="{{ $notificationLink }}" class="p-5 flex items-start gap-4 transition hover:bg-blue-50/40 {{ $notification->isUnread() ? 'bg-blue-50/60' : '' }}">

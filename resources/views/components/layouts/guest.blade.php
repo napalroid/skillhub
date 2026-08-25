@@ -55,7 +55,8 @@
 
             <div class="relative z-10 flex flex-col justify-between p-10 xl:p-14 w-full">
                 <div>
-                    <a href="{{ route('home') }}" class="inline-flex items-center gap-2.5 group">
+                    <x-brand-logo :href="route('home')" surface="dark" class="relative z-10" />
+                    <a href="{{ route('home') }}" class="hidden inline-flex items-center gap-2.5 group">
                         <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 border border-white/20 text-white backdrop-blur-sm">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
@@ -133,7 +134,8 @@
                 <img src="{{ $bgImage }}" alt="" class="absolute inset-0 h-full w-full object-cover">
                 <div class="absolute inset-0 bg-blue-900/70"></div>
                 <div class="relative z-10 h-full flex flex-col justify-between p-6">
-                    <a href="{{ route('home') }}" class="inline-flex items-center gap-2">
+                    <x-brand-logo :href="route('home')" surface="dark" class="relative z-10" />
+                    <a href="{{ route('home') }}" class="hidden inline-flex items-center gap-2">
                         <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 border border-white/20 text-white">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />

@@ -44,6 +44,7 @@
         }
     </style>
 
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
 <body class="font-sans antialiased bg-gray-50 min-h-screen flex flex-col">
@@ -54,9 +55,7 @@
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
                 <div class="flex-shrink-0">
-                    <a href="{{ route('home') }}" class="text-2xl font-bold text-blue-600 hover:text-blue-700 transition">
-                        SkillHub
-                    </a>
+                    <x-brand-logo :href="route('home')" class="transition hover:opacity-85" />
                 </div>
 
                 <!-- Middle Links (Desktop) -->
@@ -66,6 +65,7 @@
                         <a href="{{ route('services.my') }}" class="text-gray-700 hover:text-blue-600 font-medium transition">Jasa Saya</a>
                         <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition">Pesanan</a>
                         <a href="{{ route('conversations.seller-index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition">Chat</a>
+                        <a href="{{ route('wallet.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition">Dompet</a>
                         @if(auth()->user()->role === 'admin')
                             <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-blue-600 font-medium transition">Admin Panel</a>
                         @endif
@@ -76,6 +76,10 @@
                 <div class="flex items-center space-x-4">
                     @auth
                         <x-notification-bell />
+                        <a href="{{ route('wallet.index') }}" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-gray-900 hover:text-blue-600 transition" title="Saldo Dompet">
+                            <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                            Rp{{ number_format(auth()->user()->balance, 0, ',', '.') }}
+                        </a>
                     @endauth
                     @guest
                         <a href="{{ route('login') }}" class="text-gray-700 hover:text-blue-600 font-medium transition">Login</a>
@@ -91,6 +95,7 @@
                                 <a href="{{ route('services.my') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Jasa Saya</a>
                                 <a href="{{ route('orders.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Pesanan</a>
                                 <a href="{{ route('conversations.seller-index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Chat</a>
+                                <a href="{{ route('wallet.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">Dompet</a>
                                 <hr class="my-1">
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
@@ -116,6 +121,7 @@
                     @auth
                         <a href="{{ route('notifications.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition">Notifikasi</a>
                         <a href="{{ route('conversations.seller-index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition">Chat</a>
+                        <a href="{{ route('wallet.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition">Dompet</a>
                         <a href="{{ route('services.my') }}" class="text-gray-700 hover:text-blue-600 font-medium transition">Jasa Saya</a>
                         <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition">Pesanan</a>
                         @if(auth()->user()->role === 'admin')
@@ -163,11 +169,7 @@
     </main>
 
     <!-- ====== FOOTER ====== -->
-    <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="container mx-auto px-4 py-6 text-center text-sm text-gray-500">
-            &copy; {{ date('Y') }} SkillHub. Dibuat untuk UKK PPLG.
-        </div>
-    </footer>
+    <x-site-footer />
 
     <!-- ====== SCRIPTS ====== -->
     <script>

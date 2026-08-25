@@ -5,10 +5,7 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                        <img src="{{ asset('images/logo-smk8.png') }}" alt="Logo SMK 8" class="h-8 w-auto object-contain">
-                        <span class="font-bold text-xl text-gray-900 tracking-tight">SkillHub</span>
-                    </a>
+                    <x-brand-logo :href="route('dashboard')" />
                 </div>
 
                 <!-- Navigation Links -->

@@ -1,373 +1,294 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - SkillHub</title>
+<x-layouts.admin>
+    {{-- STAT CARDS --}}
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-16" data-stagger-container>
+        <div class="stat-card" data-stagger-item>
+            <p class="text-xs font-heading font-bold text-uppercase-tracked text-[#999999]">Siswa Terdaftar</p>
+            <p class="mt-3 font-heading font-bold text-3xl text-black">{{ number_format($totalStudents, 0, ',', '.') }}</p>
+        </div>
+        <div class="stat-card" data-stagger-item>
+            <p class="text-xs font-heading font-bold text-uppercase-tracked text-[#999999]">Total Jasa</p>
+            <p class="mt-3 font-heading font-bold text-3xl text-black">{{ number_format($totalServices, 0, ',', '.') }}</p>
+        </div>
+        <div class="stat-card" data-stagger-item>
+            <p class="text-xs font-heading font-bold text-uppercase-tracked text-[#999999]">Menunggu Verifikasi</p>
+            <p class="mt-3 font-heading font-bold text-3xl text-[#EDE734]">{{ number_format($pendingCount, 0, ',', '.') }}</p>
+        </div>
+        <div class="stat-card" data-stagger-item>
+            <p class="text-xs font-heading font-bold text-uppercase-tracked text-[#999999]">Total Pesanan</p>
+            <p class="mt-3 font-heading font-bold text-3xl text-black">{{ number_format($totalOrders, 0, ',', '.') }}</p>
+        </div>
+        <div class="stat-card stat-card-accent" data-stagger-item>
+            <p class="text-xs font-heading font-bold text-uppercase-tracked text-[#999999]">Saldo Escrow Tertahan</p>
+            <p class="mt-3 font-heading font-bold text-3xl text-[#E4002B]">Rp{{ number_format($escrowBalance, 0, ',', '.') }}</p>
+        </div>
+    </section>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    {{-- CHART + REPORTS --}}
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-16" data-stagger-container>
+        {{-- Chart: Penjualan --}}
+        @php
+            $chartMax = max(max($chartOrders), 1);
+            $chartSteps = 4;
+            $previousChartOffset = min($chartOffset + 1, $chartMaxOffset);
+            $nextChartOffset = max($chartOffset - 1, 0);
+            $periodLabels = ['daily' => 'Harian', 'weekly' => 'Mingguan', 'monthly' => 'Bulanan'];
+        @endphp
+        <div class="lg:col-span-2 admin-card overflow-hidden" data-stagger-item>
+            <div class="p-6 lg:p-7">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h2 class="font-heading font-bold text-lg text-black uppercase tracking-tight">Penjualan Transaksi</h2>
+                        <p class="text-xs leading-relaxed text-[#555555] mt-1 max-w-[42ch]">Visual escrow yang bersih. Batang ramping dengan jeda napas, siap untuk slide presentasi UKK.</p>
+                    </div>
+                    <div class="flex items-center gap-1 rounded-full border border-[#DDDDDD] bg-[#F5F5F5] p-1">
+                        @foreach ($periodLabels as $period => $label)
+                            <a href="{{ route('admin.dashboard', ['period' => $period, 'offset' => 0]) }}"
+                               class="px-3.5 py-2 text-[10px] font-heading font-bold uppercase tracking-wider rounded-full transition-colors {{ $chartPeriod === $period ? 'bg-black text-white shadow-sm' : 'text-[#555555] hover:text-black' }}">
+                                {{ $label }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
 
-    <style>
-        body {
-            font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-            background: #f8f8ff;
-        }
-    </style>
-</head>
-
-<body class="min-h-screen text-slate-900">
-    <div class="min-h-screen border border-blue-600 rounded-md overflow-hidden bg-[#f8f8ff]">
-
-        {{-- NAVBAR --}}
-        <header class="bg-white border-b border-slate-200">
-            <div class="mx-auto max-w-7xl px-5">
-                <div class="h-16 flex items-center justify-between">
-                    <div class="flex items-center gap-8">
-                        <a href="{{ route('admin.dashboard') }}" class="leading-tight">
-                            <p class="font-bold text-lg text-slate-900">SkillHub</p>
-                            <p class="text-[9px] text-slate-500">Admin Portal</p>
+                <div class="mt-6 grid grid-cols-1 gap-3 rounded-sm border border-[#DDDDDD] bg-[#F5F5F5] p-4 sm:grid-cols-[1.4fr_auto] sm:items-end">
+                    <div>
+                        <p class="text-[10px] font-heading font-bold uppercase tracking-wider text-[#999999]">{{ $chartOffset === 0 ? ($chartPeriod === 'daily' ? 'Hari ini' : ($chartPeriod === 'weekly' ? 'Minggu ini' : 'Bulan ini')) : 'Periode terpilih' }}</p>
+                        <p class="font-heading font-bold text-2xl leading-none text-black mt-2">Rp{{ number_format($chartRevenue[count($chartRevenue) - 1] ?? 0, 0, ',', '.') }}</p>
+                        <p class="text-xs text-[#555555] mt-1"><span class="font-heading font-bold text-black">{{ $chartOrders[count($chartOrders) - 1] ?? 0 }}</span> pesanan pada titik terakhir</p>
+                    </div>
+                    <div class="flex items-center gap-2 justify-between sm:justify-end">
+                        <a href="{{ route('admin.dashboard', ['period' => $chartPeriod, 'offset' => $previousChartOffset]) }}"
+                           @class(['flex h-9 w-9 items-center justify-center rounded-full border bg-white text-black transition-colors hover:border-black hover:bg-black hover:text-white', $chartOffset >= $chartMaxOffset ? 'pointer-events-none opacity-30 border-[#DDDDDD]' : 'border-black']) 
+                           aria-label="Lihat periode sebelumnya">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="m14.25 18-6-6 6-6"/></svg>
                         </a>
-
-                        <nav class="hidden md:flex items-center h-16 gap-6 text-xs text-slate-500">
-                            <a href="{{ route('admin.dashboard') }}" class="h-16 inline-flex items-center border-b-2 border-blue-600 text-blue-700 font-semibold">
-                                Dashboard
-                            </a>
-
-                            <a href="{{ route('admin.categories.index') }}" class="hover:text-blue-700 transition">
-                                Categories
-                            </a>
-
-                            <a href="{{ route('admin.subcategories.index') }}" class="hover:text-blue-700 transition">
-                                Subcategories
-                            </a>
-
-                            <a href="{{ route('admin.payments.index') }}" class="hover:text-blue-700 transition">
-                                Transactions
-                            </a>
-
-                            <a href="{{ route('admin.reports.index') }}" class="hover:text-blue-700 transition">
-                                Reports
-                            </a>
-                        </nav>
-                    </div>
-
-                    <div class="flex items-center gap-4">
-                        <a href="{{ route('home') }}" class="text-slate-500 hover:text-blue-700" title="Lihat website">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6 6 0 0 0-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 0 1-6 0v-1m6 0H9"/>
-                            </svg>
+                        <div class="min-w-[148px] rounded-full border border-[#DDDDDD] bg-white px-3 py-2 text-center">
+                            <p class="text-[10px] font-heading font-bold uppercase tracking-wide text-black">{{ $chartStart->translatedFormat('d M Y') }} — {{ $chartEnd->translatedFormat('d M Y') }}</p>
+                            <p class="text-[10px] text-[#999999]">geser hingga 3 tahun ke belakang</p>
+                        </div>
+                        <a href="{{ route('admin.dashboard', ['period' => $chartPeriod, 'offset' => $nextChartOffset]) }}"
+                           @class(['flex h-9 w-9 items-center justify-center rounded-full border bg-white text-black transition-colors hover:border-black hover:bg-black hover:text-white', $chartOffset === 0 ? 'pointer-events-none opacity-30 border-[#DDDDDD]' : 'border-black'])
+                           aria-label="Lihat periode lebih baru">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="m9.75 6 6 6-6 6"/></svg>
                         </a>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50" title="Keluar dari akun">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6A2.25 2.25 0 0 0 5.25 5.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m-3-3h8.25m0 0-3-3m3 3-3 3" />
-                                </svg>
-                                <span class="hidden sm:inline">Logout</span>
-                            </button>
-                        </form>
-
-                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
-                            {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 2)) }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <main class="mx-auto max-w-7xl px-5 py-6 lg:py-8">
-
-            {{-- HEADER --}}
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-                <div>
-                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Platform Overview</h1>
-                    <p class="text-sm text-slate-500 mt-1">
-                        Selamat datang, {{ auth()->user()->name }}. Berikut ringkasan SkillHub hari ini.
-                    </p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-3">
-                    <span class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-600">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3m-9 8h10m-12 9h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
-                        </svg>
-                        Hari ini, {{ now()->format('d M Y') }}
-                    </span>
-
-                    <a href="{{ route('admin.categories.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-800 transition">
-                        <span class="text-base leading-none">+</span>
-                        Tambah Kategori
-                    </a>
-                </div>
-            </div>
-
-            {{-- FLASH MESSAGE --}}
-            @if (session('success'))
-                <div class="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            {{-- STATISTIC --}}
-            <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-5">
-                <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
-                                Siswa Terdaftar
-                            </p>
-                            <p class="mt-2 text-3xl font-bold text-slate-900">
-                                {{ number_format($totalStudents, 0, ',', '.') }}
-                            </p>
-                            <p class="mt-2 text-xs text-emerald-600">Akun siswa aktif di platform</p>
-                        </div>
-
-                        <span class="rounded-lg bg-blue-50 p-2 text-blue-700">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 14 3 9l9-5 9 5-9 5Zm-6 2.5V19c0 1.66 2.69 3 6 3s6-1.34 6-3v-2.5"/>
-                            </svg>
-                        </span>
                     </div>
                 </div>
 
-                <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
-                                Jasa Aktif
-                            </p>
-                            <p class="mt-2 text-3xl font-bold text-slate-900">
-                                {{ number_format($totalServices, 0, ',', '.') }}
-                            </p>
-                            <p class="mt-2 text-xs text-emerald-600">Jasa yang telah disetujui</p>
-                        </div>
-
-                        <span class="rounded-lg bg-blue-50 p-2 text-blue-700">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7h-3V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v9a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V9a2 2 0 0 0-2-2ZM9 5h6v2H9V5Z"/>
-                            </svg>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
-                                Menunggu Verifikasi
-                            </p>
-                            <p class="mt-2 text-3xl font-bold text-slate-900">
-                                {{ number_format($pendingCount, 0, ',', '.') }}
-                            </p>
-                            <p class="mt-2 text-xs text-amber-600">Pengajuan jasa perlu ditinjau</p>
-                        </div>
-
-                        <span class="rounded-lg bg-amber-50 p-2 text-amber-700">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l2.5 2.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                            </svg>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
-                                Pembayaran Pending
-                            </p>
-                            <p class="mt-2 text-3xl font-bold text-slate-900">
-                                {{ number_format($pendingPayments, 0, ',', '.') }}
-                            </p>
-                            <p class="mt-2 text-xs text-blue-600">Menunggu verifikasi admin</p>
-                        </div>
-
-                        <span class="rounded-lg bg-blue-50 p-2 text-blue-700">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10h18M7 15h2m4 0h4M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/>
-                            </svg>
-                        </span>
-                    </div>
-                </div>
-            </section>
-
-            {{-- CONTENT --}}
-            <section class="grid grid-cols-1 xl:grid-cols-3 gap-5">
-
-                {{-- APPROVAL QUEUE --}}
-                <div class="xl:col-span-2 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                    <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-                        <div>
-                            <h2 class="font-bold text-slate-900">Antrian Persetujuan Jasa</h2>
-                            <p class="mt-0.5 text-xs text-slate-500">Tinjau jasa siswa sebelum dipublikasikan.</p>
-                        </div>
-
-                        <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                            {{ $pendingCount }} pengajuan
-                        </span>
-                    </div>
-
-                    @if ($pendingServices->isNotEmpty())
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full text-left">
-                                <thead class="bg-slate-50 border-b border-slate-200">
-                                    <tr class="text-[10px] uppercase tracking-wider text-slate-500">
-                                        <th class="px-5 py-3 font-semibold">Informasi Jasa</th>
-                                        <th class="px-5 py-3 font-semibold">Penyedia</th>
-                                        <th class="px-5 py-3 font-semibold">Diajukan</th>
-                                        <th class="px-5 py-3 font-semibold text-right">Aksi</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody class="divide-y divide-slate-100">
-                                    @foreach ($pendingServices->take(5) as $service)
-                                        <tr class="hover:bg-slate-50 transition">
-                                            <td class="px-5 py-4">
-                                                <div class="flex items-center gap-3">
-                                                    <span class="w-9 h-9 shrink-0 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold">
-                                                        {{ strtoupper(substr($service->title, 0, 1)) }}
-                                                    </span>
-
-                                                    <div class="min-w-0">
-                                                        <p class="font-semibold text-sm text-slate-800 truncate">
-                                                            {{ $service->title }}
-                                                        </p>
-                                                        <p class="text-xs text-slate-500">
-                                                            {{ $service->subcategory?->name ?? 'Tanpa kategori' }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </td>
-
-                                            <td class="px-5 py-4 text-xs text-slate-700">
-                                                {{ $service->seller?->name ?? 'Tidak diketahui' }}
-                                            </td>
-
-                                            <td class="px-5 py-4 text-xs text-slate-500">
-                                                {{ $service->created_at->diffForHumans() }}
-                                            </td>
-
-                                            <td class="px-5 py-4">
-                                                <div class="flex justify-end gap-2">
-                                                    <form action="{{ route('admin.services.reject', $service) }}" method="POST">
-                                                        @csrf
-                                                        <button type="submit" onclick="return confirm('Tolak jasa ini?')" class="rounded-md border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition">
-                                                            Tolak
-                                                        </button>
-                                                    </form>
-
-                                                    <form action="{{ route('admin.services.approve', $service) }}" method="POST">
-                                                        @csrf
-                                                        <button type="submit" class="rounded-md bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-800 transition">
-                                                            Setujui
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="py-14 text-center">
-                            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 13 4 4L19 7"/>
-                                </svg>
+                <div class="relative mt-6 rounded-sm border border-[#DDDDDD] bg-white p-4 sm:p-5" aria-label="Grafik transaksi {{ $chartPeriod }}">
+                    <div class="absolute inset-x-4 top-4 bottom-[52px] flex flex-col justify-between pointer-events-none sm:inset-x-5" aria-hidden="true">
+                        @for ($i = $chartSteps; $i >= 0; $i--)
+                            <div class="flex items-center gap-3">
+                                <span class="hidden w-6 text-right text-[9px] font-heading font-bold text-[#999999] sm:block">{{ $i === 0 ? 0 : (int) ceil(($chartMax / $chartSteps) * $i) }}</span>
+                                <div class="flex-1 border-t {{ $i === 0 ? 'border-[#DDDDDD]' : 'border-dashed border-[#EAEAEA]' }}"></div>
                             </div>
-                            <p class="font-semibold text-slate-700">Tidak ada pengajuan baru</p>
-                            <p class="mt-1 text-sm text-slate-500">Semua jasa telah diproses.</p>
-                        </div>
-                    @endif
-                </div>
-
-                {{-- SUBMISSION REVIEW --}}
-                <aside class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                    <div class="border-b border-slate-200 px-5 py-4">
-                        <h2 class="font-bold text-slate-900">Review Cepat</h2>
-                        <p class="mt-0.5 text-xs text-slate-500">Pengajuan terbaru.</p>
+                        @endfor
                     </div>
 
-                    @if ($pendingServices->isNotEmpty())
-                        <div class="divide-y divide-slate-100">
-                            @foreach ($pendingServices->take(3) as $service)
-                                <div class="p-4">
-                                    <div class="flex gap-3">
-                                        <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold shrink-0">
-                                            {{ strtoupper(substr($service->seller?->name ?? 'U', 0, 2)) }}
-                                        </span>
+                    <div class="relative z-10 mt-1 flex h-[240px] items-end justify-between gap-2 px-1 sm:gap-3 sm:px-3">
+                        @foreach ($chartOrders as $index => $orders)
+                            @php
+                                $height = $orders > 0 ? max(14, ($orders / $chartMax) * 100) : 2;
+                                $isLast = $index === count($chartOrders) - 1;
+                            @endphp
+                            <div class="group relative flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2">
+                                @if ($orders > 0)
+                                    <span class="hidden text-[10px] font-heading font-bold text-black sm:block {{ $isLast ? 'opacity-100' : 'opacity-0 group-hover:opacity-100' }} transition-opacity">{{ $orders }}</span>
+                                @endif
+                                <div class="absolute bottom-[28px] left-1/2 z-20 hidden w-max max-w-[200px] -translate-x-1/2 rounded-sm border border-black bg-black px-3 py-2 text-center text-[10px] leading-relaxed text-white shadow-lg group-hover:block">
+                                    <strong class="font-heading">{{ $chartLabels[$index] }}</strong><br>
+                                    {{ $orders }} pesanan · Rp{{ number_format($chartRevenue[$index], 0, ',', '.') }}
+                                </div>
+                                <div class="flex h-full w-full max-w-[34px] items-end justify-center rounded-t-sm bg-[#F5F5F5] p-1 sm:max-w-[40px]">
+                                    <div class="w-full rounded-t-sm bg-black transition-all duration-200 group-hover:bg-[#E4002B]"
+                                         style="height: {{ $height }}%"
+                                         aria-label="{{ $chartLabels[$index] }}: {{ $orders }} pesanan"></div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
 
-                                        <div class="min-w-0">
-                                            <p class="font-semibold text-sm text-slate-800 truncate">
-                                                {{ $service->seller?->name ?? 'Pengguna' }}
-                                            </p>
-                                            <p class="text-xs text-slate-500 truncate">
-                                                {{ $service->title }}
-                                            </p>
-                                        </div>
+                    <div class="mt-3 grid gap-2 px-1 sm:gap-3 sm:px-3" style="grid-template-columns: repeat({{ count($chartLabels) }}, minmax(0, 1fr));">
+                        @foreach ($chartLabels as $label)
+                            <span class="min-w-0 truncate text-center text-[9px] font-heading font-bold uppercase tracking-wide text-[#999999]" title="{{ $label }}">{{ $label }}</span>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-[#555555]">
+                    <span class="inline-flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-black"></span> pesanan</span>
+                    <span class="inline-flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-[#E4002B]"></span> hover = pendapatan</span>
+                    <span class="ml-auto text-[#999999]">scroll periode hingga 3 tahun • data server-rendered, anti-hilang</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Report Alerts --}}
+        <div class="admin-card" data-stagger-item>
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-heading font-semibold text-sm text-black">Laporan Masuk</h2>
+                    <span class="badge badge-accent">{{ $pendingReports->count() }}</span>
+                </div>
+                @if ($pendingReports->isNotEmpty())
+                    <div class="space-y-3">
+                        @foreach ($pendingReports as $report)
+                            <div class="border border-[#DDDDDD] rounded-sm p-3">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-xs font-bold text-black truncate">{{ $report->order->service->title ?? 'Jasa tidak ditemukan' }}</p>
+                                        <p class="text-[10px] text-[#999999] mt-1">Pelapor: {{ $report->reporter->name ?? 'N/A' }}</p>
+                                        <p class="text-[10px] text-[#999999]">Dilaporkan: {{ $report->reportedUser->name ?? 'N/A' }}</p>
+                                        <p class="text-[10px] text-[#999999] mt-1 line-clamp-2">"{{ \Illuminate\Support\Str::limit($report->reason, 80) }}"</p>
                                     </div>
+                                    <a href="{{ route('admin.reports.index') }}" class="btn-ghost text-xs shrink-0">Lihat &rarr;</a>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="empty-state py-8">
+                        <div class="empty-state-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+                        </div>
+                        <p class="text-xs text-[#999999]">Tidak ada laporan masuk.</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </section>
 
-                                    <div class="grid grid-cols-2 gap-2 mt-3">
+    {{-- KATEGORI MANAGEMENT + APPROVAL QUEUE --}}
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6" data-stagger-container>
+
+        {{-- Category Management --}}
+        <div class="admin-card" data-stagger-item>
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <h2 class="font-heading font-semibold text-sm text-black">Kelola Kategori</h2>
+                    <button @click="showCategoryModal = true" class="btn-primary text-xs">
+                        <span class="inline-flex items-center justify-center w-5 h-5">+</span> Tambah
+                    </button>
+                </div>
+
+                <div class="space-y-2">
+                    @foreach ($categories as $category)
+                        <div class="admin-card p-3" data-stagger-item>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-lg">{{ $category->displayIcon() }}</span>
+                                    <span class="font-medium text-black">{{ $category->name }}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="badge badge-neutral text-[10px]">{{ $category->subcategories->count() }} sub</span>
+                                    <a href="{{ route('admin.categories.edit', $category) }}" class="btn-ghost p-1" aria-label="Edit kategori">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m16.862 12.71 1.176-1.176a.75.75 0 0 1 1.166 0L21 13.5v3.25a2.25 2.25 0 0 1-2.25 2.25H5.25a2.25 2.25 0 0 1-2.25-2.25V6.75A2.25 2.25 0 0 1 5.25 4.5h6.19l2.128 2.128a.75.75 0 0 0 1.071 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6.75 18 4.5m0 0 2.25-2.25M18 4.5h-2.25"/></svg>
+                                    </a>
+                                </div>
+                            </div>
+                            @if ($category->subcategories->isNotEmpty())
+                                <div class="mt-2 flex flex-wrap gap-1.5 pl-10">
+                                    @foreach ($category->subcategories as $sub)
+                                        <span class="text-[10px] px-2 py-1 rounded border border-[#DDDDDD] bg-white">{{ $sub->name }}</span>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        {{-- Pending Approval Queue --}}
+        <div class="admin-card" data-stagger-item>
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-heading font-semibold text-sm text-black">Antrian Persetujuan</h2>
+                    <span class="badge badge-accent">{{ $pendingCount }} pengajuan</span>
+                </div>
+
+                @if ($pendingServices->isNotEmpty())
+                    <div class="space-y-3" data-stagger-container>
+                        @foreach ($pendingServices->take(6) as $service)
+                            <div class="admin-card p-3" data-stagger-item>
+                                <div class="flex items-start gap-3">
+                                    <span class="w-8 h-8 rounded bg-[#F5F5F5] text-black flex items-center justify-center text-xs font-bold shrink-0 font-heading">
+                                        {{ strtoupper(substr($service->title, 0, 1)) }}
+                                    </span>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-xs font-bold text-black truncate">{{ $service->title }}</p>
+                                        <p class="text-[10px] text-[#555555] mt-0.5">{{ $service->seller?->name ?? 'N/A' }} &bull; {{ $service->subcategory?->name ?? '-' }}</p>
+                                    </div>
+                                    <div class="flex gap-1 shrink-0">
                                         <form action="{{ route('admin.services.reject', $service) }}" method="POST">
                                             @csrf
-                                            <button type="submit" onclick="return confirm('Tolak jasa ini?')" class="w-full rounded-md border border-red-200 py-1.5 text-[11px] font-semibold text-red-600 hover:bg-red-50 transition">
-                                                Tolak
-                                            </button>
+                                            <button type="submit" onclick="return confirm('Tolak jasa ini?')" class="btn-danger text-xs px-3 py-1.5">Tolak</button>
                                         </form>
-
                                         <form action="{{ route('admin.services.approve', $service) }}" method="POST">
                                             @csrf
-                                            <button type="submit" class="w-full rounded-md bg-blue-700 py-1.5 text-[11px] font-semibold text-white hover:bg-blue-800 transition">
-                                                Setujui
-                                            </button>
+                                            <button type="submit" class="btn-primary text-xs px-3 py-1.5">Setujui</button>
                                         </form>
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="p-8 text-center text-sm text-slate-500">
-                            Tidak ada jasa yang menunggu review.
-                        </div>
-                    @endif
-
-                    <div class="border-t border-slate-200 p-4">
-                        <a href="{{ route('admin.payments.index') }}" class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition">
-                            Verifikasi pembayaran
-                            <span>→</span>
-                        </a>
+                            </div>
+                        @endforeach
+                        @if ($pendingServices->count() > 6)
+                            <a href="{{ route('admin.services.pending') }}" class="btn-ghost text-xs flex items-center justify-center gap-1 w-full py-2">
+                                Lihat semua {{ $pendingServices->count() }} pengajuan &rarr;
+                            </a>
+                        @endif
                     </div>
-                </aside>
-            </section>
-        </main>
-
-        {{-- FOOTER --}}
-        <footer class="mt-10 bg-slate-950 text-slate-300">
-            <div class="mx-auto max-w-7xl px-5 py-7 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <p class="font-bold text-white">SkillHub Admin</p>
-                    <p class="mt-1 text-xs text-slate-400">Empowering student skill marketplace.</p>
-                </div>
-
-                <div class="flex gap-5 text-xs">
-                    <a href="{{ route('admin.categories.index') }}" class="hover:text-white">Kategori</a>
-                    <a href="{{ route('admin.subcategories.index') }}" class="hover:text-white">Subkategori</a>
-                    <a href="{{ route('admin.reports.index') }}" class="hover:text-white">Laporan</a>
-                </div>
-
-                <p class="text-xs text-slate-500">
-                    © {{ date('Y') }} SkillHub. All rights reserved.
-                </p>
+                @else
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m5 13 4 4L19 7"/></svg>
+                        </div>
+                        <p class="text-xs text-[#999999]">Tidak ada pengajuan baru.</p>
+                    </div>
+                @endif
             </div>
-        </footer>
+        </div>
+    </section>
+
+    {{-- CATEGORY MODAL --}}
+    <div x-show="showCategoryModal" x-cloak @click.outside="showCategoryModal = false"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0">
+        <div @click.stop class="w-full max-w-md bg-white rounded-md border border-[#DDDDDD] p-6 shadow-lg"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="font-heading font-semibold text-sm text-black">Tambah Kategori</h3>
+                <button type="button" @click="showCategoryModal = false" class="btn-ghost p-1" aria-label="Tutup modal">&times;</button>
+            </div>
+            <form method="POST" action="{{ route('admin.categories.store') }}">
+                @csrf
+                <div class="space-y-4">
+                    <div>
+                        <label class="label-field" for="cat-name">Nama Kategori</label>
+                        <input type="text" id="cat-name" name="name" required
+                            class="input-field"
+                            placeholder="Contoh: Desain & Grafis">
+                    </div>
+                    <div>
+                        <label class="label-field" for="cat-subs">Subkategori (pisahkan dengan koma)</label>
+                        <input type="text" id="cat-subs" name="subcategories" placeholder="Contoh: Desain Logo, Desain Poster"
+                            class="input-field">
+                    </div>
+                    <div class="flex justify-end gap-2 pt-2 border-t border-[#DDDDDD]">
+                        <button type="button" @click="showCategoryModal = false" class="btn-outline text-xs px-4 py-2">Batal</button>
+                        <button type="submit" class="btn-primary text-xs px-4 py-2">Simpan</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
-</body>
-</html>
+</x-layouts.admin>

@@ -24,11 +24,17 @@ class NegotiationController extends Controller
         return back()->with('success', 'Tawaran harga terkirim.');
     }
 
-    public function accept(Order $order, Negotiation $negotiation)
+    public function accept(Negotiation $negotiation)
     {
-        // Hanya lawan bicara (bukan pengirim tawaran) yang boleh menerima
-        if ($negotiation->sender_id === auth()->id()) {
-            abort(403, 'Anda tidak bisa menyetujui tawaran sendiri.');
+        $order = $negotiation->order;
+
+        $isParticipant = in_array(auth()->id(), [$order->buyer_id, $order->service->user_id]);
+        if (! $isParticipant || $negotiation->sender_id === auth()->id()) {
+            abort(403, 'Anda tidak berhak menyetujui tawaran ini.');
+        }
+
+        if ($negotiation->status !== 'pending') {
+            return back()->with('error', 'Tawaran ini sudah diproses sebelumnya.');
         }
 
         $negotiation->update(['status' => 'accepted']);

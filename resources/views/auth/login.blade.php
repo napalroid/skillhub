@@ -1,6 +1,6 @@
 <x-guest-layout
     variant="login"
-    title="Masuk ke SkillHub"
+    title="Masuk"
     subtitle="Selamat datang kembali! Masuk dengan akun yang terdaftar."
 >
     @if (session('status'))

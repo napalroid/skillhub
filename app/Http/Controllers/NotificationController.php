@@ -10,7 +10,7 @@ class NotificationController extends Controller
     public function index()
     {
         $notifications = auth()->user()->notifications()
-            ->with(['service', 'conversation'])
+            ->with(['service', 'conversation', 'order', 'payment'])
             ->latest()
             ->paginate(15);
 
@@ -52,6 +52,10 @@ class NotificationController extends Controller
             abort_unless($notification->conversation->hasParticipant(auth()->user()), 403);
 
             return redirect()->route('conversations.show', $notification->conversation);
+        }
+
+        if (in_array($notification->type, ['payment_paid', 'escrow_ready', 'order_escrow', 'order_confirmed'], true) && $notification->order) {
+            return redirect()->route('orders.show', $notification->order);
         }
 
         return redirect()->route('notifications.index');

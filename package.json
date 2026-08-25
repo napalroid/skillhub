@@ -5,6 +5,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
+        "reverb": "php artisan reverb:start",
         "proxy:ngrok": "node scripts/ngrok-reverb-proxy.mjs"
     },
     "devDependencies": {

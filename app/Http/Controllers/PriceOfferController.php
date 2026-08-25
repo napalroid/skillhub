@@ -43,7 +43,7 @@ class PriceOfferController extends Controller
         $priceOffer->refresh();
         try { broadcast(new PriceOfferStatusChanged($priceOffer))->toOthers(); } catch (BroadcastException $exception) { report($exception); }
 
-        return redirect()->route('orders.show', $order)
+        return redirect()->route('orders.payment.show', $order)
             ->with('success', 'Penawaran diterima. Silakan lanjutkan pembayaran.');
     }
 

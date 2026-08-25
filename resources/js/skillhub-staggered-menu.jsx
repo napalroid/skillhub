@@ -71,7 +71,7 @@ function StaggeredMenu({ links, account }) {
 }
 
 if (menuRoot) {
-    const links = { home: menuRoot.dataset.home, items: [{ label: 'Home', href: menuRoot.dataset.home }, { label: 'Marketplace', href: menuRoot.dataset.marketplace }, { label: 'How we work', href: menuRoot.dataset.how }, { label: 'Why us?', href: menuRoot.dataset.whyUs }, { label: 'Get started', href: menuRoot.dataset.getStarted }] };
+    const links = { home: menuRoot.dataset.home, dompet: menuRoot.dataset.dompet, pesanan: menuRoot.dataset.pesanan, chat: menuRoot.dataset.chat || '/seller/messages', items: [{ label: 'Home', href: menuRoot.dataset.home }, { label: 'Marketplace', href: menuRoot.dataset.marketplace }, { label: 'Dompet', href: menuRoot.dataset.dompet }, { label: 'Pesanan', href: menuRoot.dataset.pesanan }, { label: 'Chat', href: menuRoot.dataset.chat || '/seller/messages' }] };
     const account = { authenticated: menuRoot.dataset.authenticated === 'true', userName: menuRoot.dataset.userName, profileUrl: menuRoot.dataset.profileUrl, loginUrl: menuRoot.dataset.login, registerUrl: menuRoot.dataset.register, logoutUrl: menuRoot.dataset.logoutUrl, csrfToken: menuRoot.dataset.csrfToken, notifications: getNotifications(), notificationsUrl: menuRoot.dataset.notificationsUrl, readAllUrl: menuRoot.dataset.notificationsReadAllUrl };
     createRoot(menuRoot).render(<StaggeredMenu links={links} account={account} />);
 }

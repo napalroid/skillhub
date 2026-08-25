@@ -28,9 +28,11 @@
          data-user-name="{{ auth()->user()?->name ?? '' }}"
          data-profile-url="{{ route('profile.edit') }}"
          data-logout-url="{{ route('logout') }}"
-         data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
-         data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
-         data-csrf-token="{{ csrf_token() }}"></div>
+          data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
+          data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
+          data-dompet="{{ route('wallet.index') }}"
+          data-pesanan="{{ route('orders.index') }}"
+          data-csrf-token="{{ csrf_token() }}"></div>
     <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT)</script>
 
     <x-notification-toast />

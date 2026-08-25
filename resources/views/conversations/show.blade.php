@@ -31,7 +31,7 @@
             </div>
             <div class="flex items-center gap-2">
                 @if ($isSeller)
-                    <button type="button" @click="offerModal = true" class="border border-blue-400 bg-blue-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-blue-500">Buat Penawaran</button>
+                    <button type="button" @click="offerModal = true" class="border border-blue-400 bg-blue-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-blue-500">Buat Penawaran Harga</button>
                 @endif
                 <span class="border border-white/30 px-3 py-2 text-xs font-bold">{{ $conversation->service->subcategory?->name ?? 'Jasa' }}</span>
             </div>
@@ -56,10 +56,10 @@
                     <article data-offer-id="{{ $offer->id }}" class="my-3 border border-blue-300/50 bg-blue-50 p-4 text-[#101828] shadow-sm">
                         <div class="flex items-start justify-between gap-4"><div><p class="text-[10px] font-bold tracking-[.16em] text-blue-700">PENAWARAN HARGA</p><h2 class="mt-1 text-sm font-bold">{{ $conversation->service->title }}</h2></div><span data-offer-status class="border border-blue-200 bg-white px-2 py-1 text-[10px] font-bold uppercase text-blue-700">{{ $offer->status->value }}</span></div>
                         <dl class="mt-4 grid grid-cols-2 gap-3 text-xs"><div><dt class="text-black/50">Harga asli</dt><dd class="mt-1 font-bold">Rp{{ number_format($offer->original_price, 0, ',', '.') }}</dd></div><div><dt class="text-black/50">Harga kesepakatan</dt><dd class="mt-1 font-bold text-blue-700">Rp{{ number_format($offer->offer_price, 0, ',', '.') }}</dd></div></dl>
-                        @if($offer->note)<p class="mt-3 border-t border-blue-200 pt-3 text-xs leading-5 text-black/70">{{ $offer->note }}</p>@endif
-                        @if (! $isSeller && $offer->buyer_id === auth()->id() && $offer->isPending() && ! $offer->isExpired())
+@if($offer->note)<p class="mt-3 border-t border-blue-200 pt-3 text-xs leading-5 text-black/70">{{ $offer->note }}</p>@endif
+                        @if ($offer->isPending() && ! $offer->isExpired() && !$isSeller)
                             <div data-offer-actions class="mt-4 flex flex-wrap gap-2 border-t border-blue-200 pt-3">
-                                <form method="POST" action="{{ route('price-offers.accept', $offer) }}">@csrf<button class="bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700">Terima &amp; Pesan</button></form>
+                                <form method="POST" action="{{ route('price-offers.accept', $offer) }}">@csrf<button class="bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700">Terima & Bayar</button></form>
                                 <form method="POST" action="{{ route('price-offers.reject', $offer) }}">@csrf<button class="border border-black/20 bg-white px-3 py-2 text-xs font-bold hover:bg-black hover:text-white">Tolak</button></form>
                             </div>
                         @endif
@@ -76,19 +76,19 @@
         </section>
 
         @if ($isSeller)
-            <div x-show="offerModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" @keydown.escape.window="offerModal = false">
-                <div @click.outside="offerModal = false" class="w-full max-w-md bg-white p-6 text-[#101828] shadow-2xl">
-                    <div class="flex items-start justify-between gap-4"><div><p class="text-[10px] font-bold tracking-[.16em] text-blue-700">BUAT PENAWARAN HARGA</p><h2 class="mt-1 text-lg font-bold">{{ $conversation->service->title }}</h2></div><button type="button" @click="offerModal = false" class="text-xl text-black/50">&times;</button></div>
-                    <p class="mt-4 text-sm text-black/60">Harga asli: <strong class="text-black">Rp{{ number_format($conversation->service->price, 0, ',', '.') }}</strong></p>
-                    <form method="POST" action="{{ route('price-offers.store', $conversation) }}" class="mt-5 space-y-4">
-                        @csrf
-                        <div><label for="offer_price" class="block text-xs font-bold">Harga kesepakatan</label><input id="offer_price" type="number" name="offer_price" min="1" max="{{ $conversation->service->price }}" step="1" required class="mt-2 w-full border border-black/20 px-3 py-3 text-sm outline-none focus:border-blue-600" placeholder="Contoh: 500000"><p class="mt-1 text-[11px] text-black/50">Tidak boleh melebihi harga asli.</p></div>
-                        <div><label for="note" class="block text-xs font-bold">Catatan <span class="font-normal text-black/50">(opsional)</span></label><textarea id="note" name="note" maxlength="1000" rows="3" class="mt-2 w-full resize-none border border-black/20 p-3 text-sm outline-none focus:border-blue-600" placeholder="Sesuai kesepakatan di chat"></textarea></div>
-                        <div class="flex justify-end gap-2"><button type="button" @click="offerModal = false" class="border border-black/20 px-4 py-2.5 text-xs font-bold">Batal</button><button class="bg-blue-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-blue-700">Buat Penawaran</button></div>
-                    </form>
-                </div>
+        <div x-show="offerModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" @keydown.escape.window="offerModal = false">
+            <div @click.outside="offerModal = false" class="w-full max-w-md bg-white p-6 text-[#101828] shadow-2xl">
+                <div class="flex items-start justify-between gap-4"><div><p class="text-[10px] font-bold tracking-[.16em] text-blue-700">BUAT PENAWARAN HARGA</p><h2 class="mt-1 text-lg font-bold">{{ $conversation->service->title }}</h2></div><button type="button" @click="offerModal = false" class="text-xl text-black/50">&times;</button></div>
+                <p class="mt-4 text-sm text-black/60">Harga asli jasa: <strong class="text-black">Rp{{ number_format($conversation->service->price, 0, ',', '.') }}</strong></p>
+                <form method="POST" action="{{ route('price-offers.store', $conversation) }}" class="mt-5 space-y-4">
+                    @csrf
+                    <div><label for="offer_price" class="block text-xs font-bold">Harga kesepakatan (bisa lebih tinggi atau lebih rendah dari harga asli)</label><input id="offer_price" type="text" inputmode="numeric" pattern="[0-9]*" name="offer_price" min="1" required class="mt-2 w-full border border-black/20 px-3 py-3 text-sm outline-none focus:border-blue-600" placeholder="Contoh: 500000"><p class="mt-1 text-[11px] text-black/50">Masukkan harga yang disepakati bersama di chat.</p></div>
+                    <div><label for="note" class="block text-xs font-bold">Catatan <span class="font-normal text-black/50">(opsional)</span></label><textarea id="note" name="note" maxlength="1000" rows="3" class="mt-2 w-full resize-none border border-black/20 p-3 text-sm outline-none focus:border-blue-600" placeholder="Catatan kesepakatan, detail tambahan, dll"></textarea></div>
+                    <div class="flex justify-end gap-2"><button type="button" @click="offerModal = false" class="border border-black/20 px-4 py-2.5 text-xs font-bold">Batal</button><button class="bg-blue-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-blue-700">Kirim Penawaran</button></div>
+                </form>
             </div>
-        @endif
+        </div>
+    @endif
     </main>
 </body>
 </html>

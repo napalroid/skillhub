@@ -11,6 +11,8 @@ class UserNotification extends Model
         'user_id',
         'service_id',
         'conversation_id',
+        'order_id',
+        'payment_id',
         'type',
         'title',
         'message',
@@ -34,6 +36,16 @@ class UserNotification extends Model
     public function conversation(): BelongsTo
     {
         return $this->belongsTo(Conversation::class);
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    public function payment(): BelongsTo
+    {
+        return $this->belongsTo(Payment::class);
     }
 
     public function scopeUnread($query)

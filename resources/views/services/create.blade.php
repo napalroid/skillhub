@@ -192,49 +192,5 @@
 @endpush
 
 @section('pageFooter')
-    <footer class="relative overflow-hidden bg-black px-5 pb-7 pt-14 text-white">
-        <div class="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-blue-600/15 blur-3xl"></div>
-        <div class="relative mx-auto max-w-6xl">
-            <div class="grid gap-10 border-b border-white/15 pb-11 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
-                <div>
-                    <a href="{{ route('home') }}" class="inline-flex items-center gap-2.5 text-xl font-extrabold tracking-tight transition duration-200 hover:scale-105 hover:text-blue-300">
-                        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-base" aria-hidden="true">✦</span>
-                        SkillHub
-                    </a>
-                    <p class="mt-4 max-w-xs text-sm leading-6 text-slate-400">Marketplace jasa antarsiswa untuk berkarya, berkolaborasi, dan berkembang bersama.</p>
-                </div>
-
-                <div>
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-white">Jelajahi</h3>
-                    <div class="mt-4 flex flex-col items-start gap-3 text-sm text-slate-400">
-                        <a href="{{ route('dashboard') }}#jasa" class="origin-left transition duration-200 hover:scale-110 hover:text-white">Marketplace Jasa</a>
-                        <a href="{{ route('dashboard') }}#keunggulan" class="origin-left transition duration-200 hover:scale-110 hover:text-white">Keunggulan</a>
-                        <a href="{{ route('dashboard') }}#review" class="origin-left transition duration-200 hover:scale-110 hover:text-white">Ulasan Pengguna</a>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-white">Akun</h3>
-                    <div class="mt-4 flex flex-col items-start gap-3 text-sm text-slate-400">
-                        <a href="{{ route('profile.edit') }}" class="origin-left transition duration-200 hover:scale-110 hover:text-white">Profil {{ auth()->user()->name }}</a>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="origin-left transition duration-200 hover:scale-110 hover:text-white">Keluar</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-white">SkillHub</h3>
-                    <p class="mt-4 text-sm leading-6 text-slate-400">Tempat yang aman untuk menjual keahlian dan mencari bantuan dari sesama siswa.</p>
-                    <a href="{{ route('dashboard') }}#cara-kerja" class="mt-4 inline-block origin-left text-sm font-semibold text-blue-300 transition duration-200 hover:scale-110 hover:text-white">Cara kerja kami →</a>
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-3 pt-7 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-                <p>© {{ date('Y') }} SkillHub. Dibuat untuk siswa berkarya.</p>
-                <p class="transition duration-200 hover:scale-105 hover:text-slate-300">Aman • Terpercaya • Untuk siswa</p>
-            </div>
-        </div>
-    </footer>
+    <x-site-footer />
 @endsection
