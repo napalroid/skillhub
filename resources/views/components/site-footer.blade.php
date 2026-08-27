@@ -15,8 +15,8 @@
         <!-- Top Area: Brand + Newsletter -->
         <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 py-12 lg:py-16">
             <div class="flex-1">
-                <x-brand-logo href="{{ route('home') }}" surface="dark" class="font-bold" />
-                <p class="mt-4 max-w-sm text-sm text-white/50">
+                <h1 class="skillhub-brand-label" style="font-family:'Archivo',sans-serif;font-size:2.5rem;letter-spacing:.14em;text-transform:uppercase;color:#56CCF2;-webkit-text-stroke:1px #080808;paint-order:stroke fill">SKILLHUB</h1>
+                <p class="mt-6 text-lg text-white">
                     Marketplace jasa untuk lingkungan sekolah. Tawarkan keahlian atau temukan bantuan — dengan sistem escrow yang aman.
                 </p>
             </div>

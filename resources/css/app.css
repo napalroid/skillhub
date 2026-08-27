@@ -129,6 +129,14 @@
         line-height: 1;
     }
 
+    .skillhub-brand {
+        display: inline-flex;
+        align-items: center;
+        color: inherit;
+        text-decoration: none;
+        line-height: 1;
+    }
+
     .skillhub-brand-label {
         font-family: 'Archivo', sans-serif;
         font-size: 1.5rem;
@@ -137,6 +145,8 @@
         text-transform: uppercase;
         white-space: nowrap;
         color: #56CCF2;
+        -webkit-text-stroke: 1px #080808;
+        paint-order: stroke fill;
     }
 
     .skillhub-brand--light .skillhub-brand-label,
