@@ -18,12 +18,27 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="font-sans antialiased h-full bg-gray-50 text-gray-900">
+<body class="font-sans antialiased h-full bg-gray-50 pt-16 text-gray-900">
     <div class="min-h-screen flex flex-col">
         
         <!-- Navigation -->
         @unless (View::hasSection('hideNavigation'))
-            @include('layouts.navigation')
+            <div id="skillhub-staggered-menu"
+                 data-home="{{ route('home') }}"
+                 data-marketplace="{{ route('services.index') }}"
+                 data-chat="{{ route('conversations.seller-index') }}"
+                 data-login="{{ route('login') }}"
+                 data-register="{{ route('register') }}"
+                 data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
+                 data-user-name="{{ auth()->user()?->name ?? '' }}"
+                 data-profile-url="{{ route('profile.edit') }}"
+                 data-logout-url="{{ route('logout') }}"
+                 data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
+                 data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
+                 data-dompet="{{ route('wallet.index') }}"
+                 data-pesanan="{{ route('orders.index') }}"
+                 data-csrf-token="{{ csrf_token() }}"></div>
+            <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)</script>
         @endunless
 
         <x-notification-toast />

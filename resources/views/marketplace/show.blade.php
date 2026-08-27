@@ -49,8 +49,25 @@
         [x-cloak] { display: none !important; }
         body { font-family: 'DM Sans', sans-serif; }
     </style>
+    @vite('resources/js/app.js')
 </head>
-<body class="bg-[#f2f2f1] text-[#171717] antialiased">
+<body class="bg-[#f2f2f1] text-[#171717] antialiased pt-16">
+    <div id="skillhub-staggered-menu"
+         data-home="{{ route('home') }}"
+         data-marketplace="{{ route('services.index') }}"
+         data-chat="{{ route('conversations.seller-index') }}"
+         data-login="{{ route('login') }}"
+         data-register="{{ route('register') }}"
+         data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
+         data-user-name="{{ auth()->user()?->name ?? '' }}"
+         data-profile-url="{{ route('profile.edit') }}"
+         data-logout-url="{{ route('logout') }}"
+         data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
+         data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
+         data-dompet="{{ route('wallet.index') }}"
+         data-pesanan="{{ route('orders.index') }}"
+         data-csrf-token="{{ csrf_token() }}"></div>
+    <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)</script>
     <div x-data="productPage(@js($photos->values()), @js($reviewData), @js(session('success') ?? session('error')))" @keydown.escape.window="closeAll()" class="min-h-screen">
         <header class="border-b border-black/10 bg-[#f2f2f1]">
             <div class="mx-auto flex h-14 max-w-[1440px] items-center justify-between px-5 sm:px-8">
@@ -58,22 +75,6 @@
                     <i data-lucide="chevron-left" class="h-3.5 w-3.5"></i> Home / Products
                 </a>
                 <div class="flex items-center gap-2">
-                    @auth
-                        <div class="relative" @click.outside="profileOpen = false">
-                            <button type="button" @click="profileOpen = !profileOpen" class="flex items-center gap-2 rounded-full border border-black/15 bg-white px-2 py-1 text-xs font-semibold transition hover:border-black/40">
-                                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#181818] text-[10px] text-white">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
-                                <span class="hidden sm:block">{{ auth()->user()->name }}</span>
-                                <i data-lucide="chevron-down" class="h-3.5 w-3.5"></i>
-                            </button>
-                            <div x-show="profileOpen" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95 -translate-y-1" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-end="opacity-0 scale-95" class="absolute right-0 z-30 mt-2 w-44 rounded-xl border border-black/10 bg-white p-1.5 shadow-xl">
-                                <a href="{{ route('profile.edit') }}" class="block rounded-lg px-3 py-2 text-xs font-semibold text-black/70 hover:bg-black/5">Profil</a>
-                                <a href="{{ route('orders.index') }}" class="block rounded-lg px-3 py-2 text-xs font-semibold text-black/70 hover:bg-black/5">Pesanan</a>
-                                <form method="POST" action="{{ route('logout') }}">@csrf<button class="block w-full rounded-lg px-3 py-2 text-left text-xs font-semibold text-red-600 hover:bg-red-50">Keluar</button></form>
-                            </div>
-                        </div>
-                    @else
-                        <a href="{{ route('login') }}" class="text-xs font-semibold text-black/70 hover:text-black">Masuk</a>
-                    @endauth
                     <button type="button" @click="sidebarOpen = true" class="flex h-8 w-8 items-center justify-center rounded-full border border-black/15 bg-white lg:hidden" aria-label="Buka menu"><i data-lucide="menu" class="h-4 w-4"></i></button>
                 </div>
             </div>

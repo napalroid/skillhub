@@ -10,6 +10,7 @@ use App\Models\Report;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -207,7 +208,21 @@ class AdminController extends Controller
                 'released_by' => auth()->id(),
             ]);
 
+            $oldBalance = $seller->balance;
             User::whereKey($seller->id)->lockForUpdate()->increment('balance', $fresh->amount);
+
+            // Create wallet transaction for seller's income
+            WalletTransaction::create([
+                'user_id' => $seller->id,
+                'type' => 'credit',
+                'amount' => $fresh->amount,
+                'balance_before' => $oldBalance,
+                'balance_after' => $seller->fresh()->balance,
+                'reference_type' => 'order',
+                'reference_id' => $order->id,
+                'description' => 'Pendapatan dari pesanan #'.$order->id.' - '.($order->service?->title ?? 'jasa'),
+                'status' => 'completed',
+            ]);
 
             UserNotification::create([
                 'user_id' => $seller->id,
@@ -334,13 +349,29 @@ class AdminController extends Controller
         ]);
 
         DB::transaction(function () use ($payoutRequest, $request) {
-            User::whereKey($payoutRequest->user_id)->lockForUpdate()->increment('balance', $payoutRequest->amount);
+            $user = User::whereKey($payoutRequest->user_id)->lockForUpdate()->firstOrFail();
+            $oldBalance = $user->balance;
+            
+            $user->increment('balance', $payoutRequest->amount);
 
             $payoutRequest->update([
                 'status' => PayoutRequest::STATUS_REJECTED,
                 'admin_note' => $request->admin_note,
                 'processed_by' => auth()->id(),
                 'processed_at' => now(),
+            ]);
+
+            // Create wallet transaction for refund
+            WalletTransaction::create([
+                'user_id' => $payoutRequest->user_id,
+                'type' => 'credit',
+                'amount' => $payoutRequest->amount,
+                'balance_before' => $oldBalance,
+                'balance_after' => $user->fresh()->balance,
+                'reference_type' => 'payout_request',
+                'reference_id' => $payoutRequest->id,
+                'description' => 'Pengembalian dana penarikan ditolak #WD-'.$payoutRequest->id,
+                'status' => 'completed',
             ]);
 
             UserNotification::create([

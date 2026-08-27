@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\PayoutRequest;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Models\WalletTransaction;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,13 +18,45 @@ class WalletController extends Controller
     {
         $user = $request->user();
 
-        $requests = PayoutRequest::where('user_id', $user->id)
+        // Get balance from user
+        $balance = $user->balance;
+
+        // Get wallet transactions with eager loading
+        $filter = $request->query('filter', 'all');
+        $query = WalletTransaction::where('user_id', $user->id)->with(['order', 'payoutRequest']);
+
+        switch ($filter) {
+            case 'income':
+                $query->where('type', 'credit');
+                break;
+            case 'expense':
+                $query->where('type', 'debit');
+                break;
+            default:
+                // all - include both credit and debit
+                break;
+        }
+
+        $transactions = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+
+        // Get withdrawal requests (for pending/processing withdrawals)
+        $withdrawals = PayoutRequest::where('user_id', $user->id)
+            ->whereIn('status', ['pending', 'completed'])
             ->latest()
-            ->paginate(10);
+            ->limit(3)
+            ->get();
 
         return view('wallet.index', [
-            'balance' => $user->balance,
-            'requests' => $requests,
+            'balance' => $balance,
+            'transactions' => $transactions,
+            'withdrawals' => $withdrawals,
+            'filter' => $filter,
+            'methods' => PayoutRequest::METHOD_LABELS,
+            'default' => [
+                'type' => $user->payout_type,
+                'account' => $user->payout_account,
+                'name' => $user->payout_account_name,
+            ],
         ]);
     }
 
@@ -62,6 +96,8 @@ class WalletController extends Controller
                 return;
             }
 
+            $oldBalance = $fresh->balance;
+
             $fresh->decrement('balance', $data['amount']);
 
             $fresh->update([
@@ -76,19 +112,20 @@ class WalletController extends Controller
                 'method_type' => $data['method_type'],
                 'account_identifier' => $data['account_identifier'],
                 'account_name' => $data['account_name'],
-                'status' => PayoutRequest::STATUS_COMPLETED,
-                'processed_by' => $user->id,
-                'processed_at' => now(),
+                'status' => PayoutRequest::STATUS_PENDING,
             ]);
 
-            $method = PayoutRequest::METHOD_LABELS[$data['method_type']] ?? strtoupper($data['method_type']);
-
-            UserNotification::create([
+            // Create wallet transaction for withdrawal
+            WalletTransaction::create([
                 'user_id' => $user->id,
-                'type' => 'payout_completed',
-                'title' => 'Pencairan berhasil',
-                'message' => 'Penarikan saldo Rp'.number_format($data['amount'], 0, ',', '.').' ke '.$method.' ('.$data['account_identifier'].') telah diproses dan dananya dikirim.',
-                'is_read' => false,
+                'type' => 'debit',
+                'amount' => $data['amount'],
+                'balance_before' => $oldBalance,
+                'balance_after' => $fresh->balance,
+                'reference_type' => 'payout_request',
+                'reference_id' => PayoutRequest::orderByDesc('id')->first()->id,
+                'description' => 'Penarikan saldo ke '.$data['method_type'].' '.$data['account_identifier'],
+                'status' => 'pending',
             ]);
 
             $ok = true;
@@ -99,6 +136,6 @@ class WalletController extends Controller
         }
 
         return redirect()->route('wallet.index')
-            ->with('success', 'Saldo Rp'.number_format($data['amount'], 0, ',', '.').' berhasil dicairkan ke '.($data['method_type']).'.');
+            ->with('success', 'Penarikan saldo berhasil diajukan. Permintaan sedang diproses.');
     }
 }

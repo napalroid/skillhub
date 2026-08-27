@@ -1,3 +1,59 @@
 <!doctype html>
-<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{ $title }} - SkillHub</title><script src="https://cdn.tailwindcss.com"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"><style>body{font-family:'DM Sans',sans-serif}</style></head>
-<body class="bg-[#f6f6f6] text-[#080808]"><main class="mx-auto min-h-screen max-w-6xl px-5 py-10 sm:px-8"><a href="{{ route('dashboard') }}" class="text-xs font-bold text-black/55 hover:text-black">← Kembali ke dashboard</a><div class="mt-8 flex items-end justify-between gap-4"><div><p class="text-xs font-bold uppercase tracking-[.14em] text-black/45">SkillHub</p><h1 class="mt-2 text-4xl font-bold tracking-[-.07em]">{{ $title }}</h1></div><div class="flex items-center gap-2"><a href="{{ route('conversations.index') }}" class="border px-4 py-2 text-xs font-bold transition hover:bg-black hover:text-white {{ request()->routeIs('conversations.index') ? 'bg-black text-white border-black' : 'border-black' }}">Sebagai pembeli</a><a href="{{ route('conversations.seller-index') }}" class="border px-4 py-2 text-xs font-bold transition hover:bg-black hover:text-white {{ request()->routeIs('conversations.seller-index') ? 'bg-black text-white border-black' : 'border-black' }}">Sebagai penjual</a></div></div><section class="mt-9 border-t border-black"><div class="divide-y divide-black/15">@forelse($conversations as $conversation) @php($partner = $conversation->buyer_id === auth()->id() ? $conversation->seller : $conversation->buyer) <a href="{{ route('conversations.show',$conversation) }}" class="grid gap-2 py-5 transition hover:bg-black hover:px-4 hover:text-white sm:grid-cols-[1fr_auto]"><div><div class="flex items-center gap-2"><strong>{{ $partner->name }}</strong>@if($conversation->unread_count)<span class="bg-black px-1.5 py-0.5 text-[10px] text-white group-hover:bg-white group-hover:text-black">{{ $conversation->unread_count }}</span>@endif</div><p class="mt-1 text-sm font-semibold">{{ $conversation->service->title }}</p><p class="mt-1 text-xs text-current/60">{{ $conversation->latestMessage?->message ?? 'Belum ada pesan.' }}</p></div><time class="text-xs text-current/55">{{ $conversation->latestMessage?->created_at?->format('d M, H:i') ?? $conversation->created_at->format('d M, H:i') }}</time></a>@empty <p class="py-16 text-center text-sm text-black/55">Belum ada percakapan.</p>@endforelse</div></section><div class="mt-6">{{ $conversations->links() }}</div></main></body></html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ $title }} - SkillHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --adidas-line: #e5e5e5; }
+        body { font-family: 'Inter', sans-serif; background: #f6f6f6; color: #080808; }
+        .font-display { font-family: 'Archivo', sans-serif; }
+        .chat-message { max-width: 76%; padding: .8rem 1rem; border: 1px solid var(--adidas-line); }
+        .chat-message-own { margin-left: auto; background: #080808; color: #fff; border-color: #080808; }
+        .chat-message-other { background: #fff; color: #080808; }
+        .chat-message-name, .chat-message time { display: block; font-size: .68rem; font-weight: 700; letter-spacing: .04em; opacity: .6; text-transform: uppercase; }
+        .chat-message p { margin: .3rem 0; font-size: .88rem; line-height: 1.5; white-space: pre-wrap; }
+        [x-cloak] { display: none !important; }
+    </style>
+    @vite('resources/js/app.js')
+</head>
+<body class="pt-16">
+    <div id="skillhub-staggered-menu"
+         data-home="{{ route('home') }}"
+         data-marketplace="{{ route('services.index') }}"
+         data-chat="{{ route('conversations.seller-index') }}"
+         data-login="{{ route('login') }}"
+         data-register="{{ route('register') }}"
+         data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
+         data-user-name="{{ auth()->user()?->name ?? '' }}"
+         data-profile-url="{{ route('profile.edit') }}"
+         data-logout-url="{{ route('logout') }}"
+         data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
+         data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
+         data-dompet="{{ route('wallet.index') }}"
+         data-pesanan="{{ route('orders.index') }}"
+         data-csrf-token="{{ csrf_token() }}"></div>
+    <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)</script>
+    <main x-data="{ offerModal: false, mobileView: '{{ $conversation ? 'chat' : 'list' }}' }" class="flex min-h-screen flex-col bg-white">
+            <header class="flex items-center justify-between gap-4 border-b border-[#e5e5e5] px-5 py-3 sm:px-8">
+                <h1 class="font-display text-base font-extrabold uppercase tracking-[-.03em] text-black">{{ $title }}</h1>
+            </header>
+
+        <div class="grid min-h-0 flex-1 lg:grid-cols-[360px_1fr]">
+            <aside class="min-h-0 border-b border-[#e5e5e5] lg:border-b-0 lg:border-r"
+                   :class="mobileView === 'chat' ? 'hidden lg:flex' : 'flex'">
+                @include('conversations._sidebar')
+            </aside>
+
+            <div class="min-h-0 flex flex-col"
+                 :class="mobileView === 'list' ? 'hidden lg:flex' : 'flex'">
+                @include('conversations._chat')
+            </div>
+        </div>
+    </main>
+</body>
+</html>

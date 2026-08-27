@@ -11,6 +11,81 @@
     <style>
         html { scroll-behavior: smooth; }
         body { font-family: 'DM Sans', sans-serif; }
+        
+        .site-footer .footer-heading {
+            @apply text-base font-bold uppercase tracking-widest text-white mb-6;
+        }
+        
+        .site-footer .footer-list {
+            @apply space-y-3;
+        }
+        
+        .site-footer .footer-list a {
+            @apply text-sm text-white/60 transition-all duration-250 cubic-bezier(0.4, 0, 0.2, 1) relative group;
+        }
+        
+        .site-footer .footer-list a::after {
+            @apply absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 bg-white transition-transform duration-250 cubic-bezier(0.4, 0, 0.2, 1);
+            content: "";
+        }
+        
+        .site-footer .footer-list a:hover {
+            @apply text-white;
+        }
+        
+        .site-footer .footer-list a:hover::after {
+            @apply scale-x-100 origin-left;
+        }
+        
+        .site-footer .footer-newsletter-input {
+            @apply flex-1 min-w-0 bg-black/50 border border-white/20 px-4 py-3 text-sm text-white placeholder-white/40 focus:border-white/60 focus:outline-none transition-colors duration-250;
+        }
+        
+        .site-footer .footer-newsletter-btn {
+            @apply flex items-center justify-center px-4 py-3 bg-white/10 hover:bg-white/20 transition-all duration-250;
+        }
+        
+        .site-footer .footer-newsletter-btn:hover svg {
+            @apply translate-x-1;
+        }
+        
+        .site-footer .footer-social {
+            @apply text-white/60 transition-all duration-250 hover:text-white hover:scale-1.08 hover:-translate-y-0.5 hover:opacity-100;
+        }
+        
+        .site-footer .footer-mini {
+            @apply text-xs text-white/40 transition-all duration-250 hover:text-white/80;
+        }
+        
+        .site-footer .footer-top {
+            @apply text-xs text-white/50 hover:text-white transition-all duration-250 hover:scale-105;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .site-footer .js-anim [data-reveal] {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .site-footer .js-anim [data-reveal].is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .footer-scarface {
+            background: #000;
+        }
+        
+        .footer-scarface img {
+            transition: transform 0.3s ease;
+        }
+        
+        .footer-scarface:hover img {
+            transform: scale(1.02);
+        }
     </style>
     @vite('resources/js/app.js')
 </head>
@@ -179,6 +254,30 @@
             </div>
         </section>
 
+        {{-- GALERI FOTO (ADIDAS STYLE) --}}
+        <section style="width:100vw; margin-left:calc(50% - 50vw);">
+            <div class="grid grid-cols-3">
+                <div class="relative block aspect-[3/4] overflow-hidden">
+                    <img src="{{ asset('marketplace-image/edgardavidskillhub.jpeg') }}"
+                         alt="SkillHub"
+                         loading="lazy"
+                         class="h-full w-full object-cover object-left">
+                </div>
+                <div class="relative block aspect-[3/4] overflow-hidden">
+                    <img src="{{ asset('marketplace-image/zinedinezidaneskillhub.jpeg') }}"
+                         alt="SkillHub"
+                         loading="lazy"
+                         class="h-full w-full object-cover object-center">
+                </div>
+                <div class="relative block aspect-[3/4] overflow-hidden">
+                    <img src="{{ asset('marketplace-image/messiskillhub3.jpeg') }}"
+                         alt="SkillHub"
+                         loading="lazy"
+                         class="h-full w-full object-cover object-right">
+                </div>
+            </div>
+        </section>
+
         {{-- REVIEW PENGGUNA --}}
         <section id="review-static" class="hidden" aria-hidden="true">
             <div class="absolute inset-y-0 left-0 w-2 bg-rose-300"></div>
@@ -232,55 +331,6 @@
         <div id="skillhub-cta-motion" data-action-url="{{ auth()->check() ? route('services.create') : route('register') }}" data-action-label="{{ auth()->check() ? 'Ajukan jasa' : 'Buat akun gratis' }}"></div>
     </main>
 
-    <footer class="relative overflow-hidden bg-black px-5 pb-7 pt-14 text-white">
-        <div class="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-blue-600/15 blur-3xl"></div>
-        <div class="relative mx-auto max-w-6xl">
-            <div class="grid gap-10 border-b border-white/15 pb-11 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
-                <div>
-                    <a href="{{ route('home') }}" class="inline-flex items-center gap-2.5 text-xl font-extrabold tracking-tight transition duration-200 hover:scale-105 hover:text-blue-300">
-                        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-base">✦</span>
-                        SkillHub
-                    </a>
-                    <p class="mt-4 max-w-xs text-sm leading-6 text-slate-400">Marketplace jasa antarsiswa untuk berkarya, berkolaborasi, dan berkembang bersama.</p>
-                </div>
-
-                <div>
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-white">Jelajahi</h3>
-                    <div class="mt-4 flex flex-col items-start gap-3 text-sm text-slate-400">
-                        <a href="#jasa" class="origin-left transition duration-200 hover:scale-110 hover:text-white">Marketplace Jasa</a>
-                        <a href="#keunggulan" class="origin-left transition duration-200 hover:scale-110 hover:text-white">Keunggulan</a>
-                        <a href="#review" class="origin-left transition duration-200 hover:scale-110 hover:text-white">Ulasan Pengguna</a>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-white">Akun</h3>
-                    <div class="mt-4 flex flex-col items-start gap-3 text-sm text-slate-400">
-                        @auth
-                            <a href="{{ route('profile.edit') }}" class="origin-left transition duration-200 hover:scale-110 hover:text-white">Profil {{ auth()->user()->name }}</a>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="origin-left transition duration-200 hover:scale-110 hover:text-white">Keluar</button>
-                            </form>
-                        @else
-                            <a href="{{ route('login') }}" class="origin-left transition duration-200 hover:scale-110 hover:text-white">Masuk</a>
-                            <a href="{{ route('register') }}" class="origin-left transition duration-200 hover:scale-110 hover:text-white">Daftar</a>
-                        @endauth
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-white">SkillHub</h3>
-                    <p class="mt-4 text-sm leading-6 text-slate-400">Tempat yang aman untuk menjual keahlian dan mencari bantuan dari sesama siswa.</p>
-                    <a href="#cara-kerja" class="mt-4 inline-block origin-left text-sm font-semibold text-blue-300 transition duration-200 hover:scale-110 hover:text-white">Cara kerja kami →</a>
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-3 pt-7 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-                <p>© {{ date('Y') }} SkillHub. Dibuat untuk siswa berkarya.</p>
-                <p class="transition duration-200 hover:scale-105 hover:text-slate-300">Aman • Terpercaya • Untuk siswa</p>
-            </div>
-        </div>
-    </footer>
+    <x-site-footer />
 </body>
 </html>

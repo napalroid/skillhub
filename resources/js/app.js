@@ -10,11 +10,7 @@ import './skillhub-cta-motion.jsx';
 import './skillhub-featured-services.jsx';
 import './skillhub-review-motion.jsx';
 import './skillhub-how-we-work.jsx';
-import './skillhub-decrypted-greeting.jsx';
-import './skillhub-marketplace-gooey-nav.jsx';
 import './admin-mount.jsx';
 
 window.Alpine = Alpine;
-// Chart is already assigned above to force inclusion
-
 Alpine.start();

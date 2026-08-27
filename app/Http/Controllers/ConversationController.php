@@ -40,39 +40,53 @@ class ConversationController extends Controller
 
     public function index()
     {
-        return $this->list('buyer_id', 'Percakapan saya');
+        return $this->render('buyer_id');
     }
 
     public function sellerIndex()
     {
-        return $this->list('seller_id', 'Pesan masuk');
+        return $this->render('seller_id');
     }
 
-    private function list(string $participantColumn, string $title)
+    private function render(string $participantColumn, ?Conversation $conversation = null)
     {
-        $userId = auth()->id();
-        $conversations = Conversation::query()
-            ->where($participantColumn, $userId)
-            ->with(['service', 'buyer', 'seller', 'latestMessage'])
-            ->withCount(['messages as unread_count' => fn ($query) => $query->where('sender_id', '!=', $userId)->whereNull('read_at')])
-            ->latest('updated_at')
-            ->paginate(15);
+        $filter = request()->query('filter', 'all'); // all | unread | read
+        $conversations = $this->sidebarQuery($participantColumn, $filter)->paginate(15);
 
-        return view('conversations.index', compact('conversations', 'title'));
+        if ($conversation) {
+            $this->authorizeParticipant($conversation);
+            $conversation->messages()
+                ->where('sender_id', '!=', auth()->id())
+                ->whereNull('read_at')
+                ->update(['read_at' => now()]);
+            $conversation->load(['service.seller', 'buyer', 'seller', 'messages.sender', 'priceOffers']);
+        }
+
+        $title = $participantColumn === 'buyer_id' ? 'Percakapan saya' : 'Pesan masuk';
+        $mode = $participantColumn === 'buyer_id' ? 'buyer' : 'seller';
+        $indexRoute = $mode === 'buyer' ? 'conversations.index' : 'conversations.seller-index';
+
+        return view('conversations.index', compact('conversations', 'conversation', 'filter', 'title', 'mode', 'indexRoute'));
     }
 
     public function show(Conversation $conversation)
     {
-        $this->authorizeParticipant($conversation);
+        $participantColumn = $conversation->seller_id === auth()->id() ? 'seller_id' : 'buyer_id';
 
-        $conversation->messages()
-            ->where('sender_id', '!=', auth()->id())
-            ->whereNull('read_at')
-            ->update(['read_at' => now()]);
+        return $this->render($participantColumn, $conversation);
+    }
 
-        $conversation->load(['service.seller', 'buyer', 'seller', 'messages.sender', 'priceOffers']);
+    private function sidebarQuery(string $participantColumn, string $filter)
+    {
+        $userId = auth()->id();
 
-        return view('conversations.show', compact('conversation'));
+        return Conversation::query()
+            ->where($participantColumn, $userId)
+            ->with(['service', 'buyer', 'seller', 'latestMessage'])
+            ->withCount(['messages as unread_count' => fn ($query) => $query->where('sender_id', '!=', $userId)->whereNull('read_at')])
+            ->when($filter === 'unread', fn ($query) => $query->whereHas('messages', fn ($message) => $message->where('sender_id', '!=', $userId)->whereNull('read_at')))
+            ->when($filter === 'read', fn ($query) => $query->whereDoesntHave('messages', fn ($message) => $message->where('sender_id', '!=', $userId)->whereNull('read_at')))
+            ->latest('updated_at');
     }
 
     public function store(Request $request, Conversation $conversation)

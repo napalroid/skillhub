@@ -88,7 +88,7 @@ Route::middleware(['auth'])->group(function () {
     // --- FILE ---
     Route::post('/pesanan/{order}/files', [OrderFileController::class, 'store'])->name('order-files.store');
     Route::post('/order-files/{order}/approve', [OrderFileController::class, 'approve'])->name('order-files.approve');
-    Route::post('/order-files/{order}/revision', [OrderFileController::class, 'requestRevision'])->name('order-files.revision');
+    Route::post('/order-files/{order}/revision', [OrderFileController::class, 'requestRevision'])->name('order-files.revise');
     Route::post('/pesanan/{order}/start-work', [OrderFileController::class, 'startWork'])->name('orders.start-work');
 
     // --- PEMBAYARAN ---

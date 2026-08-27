@@ -1,130 +1,163 @@
 @php
     $socials = [
-        ['label' => 'Instagram', 'href' => '#', 'path' => 'M12 2.25c2.67 0 2.99.01 4.04.058 1.05.048 1.62.22 2 .37.5.13.86.4 1.24.78.38.38.65.74.78 1.24.15.38.32.95.37 2 .048 1.05.058 1.37.058 4.04s-.01 2.99-.058 4.04c-.048 1.05-.22 1.62-.37 2-.13.5-.4.86-.78 1.24-.38.38-.74.65-1.24.78-.38.15-.95.32-2 .37-1.05.048-1.37.058-4.04.058s-2.99-.01-4.04-.058c-1.05-.048-1.62-.22-2-.37a3.3 3.3 0 0 1-1.24-.78 3.3 3.3 0 0 1-.78-1.24c-.15-.38-.32-.95-.37-2C2.26 14.99 2.25 14.67 2.25 12s.01-2.99.058-4.04c.048-1.05.22-1.62.37-2 .13-.5.4-.86.78-1.24.38-.38.74-.65 1.24-.78.38-.15.95-.32 2-.37C9.01 2.26 9.33 2.25 12 2.25Zm0 1.5c-2.62 0-2.93.01-3.96.057-1 .046-1.54.21-1.9.35-.48.18-.82.4-1.18.76-.36.36-.58.7-.76 1.18-.14.36-.31.9-.35 1.9C4.26 9.07 4.25 9.38 4.25 12s.01 2.93.057 3.96c.046 1 .21 1.54.35 1.9.18.48.4.82.76 1.18.36.36.7.58 1.18.76.36.14.9.31 1.9.35 1.03.047 1.34.057 3.96.057s2.93-.01 3.96-.057c1-.046 1.54-.21 1.9-.35.48-.18.82-.4 1.18-.76.36-.36.58-.7.76-1.18.14-.36.31-.9.35-1.9.047-1.03.057-1.34.057-3.96s-.01-2.93-.057-3.96c-.046-1-.21-1.54-.35-1.9a3.16 3.16 0 0 0-.76-1.18 3.16 3.16 0 0 0-1.18-.76c-.36-.14-.9-.31-1.9-.35C14.93 3.76 14.62 3.75 12 3.75Zm0 2.77a5.48 5.48 0 1 1 0 10.96 5.48 5.48 0 0 1 0-10.96Zm0 1.5a3.98 3.98 0 1 0 0 7.96 3.98 3.98 0 0 0 0-7.96Zm5.65-2.4a1.28 1.28 0 1 1 0 2.56 1.28 1.28 0 0 1 0-2.56Z'],
-        ['label' => 'TikTok', 'href' => '#', 'path' => 'M16.5 3c.4 2.3 1.9 3.8 4.2 4v2.7c-1.5.1-2.9-.3-4.2-1.1v5.9c0 3.1-2.3 5.7-5.4 6-3.4.3-6.3-2.2-6.3-5.5 0-2.9 2.3-5.3 5.2-5.5.3 0 .6.1.8.2v2.8c-.2-.1-.5-.2-.8-.2-1.4 0-2.6 1.2-2.6 2.7 0 1.5 1.2 2.7 2.7 2.7 1.6 0 2.9-1.2 2.9-2.9V3h3.3Z'],
-        ['label' => 'YouTube', 'href' => '#', 'path' => 'M21.6 7.2a2.6 2.6 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.6 2.6 0 0 0 2.4 7.2 27 27 0 0 0 2 12a27 27 0 0 0 .4 4.8 2.6 2.6 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.6 2.6 0 0 0 1.8-1.8A27 27 0 0 0 22 12a27 27 0 0 0-.4-4.8ZM10 15V9l5 3-5 3Z'],
-        ['label' => 'X', 'href' => '#', 'path' => 'M17.53 3H20.5l-6.49 7.41L21.75 21h-5.96l-4.66-6.09L5.7 21H2.73l6.94-7.93L2.25 3h6.1l4.22 5.58L17.53 3Zm-1.04 16.2h1.65L7.6 4.71H5.83L16.49 19.2Z'],
+        ['label' => 'Instagram', 'href' => '#', 'icon' => 'tabler:brand-instagram'],
+        ['label' => 'Facebook', 'href' => '#', 'icon' => 'tabler:brand-facebook'],
+        ['label' => 'X', 'href' => '#', 'icon' => 'tabler:brand-x'],
+        ['label' => 'YouTube', 'href' => '#', 'icon' => 'tabler:brand-youtube'],
+        ['label' => 'TikTok', 'href' => '#', 'icon' => 'tabler:brand-tiktok'],
     ];
+
+    $skillhubscarfaceUrl = asset('marketplace-image/skillhubscarfaceasli.png');
 @endphp
 
-<footer class="site-footer bg-black text-white">
-    <div class="mx-auto max-w-6xl px-5 py-14 sm:px-6">
-        <div class="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
-            {{-- Brand --}}
-            <div data-reveal>
-                <x-brand-logo :href="route('home')" surface="dark" />
-                <p class="mt-4 max-w-xs text-sm leading-6 text-white/60">
+<footer class="site-footer bg-[#000000] text-white">
+    <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+        <!-- Top Area: Brand + Newsletter -->
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 py-12 lg:py-16">
+            <div class="flex-1">
+                <x-brand-logo href="{{ route('home') }}" surface="dark" class="font-bold" />
+                <p class="mt-4 max-w-sm text-sm text-white/50">
                     Marketplace jasa untuk lingkungan sekolah. Tawarkan keahlian atau temukan bantuan — dengan sistem escrow yang aman.
                 </p>
-                <div class="mt-6 flex items-center gap-3">
+            </div>
+
+            <div class="flex-1 lg:max-w-md">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-white mb-4">Tetap Terhubung</h3>
+                <div class="flex gap-2">
+                    <input
+                        type="email"
+                        placeholder="EMAIL"
+                        class="flex-1 min-w-0 bg-transparent border border-white/20 text-white text-sm px-4 py-3 rounded-lg transition-all duration-250 focus:border-white focus:outline-none placeholder-white/30"
+                        aria-label="Email untuk newsletter"
+                    >
+                    <button class="bg-white text-black font-bold text-sm px-6 py-3 rounded-lg hover:bg-white/90 transition-colors duration-250 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Separator -->
+        <div class="border-t border-white/10 my-6 lg:my-8"></div>
+
+        <!-- Navigation Columns -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12 mb-12">
+            <!-- Column 1: SkillHub -->
+            <div>
+                <h3 class="text-xs font-bold mb-5" style="font-family:'Archivo',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#56CCF2">SKILLHUB</h3>
+                <ul class="space-y-3">
+                    <li><a href="{{ route('home') }}" class="footer-link text-white/50 text-sm hover:text-white transition-colors">Tentang Kami</a></li>
+                    <li><a href="#cara-kerja" class="footer-link text-white/50 text-sm hover:text-white transition-colors">Cara Kerja</a></li>
+                    <li><a href="#escrow" class="footer-link text-white/50 text-sm hover:text-white transition-colors">Sistem Escrow</a></li>
+                    <li><a href="#review" class="footer-link text-white/50 text-sm hover:text-white transition-colors">Ulasan Pengguna</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 2: Bantuan -->
+            <div>
+                <h3 class="text-xs font-bold uppercase tracking-widest text-white mb-5">Bantuan</h3>
+                <ul class="space-y-3">
+                    <li><a href="#" class="footer-link text-white/50 text-sm hover:text-white transition-colors">FAQ</a></li>
+                    <li><a href="#" class="footer-link text-white/50 text-sm hover:text-white transition-colors">Hubungi Kami</a></li>
+                    <li><a href="#" class="footer-link text-white/50 text-sm hover:text-white transition-colors">Pusat Bantuan</a></li>
+                    <li><a href="#" class="footer-link text-white/50 text-sm hover:text-white transition-colors">Status Layanan</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Layanan -->
+            <div>
+                <h3 class="text-xs font-bold uppercase tracking-widest text-white mb-5">Layanan</h3>
+                <ul class="space-y-3">
+                    <li><a href="{{ route('services.index') }}" class="footer-link text-white/50 text-sm hover:text-white transition-colors">Marketplace Jasa</a></li>
+                    <li><a href="{{ route('services.create') }}" class="footer-link text-white/50 text-sm hover:text-white transition-colors">Ajukan Jasa</a></li>
+                    <li><a href="#" class="footer-link text-white/50 text-sm hover:text-white transition-colors">Kategori</a></li>
+                    <li><a href="#" class="footer-link text-white/50 text-sm hover:text-white transition-colors">Top Seller</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 4: Ikuti Kami -->
+            <div>
+                <h3 class="text-xs font-bold uppercase tracking-widest text-white mb-5">Ikuti Kami</h3>
+                <div class="flex flex-wrap gap-3">
                     @foreach ($socials as $social)
-                        <a href="{{ $social['href'] }}" aria-label="{{ $social['label'] }}" class="footer-social">
-                            <svg viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4" aria-hidden="true">
-                                <path d="{{ $social['path'] }}" />
+                        <a 
+                            href="{{ $social['href'] }}" 
+                            aria-label="{{ $social['label'] }} SkillHub"
+                            class="footer-social flex items-center justify-center w-10 h-10 rounded-full border border-white/15 text-white/60 transition-all duration-250 hover:border-white hover:bg-white hover:text-black hover:-translate-y-1"
+                        >
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <x-icon name="{{ $social['icon'] }}" />
                             </svg>
                         </a>
                     @endforeach
                 </div>
             </div>
-
-            {{-- Jelajahi --}}
-            <div data-reveal>
-                <h3 class="footer-heading">Jelajahi</h3>
-                <ul class="footer-list">
-                    <li><a href="{{ route('services.index') }}">Marketplace Jasa</a></li>
-                    <li><a href="{{ route('home') }}#cara-kerja">Cara Kerja</a></li>
-                    <li><a href="{{ route('home') }}#escrow">Sistem Escrow</a></li>
-                    <li><a href="{{ route('home') }}#review">Ulasan Pengguna</a></li>
-                </ul>
-            </div>
-
-            {{-- Akun --}}
-            <div data-reveal>
-                <h3 class="footer-heading">Akun</h3>
-                <ul class="footer-list">
-                    @guest
-                        <li><a href="{{ route('login') }}">Masuk</a></li>
-                        <li><a href="{{ route('register') }}">Daftar Gratis</a></li>
-                    @else
-                        <li><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                        <li><a href="{{ route('orders.index') }}">Pesanan Saya</a></li>
-                        <li><a href="{{ route('services.create') }}">Ajukan Jasa</a></li>
-                        <li><a href="{{ route('profile.edit') }}">Profil</a></li>
-                    @endguest
-                </ul>
-            </div>
-
-            {{-- Perusahaan --}}
-            <div data-reveal>
-                <h3 class="footer-heading">SkillHub</h3>
-                <ul class="footer-list">
-                    <li><a href="{{ route('home') }}">Tentang Kami</a></li>
-                    <li><a href="#">Bantuan &amp; Kontak</a></li>
-                    <li><a href="#">Kebijakan Privasi</a></li>
-                    <li><a href="#">Syarat &amp; Ketentuan</a></li>
-                </ul>
-            </div>
-        </div>
-
-        {{-- CTA / Newsletter --}}
-        <div class="mt-12 border-t border-white/10 pt-10" data-reveal>
-            <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                    <h3 class="font-heading text-lg font-bold text-white">Punya keahlian? Jadilah seller.</h3>
-                    <p class="mt-1 text-sm text-white/60">Dapatkan orderan dari siswa lain di sekolahmu — gratis untuk memulai.</p>
-                </div>
-                <form class="flex w-full max-w-md gap-2" onsubmit="return false;">
-                    <label class="sr-only" for="footer-email">Email</label>
-                    <input id="footer-email" type="email" placeholder="Email kamu" class="footer-input" autocomplete="email">
-                    <button type="submit" class="footer-btn">Mulai</button>
-                </form>
-            </div>
-        </div>
-
-        {{-- Bottom bar --}}
-        <div class="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
-            <p class="text-xs text-white/50">&copy; {{ date('Y') }} SkillHub — Proyek UKK PPLG.</p>
-            <div class="flex flex-wrap items-center gap-5">
-                <a href="#" class="footer-mini">Privasi</a>
-                <a href="#" class="footer-mini">Ketentuan</a>
-                <a href="#" class="footer-mini">Bantuan</a>
-                <button type="button" class="footer-mini footer-top">Kembali ke atas &uarr;</button>
-            </div>
         </div>
     </div>
 
-    <script>
-        (function () {
-            var footer = document.currentScript.closest('.site-footer');
-            if (!footer) return;
-            var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            var items = footer.querySelectorAll('[data-reveal]');
-
-            function revealAll() { items.forEach(function (el) { el.classList.add('is-visible'); }); }
-
-            if (reduce || !('IntersectionObserver' in window)) {
-                revealAll();
-            } else {
-                footer.classList.add('js-anim');
-                var io = new IntersectionObserver(function (entries) {
-                    entries.forEach(function (entry) {
-                        if (entry.isIntersecting) {
-                            var i = Array.prototype.indexOf.call(items, entry.target);
-                            entry.target.style.transitionDelay = (i * 0.06) + 's';
-                            entry.target.classList.add('is-visible');
-                            io.unobserve(entry.target);
-                        }
-                    });
-                }, { threshold: 0.15 });
-                items.forEach(function (el) { io.observe(el); });
-            }
-
-            var top = footer.querySelector('.footer-top');
-            if (top) {
-                top.addEventListener('click', function () {
-                    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
-                });
-            }
-        })();
-    </script>
+    <!-- SkillHub Scarface Section - AFTER FOOTER, SEPARATE SECTION, FULL WIDTH -->
+    <section class="skillhubscarface-section w-full">
+        <div class="w-full relative aspect-[2.5/1] lg:aspect-[3/1]">
+            <img 
+                src="{{ $skillhubscarfaceUrl }}" 
+                alt="SkillHub Marketplace"
+                class="absolute inset-0 w-full h-full object-contain object-center"
+                loading="lazy"
+            >
+        </div>
+    </section>
 </footer>
+
+<script>
+    (function () {
+        var footer = document.currentScript.closest('.site-footer');
+        if (!footer) return;
+
+        // Link underline animation
+        var links = footer.querySelectorAll('.footer-link');
+        links.forEach(function (link) {
+            var underline = document.createElement('span');
+            underline.className = 'footer-underline';
+            underline.setAttribute('style', 'position:absolute;left:0;bottom:-4px;width:100%;height:2px;background:#fff;transform:scaleX(0);transform-origin:left;transition:transform 250ms cubic-bezier(0.32,0.72,0,1);pointer-events:none;');
+            link.style.position = 'relative';
+            link.appendChild(underline);
+
+            link.addEventListener('mouseenter', function () {
+                underline.style.transform = 'scaleX(1)';
+            });
+
+            link.addEventListener('mouseleave', function () {
+                underline.style.transform = 'scaleX(0)';
+            });
+        });
+
+        // Social icons hover
+        var socialIcons = footer.querySelectorAll('.footer-social');
+        socialIcons.forEach(function (icon) {
+            icon.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-2px)';
+            });
+
+            icon.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Reduced motion support
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce) {
+            links.forEach(function (link) {
+                var underline = link.querySelector('.footer-underline');
+                if (underline) {
+                    underline.style.transition = 'none';
+                }
+            });
+
+            socialIcons.forEach(function (icon) {
+                icon.style.transition = 'none';
+            });
+        }
+    })();
+</script>

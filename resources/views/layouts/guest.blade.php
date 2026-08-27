@@ -38,7 +38,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans text-slate-900 antialiased min-h-screen bg-white">
+<body class="font-sans text-slate-900 antialiased min-h-screen bg-white pt-16">
+    <div id="skillhub-staggered-menu"
+         data-home="{{ route('home') }}"
+         data-marketplace="{{ route('services.index') }}"
+         data-chat="{{ route('conversations.seller-index') }}"
+         data-login="{{ route('login') }}"
+         data-register="{{ route('register') }}"
+         data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
+         data-user-name="{{ auth()->user()?->name ?? '' }}"
+         data-profile-url="{{ route('profile.edit') }}"
+         data-logout-url="{{ route('logout') }}"
+         data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
+         data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
+         data-dompet="{{ route('wallet.index') }}"
+         data-pesanan="{{ route('orders.index') }}"
+         data-csrf-token="{{ csrf_token() }}"></div>
+    <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)</script>
 
     <div class="min-h-screen flex flex-col lg:flex-row">
 
@@ -149,23 +165,7 @@
 
             <div class="flex-1 flex items-center justify-center px-4 sm:px-8 py-8 lg:py-12 bg-slate-50 lg:bg-white">
                 <div class="w-full max-w-md">
-                    {{-- Navigasi atas form --}}
-                    <div class="flex items-center justify-between mb-8">
-                        <a href="{{ route('home') }}" class="hidden lg:inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 transition-colors">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                            </svg>
-                            Kembali ke beranda
-                        </a>
-                        <div class="flex items-center gap-2 ml-auto">
-                            @if ($variant !== 'login')
-                                <a href="{{ route('login') }}" class="text-sm text-slate-500 hover:text-blue-600 transition-colors">Masuk</a>
-                            @endif
-                            @if ($variant !== 'register')
-                                <a href="{{ route('register') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">Daftar</a>
-                            @endif
-                        </div>
-                    </div>
+                    {{-- Navigasi atas form dipindahkan ke hamburger menu global --}}
 
                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 sm:p-8">
                         @if ($title)
