@@ -2,18 +2,24 @@
     @php
         $statusStyles = [
             'pending' => 'badge badge-pending',
+            'processing' => 'badge badge-processing',
             'completed' => 'badge badge-success',
+            'failed' => 'badge badge-error',
             'rejected' => 'badge badge-accent',
         ];
         $statusLabels = [
             'pending' => 'Menunggu',
+            'processing' => 'Memproses',
             'completed' => 'Selesai',
+            'failed' => 'Gagal',
             'rejected' => 'Ditolak',
         ];
         $filterLabels = [
             'all' => 'Semua',
             'pending' => 'Menunggu',
+            'processing' => 'Memproses',
             'completed' => 'Selesai',
+            'failed' => 'Gagal',
             'rejected' => 'Ditolak',
         ];
     @endphp
@@ -32,17 +38,25 @@
                         <p class="font-heading font-bold text-sm text-[#E4002B]">{{ $counts['pending'] }}</p>
                     </div>
                     <div class="rounded-sm border border-[#DDDDDD] bg-[#F5F5F5] px-3 py-2">
+                        <p class="text-[9px] font-heading font-bold uppercase tracking-wider text-[#999999]">Memproses</p>
+                        <p class="font-heading font-bold text-sm text-blue-600">{{ $counts['processing'] }}</p>
+                    </div>
+                    <div class="rounded-sm border border-[#DDDDDD] bg-[#F5F5F5] px-3 py-2">
                         <p class="text-[9px] font-heading font-bold uppercase tracking-wider text-[#999999]">Selesai</p>
                         <p class="font-heading font-bold text-sm text-black">{{ $counts['completed'] }}</p>
                     </div>
                     <div class="rounded-sm border border-[#DDDDDD] bg-[#F5F5F5] px-3 py-2">
+                        <p class="text-[9px] font-heading font-bold uppercase tracking-wider text-[#999999]">Gagal</p>
+                        <p class="font-heading font-bold text-sm text-[#E4002B]">{{ $counts['failed'] }}</p>
+                    </div>
+                    <div class="rounded-sm border border-[#DDDDDD] bg-[#F5F5F5] px-3 py-2">
                         <p class="text-[9px] font-heading font-bold uppercase tracking-wider text-[#999999]">Ditolak</p>
-                        <p class="font-heading font-bold text-sm text-black">{{ $counts['rejected'] }}</p>
+                        <p class="font-heading font-bold text-sm text-[#999999]">{{ $counts['rejected'] }}</p>
                     </div>
                 </div>
             </div>
             <div class="flex flex-wrap gap-3">
-                @foreach (['all' => 'Semua', 'pending' => 'Menunggu', 'completed' => 'Selesai', 'rejected' => 'Ditolak'] as $key => $label)
+                @foreach (['all' => 'Semua', 'pending' => 'Menunggu', 'processing' => 'Memproses', 'completed' => 'Selesai', 'failed' => 'Gagal', 'rejected' => 'Ditolak'] as $key => $label)
                     <a href="{{ route('admin.payouts.index', ['status' => $key]) }}"
                        class="px-4 py-2 rounded-full text-[10px] font-heading font-bold uppercase tracking-wider border transition-colors {{ $status === $key ? 'bg-black border-black text-white' : 'bg-white border-[#DDDDDD] text-[#555555] hover:border-black hover:text-black' }}">
                         {{ $label }} <span class="opacity-60">({{ $counts[$key] }})</span>
@@ -90,7 +104,7 @@
                                     </td>
                                     <td>
                                         <div class="flex flex-col gap-2">
-                                            @if ($payout->status === 'pending')
+                                            @if ($payout->status === 'pending' && ! $payout->auto_processed)
                                                 <form action="{{ route('admin.payouts.process', $payout) }}" method="POST" onsubmit="return confirm('Tandai pencairan Rp{{ number_format($payout->amount, 0, ',', '.') }} ke {{ $payout->methodLabel() }} sebagai selesai?')">
                                                     @csrf
                                                     <button type="submit" class="w-full btn-primary text-[10px] px-4 py-2 justify-center">Proses</button>
@@ -100,8 +114,22 @@
                                                     <input type="hidden" name="admin_note" value="Data tujuan tidak valid">
                                                     <button type="submit" class="w-full btn-outline text-[10px] px-2 py-1.5 justify-center border-[#E4002B] text-[#E4002B] hover:bg-[#E4002B] hover:text-white">Tolak</button>
                                                 </form>
+                                            @elseif ($payout->status === 'failed')
+                                                <form action="{{ route('admin.payout.retry', $payout) }}" method="POST" onsubmit="return confirm('Ulangi pencairan ini? Saldo akan dikurangi lagi dan ditransfer ke user.')">
+                                                    @csrf
+                                                    <button type="submit" class="w-full btn-outline text-[10px] px-4 py-2 justify-center border-[#999999] text-[#999999] hover:bg-[#999999] hover:text-white">Coba Lagi</button>
+                                                </form>
+                                                @if ($payout->failure_reason)
+                                                    <p class="text-[10px] text-[#E4002B] leading-snug">Alasan: {{ $payout->failure_reason }}</p>
+                                                @endif
                                             @else
-                                                <p class="text-[10px] text-[#999999] leading-snug">Diproses {{ $payout->processed_at?->format('d M Y H:i') }}</p>
+                                                <p class="text-[10px] text-[#999999] leading-snug">
+                                                    @if ($payout->auto_processed)
+                                                        Auto Processed
+                                                    @else
+                                                        Diproses {{ $payout->processed_at?->format('d M Y H:i') }}
+                                                    @endif
+                                                </p>
                                                 @if ($payout->admin_note)
                                                     <p class="text-[10px] text-[#E4002B] leading-snug">Catatan: {{ $payout->admin_note }}</p>
                                                 @endif

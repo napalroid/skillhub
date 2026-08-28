@@ -1,149 +1,115 @@
 <x-layouts.app title="Dompet Saya">
 
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {{-- PAGE HEADER --}}
         <div class="mb-10">
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-2">Keuangan</p>
-            <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-black">
-                DOMPET
-            </h1>
-            <p class="mt-2 text-gray-500 text-base sm:text-lg">Kelola saldo dan riwayat transaksi kamu.</p>
+            <div class="flex items-baseline gap-3 mb-2">
+                <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Keuangan</p>
+                <span class="h-[1px] bg-gray-900 w-12 flex-shrink-0"></span>
+            </div>
+            <h1 class="text-4xl font-thin tracking-tight text-gray-900">DOMPET</h1>
+            <p class="mt-2 text-gray-500 text-sm">Kelola saldo dan riwayat transaksi kamu.</p>
         </div>
 
-        {{-- BALANCE SECTION - MAIN FOCAL POINT --}}
-        <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-2 border-black rounded-lg p-8 sm:p-10 mb-10 relative overflow-hidden shadow-2xl">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-32 -mt-32 pointer-events-none"></div>
-            <div class="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full -ml-24 -mb-24 pointer-events-none"></div>
-            
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 relative z-10">
-                <div class="flex-1">
-                    <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-3 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
-                        </svg>
-                        Saldo Tersedia
-                    </p>
-                    <div class="relative inline-block group">
-                        <p id="balanceText" class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter text-white drop-shadow-lg cursor-pointer transition-all duration-300 hover:scale-105 font-mono">
-                            Rp {{ number_format($balance, 0, ',', '.') }}
-                        </p>
-                        <p id="decryptedBalance" class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter text-transparent drop-shadow-lg font-mono absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-300">
-                            Rp !@#$%^&*#$!@%^&
-                        </p>
-                    </div>
-                    <div class="mt-5 space-y-2 max-w-md">
-                        <div class="flex items-start gap-2">
-                            <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            <p class="text-sm text-gray-300 leading-relaxed">Dana masuk otomatis setelah pesanan selesai</p>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <svg class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            <p class="text-sm text-gray-300 leading-relaxed">Proses penarikan instant ke e-wallet/bank</p>
-                        </div>
-                    </div>
+        {{-- BALANCE SECTION --}}
+        <div class="bg-white border border-gray-200 rounded p-8 mb-10">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Saldo Tersedia</p>
+                    <p class="text-3xl font-thin tracking-tight text-gray-900">Rp {{ number_format($balance, 0, ',', '.') }}</p>
                 </div>
-
-                <button type="button"
-                        onclick="openWithdrawModal()"
-                        class="w-full lg:w-auto bg-white hover:bg-gray-100 text-black text-sm font-black uppercase tracking-wide px-10 py-4 transition-all active:scale-[0.98] shadow-xl rounded-lg flex items-center justify-center gap-3 group">
-                    <svg class="w-5 h-5 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m0 0l-4-4m4 4l4-4"/>
+                <a href="{{ route('wallet.withdraw.create') }}" 
+                   class="inline-flex items-center justify-center bg-gray-900 hover:bg-black text-white text-sm font-bold px-8 py-4 rounded transition-all active:scale-[0.98]">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m0 0l-4-4m4 4l4-4"/>
                     </svg>
                     TARIK SALDO
-                </button>
+                </a>
             </div>
         </div>
 
-        {{-- INFO CARDS --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-            <div class="bg-white border border-gray-300 p-6 hover:shadow-lg transition-shadow duration-300">
-                <p class="text-xs font-bold uppercase tracking-wider text-gray-600 mb-3">Minimal Penarikan</p>
-                <p class="text-2xl font-black text-black">Rp 10.000</p>
+        {{-- INFO BARS --}} 
+        <div class="grid grid-cols-3 gap-3 mb-10">
+            <div class="bg-gray-50 border border-gray-200 rounded p-4 text-center">
+                <p class="text-xs text-gray-500 mb-1">Minimal</p>
+                <p class="text-lg font-bold text-gray-900">Rp {{ number_format(config('payout.min_amount', 50000), 0, ',', '.') }}</p>
             </div>
 
-            <div class="bg-white border border-gray-300 p-6 hover:shadow-lg transition-shadow duration-300">
-                <p class="text-xs font-bold uppercase tracking-wider text-gray-600 mb-3">Waktu Proses</p>
-                <p class="text-2xl font-black text-black">Instant - 1 Jam</p>
+            <div class="bg-gray-50 border border-gray-200 rounded p-4 text-center">
+                <p class="text-xs text-gray-500 mb-1">Proses</p>
+                <p class="text-lg font-bold text-gray-900">{{ config('payout.processing_delay_seconds', 10) }}s</p>
             </div>
 
-            <div class="bg-white border border-gray-300 p-6 hover:shadow-lg transition-shadow duration-300">
-                <p class="text-xs font-bold uppercase tracking-wider text-gray-600 mb-3">Biaya Admin</p>
-                <p class="text-2xl font-black text-black">Rp 0</p>
+            <div class="bg-gray-50 border border-gray-200 rounded p-4 text-center">
+                <p class="text-xs text-gray-500 mb-1">Biaya</p>
+                <p class="text-lg font-bold text-gray-900">Rp 0</p>
             </div>
         </div>
 
         {{-- TRANSACTION FILTERS --}}
         <div class="mb-8">
-            <div class="flex flex-wrap gap-4">
-                <button type="button"
-                        onclick="filterTransactions('all')"
-                        class="filter-btn px-6 py-3 text-sm font-bold border-2 border-black transition-all focus:outline-none focus:border-black focus:ring-2 focus:ring-black/20 {{ $filter === 'all' ? 'bg-black text-white' : 'bg-white text-black hover:bg-black hover:text-white' }}">
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('wallet.index', ['filter' => 'all']) }}" 
+                   class="px-5 py-2.5 text-xs font-bold border border-gray-300 rounded transition-colors {{ $filter === 'all' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-900 hover:border-gray-900' }}">
                     SEMUA
-                </button>
-                <button type="button"
-                        onclick="filterTransactions('income')"
-                        class="filter-btn px-6 py-3 text-sm font-bold border-2 border-black transition-all focus:outline-none focus:border-black focus:ring-2 focus:ring-black/20 {{ $filter === 'income' ? 'bg-black text-white' : 'bg-white text-black hover:bg-black hover:text-white' }}">
-                    UANG MASUK
-                </button>
-                <button type="button"
-                        onclick="filterTransactions('expense')"
-                        class="filter-btn px-6 py-3 text-sm font-bold border-2 border-black transition-all focus:outline-none focus:border-black focus:ring-2 focus:ring-black/20 {{ $filter === 'expense' ? 'bg-black text-white' : 'bg-white text-black hover:bg-black hover:text-white' }}">
-                    UANG KELUAR
-                </button>
+                </a>
+                <a href="{{ route('wallet.index', ['filter' => 'income']) }}" 
+                   class="px-5 py-2.5 text-xs font-bold border border-gray-300 rounded transition-colors {{ $filter === 'income' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-900 hover:border-gray-900' }}">
+                    MASUK
+                </a>
+                <a href="{{ route('wallet.index', ['filter' => 'expense']) }}" 
+                   class="px-5 py-2.5 text-xs font-bold border border-gray-300 rounded transition-colors {{ $filter === 'expense' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-900 hover:border-gray-900' }}">
+                    KELUAR
+                </a>
             </div>
         </div>
 
         {{-- TRANSACTION HISTORY --}}
-        <div class="bg-white border border-gray-300 overflow-hidden">
-            <div class="p-8 sm:p-10 border-b border-gray-300">
-                <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-black">
-                    RIWAYAT TRANSAKSI
-                </h2>
+        <div class="bg-white border border-gray-200 rounded overflow-hidden">
+            <div class="p-6 sm:p-8 border-b border-gray-200 bg-gray-50">
+                <h2 class="text-xl font-thin tracking-tight text-gray-900">RIWAYAT TRANSAKSI</h2>
             </div>
 
             @if ($transactions->count() > 0)
-                <div class="divide-y divide-gray-300">
+                <div class="divide-y divide-gray-100">
                     @foreach ($transactions as $transaction)
-                        <div class="p-8 sm:p-10 hover:bg-gray-50 transition-colors duration-200">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                                {{-- Left side: description and reference --}}
+                        <div class="p-6 hover:bg-gray-50 transition-colors">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                 <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-3 flex-wrap">
-                                        <p class="font-black text-gray-900 text-lg sm:text-2xl">
-                                            {{ $transaction->typeLabel() }}
-                                        </p>
-                                        <span class="text-xs font-bold uppercase tracking-wider px-3 py-1.5 border border-gray-300 text-gray-700 bg-white">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <p class="text-lg font-medium text-gray-900">{{ $transaction->typeLabel() }}</p>
+                                        <span class="text-xs font-medium px-2 py-0.5 border border-gray-200 rounded text-gray-600">
                                             {{ $transaction->referenceLabel() }}
                                         </span>
                                     </div>
                                     @if ($transaction->reference_type === 'order' && $transaction->order)
-                                        <p class="text-sm text-gray-600 mt-2 font-medium">
-                                            #ORD-{{ sprintf('%05d', $transaction->order_id) }}
-                                        </p>
+                                        <p class="text-xs text-gray-500 font-medium">Ref: #ORD-{{ sprintf('%05d', $transaction->order_id) }}</p>
                                     @elseif ($transaction->reference_type === 'payout_request')
-                                        <p class="text-sm text-gray-600 mt-2 font-medium">
-                                            #WD-{{ sprintf('%05d', $transaction->reference_id) }}
-                                        </p>
+                                        <p class="text-xs text-gray-500 font-medium">Ref: #WD-{{ sprintf('%05d', $transaction->reference_id) }}</p>
                                     @endif
-                                    <p class="text-sm text-gray-500 mt-2 font-medium">
-                                        {{ $transaction->created_at->translatedFormat('d F Y') }}
-                                    </p>
+                                    <p class="text-xs text-gray-400 mt-1">{{ $transaction->created_at->format('d M Y, H:i') }}</p>
                                 </div>
 
-                                {{-- Right side: amount and status --}}
-                                <div class="flex flex-col items-end sm:items-start gap-3 min-w-[150px]">
-                                    <p class="font-black text-2xl sm:text-3xl {{ $transaction->isPositive() ? 'text-green-600' : 'text-red-600' }}">
+                                <div class="flex items-center gap-3">
+                                    <p class="text-xl font-thin {{ $transaction->isPositive() ? 'text-green-600' : 'text-gray-900' }}">
                                         {{ $transaction->isPositive() ? '+' : '-' }}Rp {{ number_format(abs($transaction->amount), 0, ',', '.') }}
                                     </p>
-                                    <span class="text-xs font-bold uppercase tracking-wider px-3 py-1.5 border {{ $transaction->status === 'completed' ? 'border-green-500 text-green-700 bg-green-50' : 
-                                       ($transaction->status === 'pending' ? 'border-amber-500 text-amber-700 bg-amber-50' : 'border-red-500 text-red-700 bg-red-50') }}">
-                                        {{ $transaction->status === 'completed' ? 'Berhasil' : 
-                                           ($transaction->status === 'pending' ? 'Menunggu' : 'Gagal') }}
+                                    @php
+                                        $statusColor = match($transaction->status) {
+                                            'completed' => 'border-green-500 text-green-700 bg-green-50',
+                                            'pending' => 'border-amber-500 text-amber-700 bg-amber-50',
+                                            'failed' => 'border-red-500 text-red-700 bg-red-50',
+                                            default => 'border-gray-400 text-gray-600 bg-gray-50'
+                                        };
+                                        $statusLabel = match($transaction->status) {
+                                            'completed' => 'Berhasil',
+                                            'pending' => 'Memproses',
+                                            'failed' => 'Gagal',
+                                            default => 'Unknown'
+                                        };
+                                    @endphp
+                                    <span class="text-xs font-bold px-3 py-1 border {{ $statusColor }}">
+                                        {{ $statusLabel }}
                                     </span>
                                 </div>
                             </div>
@@ -152,7 +118,7 @@
                 </div>
 
                 {{-- PAGINATION --}}
-                <div class="p-8 sm:p-10 border-t border-gray-300 bg-white">
+                <div class="p-6 border-t border-gray-100 bg-gray-50">
                     {{ $transactions->links() }}
                 </div>
             @else
@@ -170,7 +136,7 @@
                                 Pendapatan dari pesanan yang selesai akan muncul di sini.
                             </p>
                         @elseif ($filter === 'expense')
-                            <p class="text-gray-500 text-base">
+                            <p class="text-sm text-gray-500">
                                 Riwayat penarikan saldo akan muncul di sini.
                             </p>
                         @endif
@@ -224,11 +190,11 @@
                                     </li>
                                     <li class="flex items-start gap-2">
                                         <span class="text-amber-600 font-bold">•</span>
-                                        <span>Proses pencairan membutuhkan waktu instant hingga 1 jam kerja</span>
+                                        <span>Proses pencairan membutuhkan waktu {{ config('payout.processing_delay_seconds', 10) }} detik</span>
                                     </li>
                                     <li class="flex items-start gap-2">
                                         <span class="text-amber-600 font-bold">•</span>
-                                        <span>Minimal penarikan Rp 10.000, tanpa biaya admin</span>
+                                        <span>Minimal penarikan Rp {{ number_format(config('payout.min_amount', 50000), 0, ',', '.') }}, tanpa biaya admin</span>
                                     </li>
                                 </ul>
                             </div>
@@ -250,13 +216,13 @@
                             <input type="number" 
                                    name="amount" 
                                    id="withdrawAmount" 
-                                   min="10000" 
+                                   min="{{ config('payout.min_amount', 50000) }}" 
                                    step="1000"
                                    placeholder="0"
                                    class="w-full rounded-lg border-2 border-gray-300 py-3 pl-10 pr-4 text-lg font-black text-black focus:border-black focus:ring-0 focus:outline-none @error('amount') border-red-500 @enderror">
                         </div>
                         <p class="text-xs text-gray-400 mt-2">
-                            Minimal Rp10.000. Maksimal sesuai saldo tersedia.
+                            Minimal Rp{{ number_format(config('payout.min_amount', 50000), 0, ',', '.') }}. Maksimal sesuai saldo tersedia.
                         </p>
                         @error('amount')
                             <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>

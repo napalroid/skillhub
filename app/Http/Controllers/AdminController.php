@@ -299,14 +299,18 @@ class AdminController extends Controller
         $status = $request->status ?? 'all';
 
         $query = PayoutRequest::with('user')->latest();
-        if (in_array($status, ['pending', 'completed', 'rejected'], true)) {
+        
+        $validStatuses = ['pending', 'processing', 'completed', 'failed', 'rejected'];
+        if (in_array($status, $validStatuses, true)) {
             $query->where('status', $status);
         }
 
         $counts = [
             'all' => PayoutRequest::count(),
             'pending' => PayoutRequest::where('status', 'pending')->count(),
+            'processing' => PayoutRequest::where('status', 'processing')->count(),
             'completed' => PayoutRequest::where('status', 'completed')->count(),
+            'failed' => PayoutRequest::where('status', 'failed')->count(),
             'rejected' => PayoutRequest::where('status', 'rejected')->count(),
         ];
 
@@ -336,6 +340,31 @@ class AdminController extends Controller
         ]);
 
         return back()->with('success', 'Pencairan ditandai selesai.');
+    }
+
+    public function payoutRetry(Request $request, PayoutRequest $payoutRequest)
+    {
+        if (! $payoutRequest->isFailed()) {
+            return back()->with('error', 'Hanya request yang gagal yang bisa diulang.');
+        }
+
+        $payoutRequest->update([
+            'status' => PayoutRequest::STATUS_PROCESSING,
+            'failure_reason' => null,
+            'auto_processed' => false,
+            'processed_by' => null,
+            'processed_at' => null,
+        ]);
+
+        UserNotification::create([
+            'user_id' => $payoutRequest->user_id,
+            'type' => 'payout_retry',
+            'title' => 'Pencairan diulang',
+            'message' => 'Permintaan pencairan Rp'.number_format($payoutRequest->amount, 0, ',', '.').' telah diulang. Silakan tunggu proses selanjutnya.',
+            'is_read' => false,
+        ]);
+
+        return back()->with('success', 'Pencairan diulang. Request akan diproses kembali.');
     }
 
     public function payoutReject(Request $request, PayoutRequest $payoutRequest)

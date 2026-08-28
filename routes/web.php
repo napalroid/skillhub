@@ -106,7 +106,16 @@ Route::middleware(['auth'])->group(function () {
     // --- DOMPET / PENCARIAN DANA ---
     Route::get('/dompet', [WalletController::class, 'index'])->name('wallet.index');
     Route::get('/dompet/tarik', [WalletController::class, 'withdrawCreate'])->name('wallet.withdraw.create');
-    Route::post('/dompet/tarik', [WalletController::class, 'withdrawStore'])->name('wallet.withdraw.store');
+    Route::post('/dompet/tarik', [WalletController::class, 'withdrawStore'])->name('wallet.withdraw.store')->middleware('throttle:3,5');
+    Route::get('/dompet/tarik/{payoutRequest}/verifikasi', [WalletController::class, 'withdrawVerify'])->name('wallet.withdraw.verify');
+    Route::get('/dompet/tarik/{payoutRequest}/konfirmasi', [WalletController::class, 'withdrawConfirm'])->name('wallet.withdraw.confirm');
+    Route::post('/wallet/withdraw/{payoutRequest}/process', [WalletController::class, 'withdrawProcess'])->name('wallet.withdraw.process');
+
+    // --- PAYOUT REQUEST (ADMIN) ---
+    Route::get('/admin/payouts', [AdminController::class, 'payoutIndex'])->name('admin.payouts.index');
+    Route::post('/admin/payout/{payoutRequest}/process', [AdminController::class, 'payoutProcess'])->name('admin.payout.process');
+    Route::post('/admin/payout/{payoutRequest}/reject', [AdminController::class, 'payoutReject'])->name('admin.payout.reject');
+    Route::post('/admin/payout/{payoutRequest}/retry', [AdminController::class, 'payoutRetry'])->name('admin.payout.retry');
 
     // --- PROFIL ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
