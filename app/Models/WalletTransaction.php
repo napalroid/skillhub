@@ -34,24 +34,18 @@ class WalletTransaction extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function order()
+    public function order(): BelongsTo
     {
-        if ($this->reference_type === 'order') {
-            return $this->belongsTo(Order::class, 'reference_id');
-        }
-        return null;
+        return $this->belongsTo(Order::class, 'reference_id');
     }
 
-    public function payoutRequest()
+    public function payoutRequest(): BelongsTo
     {
-        if ($this->reference_type === 'payout_request') {
-            return $this->belongsTo(PayoutRequest::class, 'reference_id');
-        }
-        return null;
+        return $this->belongsTo(PayoutRequest::class, 'reference_id');
     }
 
     // Alias for backward compatibility
-    public function withdrawal()
+    public function withdrawal(): BelongsTo
     {
         return $this->payoutRequest();
     }

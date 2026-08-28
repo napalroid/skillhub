@@ -7,7 +7,7 @@
         ['label' => 'TikTok', 'href' => '#', 'icon' => 'tabler:brand-tiktok'],
     ];
 
-    $skillhubscarfaceUrl = asset('marketplace-image/skillhubscarfaceasli.png');
+    $skillhubscarfaceUrl = asset('storage/marketplace-image/skillhubscarfaceasli.png');
 @endphp
 
 <footer class="site-footer bg-[#000000] text-white">
@@ -46,7 +46,7 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12 mb-12">
             <!-- Column 1: SkillHub -->
             <div>
-                <h3 class="text-xs font-bold mb-5" style="font-family:'Archivo',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#56CCF2">SKILLHUB</h3>
+                <h3 class="text-xs font-bold uppercase tracking-widest text-white mb-5">SkillHub</h3>
                 <ul class="space-y-3">
                     <li><a href="{{ route('home') }}" class="footer-link text-white/50 text-sm hover:text-white transition-colors">Tentang Kami</a></li>
                     <li><a href="#cara-kerja" class="footer-link text-white/50 text-sm hover:text-white transition-colors">Cara Kerja</a></li>

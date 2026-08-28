@@ -44,7 +44,7 @@
         [
             'title' => 'Solusi proyek & kebutuhan sekolah cepat dan terpercaya.',
             'subtitle' => 'Portofolio teruji dengan komunikasi langsung bersama kreator siswa yang siap membantu.',
-            'image' => asset('images/skillhub-hero.jpg'),
+            'image' => asset('images/skillhub-hero.png'),
             'tag' => 'Karya Nyata',
         ],
     ];
@@ -96,7 +96,7 @@
             align-items: center;
             gap: 0.75rem;
             padding: 0.25rem 1.125rem 0.25rem 0.25rem;
-            border-radius: 9999px;
+            border-radius: 0;
             background-color: #ffffff;
             border: 1px solid transparent;
             text-decoration: none;
@@ -107,7 +107,7 @@
 
         .category-filter-item:hover {
             border-color: #000000;
-            transform: translateY(-1px);
+            transform: translateY(0);
         }
 
         .category-filter-item.is-active {
@@ -119,14 +119,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 3.25rem;
-            height: 3.25rem;
+            width: 4rem;
+            height: 4rem;
             border-radius: 9999px;
-            background-color: #f1f5f9;
+            background-color: transparent;
             overflow: hidden;
             flex-shrink: 0;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+            border: none;
+            box-shadow: none;
         }
 
         .category-icon-circle img {
@@ -203,8 +203,8 @@
     <main x-data="carouselState()">
         
         {{-- SECTION 1: DEPTH CAROUSEL HERO (Reference Image 2 Style) --}}
-        <section class="mx-auto max-w-[1440px] px-4 pt-24 sm:px-6 lg:px-8 lg:pt-28">
-            <div class="relative overflow-hidden rounded-2xl bg-[#f8fafc] border border-slate-100 shadow-sm min-h-[380px] sm:min-h-[440px] lg:min-h-[480px] flex items-center"
+        <section class="mx-auto max-w-[1440px] px-4 pt-20 sm:px-6 lg:px-8 lg:pt-20">
+            <div class="relative overflow-hidden rounded-2xl bg-[#f8fafc] border border-slate-100 shadow-sm min-h-[440px] sm:min-h-[500px] lg:min-h-[560px] flex items-center"
                  @mouseenter="pause()" 
                  @mouseleave="resume()">
                 
@@ -218,7 +218,7 @@
                             <div class="absolute inset-0 flex justify-end">
                                 <img :src="slide.image" 
                                      :alt="slide.title" 
-                                     class="h-full w-full sm:w-2/3 lg:w-3/5 object-cover object-center transform scale-100 transition-transform duration-1000 ease-out"
+                                     class="h-full w-full sm:w-3/4 lg:w-2/3 object-cover object-center transform scale-105 transition-transform duration-1000 ease-out"
                                      loading="eager">
                             </div>
 
@@ -345,7 +345,7 @@
                                 @if ($category['iconImage'])
                                     <img src="{{ $category['iconImage'] }}" alt="{{ $category['name'] }}">
                                 @else
-                                    <span class="text-base sm:text-lg font-bold text-slate-800">{{ $category['icon'] }}</span>
+                                    <span class="text-2xl sm:text-3xl font-bold text-slate-800">{{ $category['icon'] }}</span>
                                 @endif
                             </span>
 
@@ -362,7 +362,7 @@
 
         {{-- ADIDAS SOLID BLACK SEPARATOR LINE (CONSTRAINED WITH SIDE SPACING) --}}
         <div class="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-12 my-6 sm:my-8">
-            <div class="h-[2px] w-full bg-black"></div>
+            <div class="h-[1px] w-full bg-black"></div>
         </div>
 
 
@@ -434,7 +434,7 @@
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-6">
                     @forelse ($services as $service)
                         @php
-                            $mainImage = $service->image ? asset('storage/' . $service->image) : asset('images/skillhub-hero.jpg');
+                            $mainImage = $service->image ? asset('storage/' . $service->image) : asset('images/skillhub-hero.png');
                             $portfolioImage = filled($service->portfolio_images[0] ?? null) ? asset('storage/' . $service->portfolio_images[0]) : null;
                         @endphp
                         

@@ -7,7 +7,7 @@
 
     $panelTitles = [
         'login' => 'Transaksi aman dengan escrow sekolah',
-        'register' => 'Bergabung dengan komunitas SkillHub',
+        'register' => 'Bergabung dengan komunitas',
         'forgot' => 'Pulihkan akses akunmu dengan aman',
     ];
 
@@ -25,7 +25,7 @@
         'forgot' => 'Lupa Password',
         default => 'Masuk',
     };
-@endphp
+    @endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -53,77 +53,11 @@
             <div class="absolute inset-0 bg-blue-900/75"></div>
             <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.04\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-60"></div>
 
-            <div class="relative z-10 flex flex-col justify-between p-10 xl:p-14 w-full">
+            <div class="relative z-10 flex flex-col justify-center p-10 xl:p-14 w-full h-full">
                 <div>
-                    <x-brand-logo :href="route('home')" surface="dark" class="relative z-10" />
-                    <a href="{{ route('home') }}" class="hidden inline-flex items-center gap-2.5 group">
-                        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 border border-white/20 text-white backdrop-blur-sm">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
-                            </svg>
-                        </span>
-                        <span class="font-heading text-xl font-bold text-white group-hover:text-blue-100 transition-colors">SkillHub</span>
-                    </a>
-                </div>
-
-                <div class="max-w-md">
                     <h2 class="font-heading text-3xl xl:text-4xl font-bold text-white leading-tight">{{ $panelTitle }}</h2>
-                    <p class="mt-4 text-blue-100 leading-relaxed">{{ $panelDescription }}</p>
-
-                    @if ($variant === 'login')
-                        <div class="mt-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-5">
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-[11px] text-blue-200 uppercase tracking-wide font-medium">Pesanan #042</p>
-                                    <p class="text-white font-semibold text-sm mt-0.5">Desain Poster UKK</p>
-                                </div>
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-400/20 text-amber-200 border border-amber-300/30">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
-                                    Dana ditahan
-                                </span>
-                            </div>
-                            <div class="flex justify-between text-sm mb-3">
-                                <span class="text-blue-200">Escrow</span>
-                                <span class="text-white font-medium">Rp 75.000</span>
-                            </div>
-                            <div class="flex gap-1">
-                                @foreach (['Bayar', 'Escrow', 'Kerja', 'Selesai'] as $i => $step)
-                                    <div class="flex-1">
-                                        <div @class(['h-1.5 rounded-full', 'bg-white' => $i <= 1, 'bg-white/25' => $i > 1])></div>
-                                        <p @class(['text-[10px] mt-1', 'text-white' => $i <= 1, 'text-blue-300/60' => $i > 1])>{{ $step }}</p>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @elseif ($variant === 'register')
-                        <ul class="mt-8 space-y-3">
-                            @foreach (['Ajukan jasa ke marketplace sekolah', 'Negosiasi harga sebelum transaksi', 'Pembayaran escrow via admin', 'Review setelah pekerjaan selesai'] as $feature)
-                                <li class="flex items-center gap-3 text-sm text-blue-100">
-                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-white/15 border border-white/20">
-                                        <svg class="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                        </svg>
-                                    </span>
-                                    {{ $feature }}
-                                </li>
-                            @endforeach
-                        </ul>
-                    @else
-                        <div class="mt-8 flex items-start gap-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-5">
-                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/15 border border-white/20">
-                                <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 0 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                                </svg>
-                            </span>
-                            <div>
-                                <p class="text-white font-medium text-sm">Keamanan akun terjaga</p>
-                                <p class="text-blue-200 text-sm mt-1 leading-relaxed">Link reset hanya dikirim ke email yang terdaftar di database SkillHub.</p>
-                            </div>
-                        </div>
-                    @endif
+                    <p class="mt-4 text-blue-100 leading-relaxed max-w-md">{{ $panelDescription }}</p>
                 </div>
-
-                <p class="text-xs text-blue-200/70">&copy; {{ date('Y') }} SkillHub — Proyek UKK PPLG</p>
             </div>
         </div>
 
@@ -133,24 +67,16 @@
             <div class="lg:hidden relative h-44 sm:h-52 overflow-hidden shrink-0">
                 <img src="{{ $bgImage }}" alt="" class="absolute inset-0 h-full w-full object-cover">
                 <div class="absolute inset-0 bg-blue-900/70"></div>
-                <div class="relative z-10 h-full flex flex-col justify-between p-6">
-                    <x-brand-logo :href="route('home')" surface="dark" class="relative z-10" />
-                    <a href="{{ route('home') }}" class="hidden inline-flex items-center gap-2">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 border border-white/20 text-white">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
-                            </svg>
-                        </span>
-                        <span class="font-heading text-lg font-bold text-white">SkillHub</span>
-                    </a>
-                    <p class="font-heading text-lg font-bold text-white leading-snug max-w-xs">{{ $panelTitle }}</p>
+                <div class="relative z-10 h-full flex flex-col justify-center p-6">
+                    <h2 class="font-heading text-2xl font-bold text-white leading-snug">{{ $panelTitle }}</h2>
+                    <p class="mt-2 text-sm text-blue-100 max-w-xs">{{ $panelDescription }}</p>
                 </div>
             </div>
 
-            <div class="flex-1 flex items-center justify-center px-4 sm:px-8 py-8 lg:py-12 bg-slate-50 lg:bg-white">
+            <div class="flex-1 flex items-center justify-center px-4 sm:px-6 py-6 lg:py-8 bg-slate-50 lg:bg-white">
                 <div class="w-full max-w-md">
                     {{-- Navigasi atas form --}}
-                    <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center justify-between mb-6">
                         <a href="{{ route('home') }}" class="hidden lg:inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 transition-colors">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
@@ -167,7 +93,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 sm:p-8">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 sm:p-6">
                         @if ($title)
                             <h1 class="font-heading text-2xl font-bold text-slate-900">{{ $title }}</h1>
                         @endif
@@ -181,7 +107,7 @@
                     </div>
 
                     <p class="text-center text-xs text-slate-400 mt-6">
-                        Dengan masuk atau mendaftar, kamu setuju menggunakan SkillHub untuk lingkungan sekolah.
+                        Dengan masuk atau mendaftar, kamu setuju menggunakan layanan ini untuk lingkungan sekolah.
                     </p>
                 </div>
             </div>

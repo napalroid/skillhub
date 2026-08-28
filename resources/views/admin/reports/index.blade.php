@@ -28,7 +28,7 @@
                                 @php
                                     $serviceImage = $report->order?->service->image 
                                         ? asset('storage/' . $report->order->service->image) 
-                                        : asset('images/skillhub-hero.jpg');
+                                        : asset('images/skillhub-hero.png');
                                 @endphp
                                 <tr class="row-enter" data-stagger-item>
                                     <td>

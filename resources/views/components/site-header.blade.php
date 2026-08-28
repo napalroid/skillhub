@@ -1,8 +1,6 @@
 <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex items-center justify-between h-16">
-            <x-brand-logo :href="route('home')" />
-
             <nav class="hidden md:flex items-center gap-6">
                 <a href="{{ route('services.index') }}" class="text-sm text-slate-600 hover:text-blue-600 transition-colors">Jelajahi Jasa</a>
                 <a href="#cara-kerja" class="text-sm text-slate-600 hover:text-blue-600 transition-colors">Cara Kerja</a>

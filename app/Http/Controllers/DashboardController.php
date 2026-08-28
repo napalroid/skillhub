@@ -49,20 +49,6 @@ class DashboardController extends Controller
             ->take(8)
             ->get();
 
-        $accountNotifications = UserNotification::query()
-            ->where('user_id', auth()->id())
-            ->latest()
-            ->take(5)
-            ->get()
-            ->map(fn (UserNotification $notification) => [
-                'id' => $notification->id,
-                'title' => $notification->title,
-                'message' => $notification->message,
-                'is_read' => $notification->is_read,
-                'date' => $notification->created_at?->format('d M Y'),
-                'read_url' => route('notifications.read', $notification),
-            ])->values();
-
-        return view('dashboard', compact('featuredServices', 'featuredServiceCards', 'categories', 'accountNotifications'));
+        return view('dashboard', compact('featuredServices', 'featuredServiceCards', 'categories'));
     }
 }

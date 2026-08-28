@@ -38,7 +38,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans text-slate-900 antialiased min-h-screen bg-white pt-16">
+<body class="font-sans text-slate-900 antialiased min-h-screen bg-white">
     <div id="skillhub-staggered-menu"
          data-home="{{ route('home') }}"
          data-marketplace="{{ route('services.index') }}"
@@ -69,18 +69,7 @@
             <div class="absolute inset-0 bg-blue-900/75"></div>
             <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.04\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-60"></div>
 
-            <div class="relative z-10 flex flex-col justify-between p-10 xl:p-14 w-full">
-                <div>
-                    <x-brand-logo :href="route('home')" surface="dark" class="relative z-10" />
-                    <a href="{{ route('home') }}" class="hidden inline-flex items-center gap-2.5 group">
-                        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 border border-white/20 text-white backdrop-blur-sm">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
-                            </svg>
-                        </span>
-                        <span class="font-heading text-xl font-bold text-white group-hover:text-blue-100 transition-colors">SkillHub</span>
-                    </a>
-                </div>
+            <div class="relative z-10 flex flex-col justify-center p-10 xl:p-14 w-full h-full">
 
                 <div class="max-w-md">
                     <h2 class="font-heading text-3xl xl:text-4xl font-bold text-white leading-tight">{{ $panelTitle }}</h2>
@@ -149,16 +138,7 @@
             <div class="lg:hidden relative h-44 sm:h-52 overflow-hidden shrink-0">
                 <img src="{{ $bgImage }}" alt="" class="absolute inset-0 h-full w-full object-cover">
                 <div class="absolute inset-0 bg-blue-900/70"></div>
-                <div class="relative z-10 h-full flex flex-col justify-between p-6">
-                    <x-brand-logo :href="route('home')" surface="dark" class="relative z-10" />
-                    <a href="{{ route('home') }}" class="hidden inline-flex items-center gap-2">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 border border-white/20 text-white">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
-                            </svg>
-                        </span>
-                        <span class="font-heading text-lg font-bold text-white">SkillHub</span>
-                    </a>
+                <div class="relative z-10 h-full flex flex-col justify-center p-6">
                     <p class="font-heading text-lg font-bold text-white leading-snug max-w-xs">{{ $panelTitle }}</p>
                 </div>
             </div>

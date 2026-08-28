@@ -257,20 +257,38 @@
         {{-- GALERI FOTO (ADIDAS STYLE) --}}
         <section style="width:100vw; margin-left:calc(50% - 50vw);">
             <div class="grid grid-cols-3">
-                <div class="relative block aspect-[3/4] overflow-hidden">
-                    <img src="{{ asset('marketplace-image/edgardavidskillhub.jpeg') }}"
+                <div class="relative block aspect-[3/4] overflow-hidden bg-black">
+                    <img src="{{ asset('storage/marketplace-image/EDGARDAVIDSKILLHUB.jpeg') }}"
                          alt="SkillHub"
                          loading="lazy"
                          class="h-full w-full object-cover object-left">
+                    <div class="absolute bottom-12 left-1/3 flex flex-col gap-2">
+                        <div class="bg-white px-2 py-0.5 w-fit">
+                            <h3 class="font-display text-2xl sm:text-3xl font-black uppercase leading-none text-black" style="font-family:'Archivo',sans-serif;letter-spacing:.12em">SKILLHUB</h3>
+                        </div>
+                        <div class="bg-white px-2 py-0.5 w-fit">
+                            <p class="text-sm text-black leading-relaxed">
+                                Tempat anda menemukan jasa dari teman
+                            </p>
+                        </div>
+                        <div class="bg-white px-2 py-0.5 w-fit">
+                            <p class="text-sm text-black leading-relaxed">
+                                sekolah dengan beragam keahlian.
+                            </p>
+                        </div>
+                        <a href="{{ route('services.index') }}" class="inline-flex items-center gap-2 bg-black px-6 py-3 text-sm font-bold text-white uppercase tracking-wider transition hover:bg-black/80 w-fit">
+                            Beli sekarang <span aria-hidden="true">→</span>
+                        </a>
+                    </div>
                 </div>
-                <div class="relative block aspect-[3/4] overflow-hidden">
-                    <img src="{{ asset('marketplace-image/zinedinezidaneskillhub.jpeg') }}"
+                <div class="relative block aspect-[3/4] overflow-hidden bg-black">
+                    <img src="{{ asset('storage/marketplace-image/ZINEDINEZIDANESKILLHUB.jpeg') }}"
                          alt="SkillHub"
                          loading="lazy"
                          class="h-full w-full object-cover object-center">
                 </div>
-                <div class="relative block aspect-[3/4] overflow-hidden">
-                    <img src="{{ asset('marketplace-image/messiskillhub3.jpeg') }}"
+                <div class="relative block aspect-[3/4] overflow-hidden bg-black">
+                    <img src="{{ asset('storage/marketplace-image/messiskillhub2.jpeg') }}"
                          alt="SkillHub"
                          loading="lazy"
                          class="h-full w-full object-cover object-right">

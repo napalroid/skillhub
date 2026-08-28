@@ -76,7 +76,7 @@
                             @foreach ($services as $service)
                                 @php
                                     $statusInfo = $statusLabels[$service->status] ?? ['label' => $service->status, 'class' => 'badge-neutral'];
-                                    $mainImage = $service->image ? asset('storage/' . $service->image) : asset('images/skillhub-hero.jpg');
+                                    $mainImage = $service->image ? asset('storage/' . $service->image) : asset('images/skillhub-hero.png');
                                 @endphp
                                 <tr class="row-enter" data-stagger-item>
                                     <td>

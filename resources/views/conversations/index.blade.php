@@ -21,7 +21,7 @@
     </style>
     @vite('resources/js/app.js')
 </head>
-<body class="pt-16">
+<body class="">
     <div id="skillhub-staggered-menu"
          data-home="{{ route('home') }}"
          data-marketplace="{{ route('services.index') }}"
@@ -39,10 +39,6 @@
          data-csrf-token="{{ csrf_token() }}"></div>
     <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)</script>
     <main x-data="{ offerModal: false, mobileView: '{{ $conversation ? 'chat' : 'list' }}' }" class="flex min-h-screen flex-col bg-white">
-            <header class="flex items-center justify-between gap-4 border-b border-[#e5e5e5] px-5 py-3 sm:px-8">
-                <h1 class="font-display text-base font-extrabold uppercase tracking-[-.03em] text-black">{{ $title }}</h1>
-            </header>
-
         <div class="grid min-h-0 flex-1 lg:grid-cols-[360px_1fr]">
             <aside class="min-h-0 border-b border-[#e5e5e5] lg:border-b-0 lg:border-r"
                    :class="mobileView === 'chat' ? 'hidden lg:flex' : 'flex'">

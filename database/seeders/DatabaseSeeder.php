@@ -61,10 +61,8 @@ class DatabaseSeeder extends Seeder
         // 4. Categories & Subcategories
         $categoriesData = [
             'Desain & Grafis' => ['Desain Logo', 'Desain Poster', 'Desain Sosial Media', 'Ilustrasi'],
-            'Website & Teknologi' => ['Website Landing Page', 'Website Company Profile', 'E-commerce', 'Aplikasi Mobile'],
-            'Foto & Video' => ['Fotografi Produk', 'Video Editing', 'Videografi Acara'],
-            'Tulis & Terjemah' => ['Article Writing', 'Copywriting', 'Terjemah Bahasa Inggris'],
-            'Bisnis & Marketing' => ['Social Media Management', 'Content Planning', 'Email Marketing'],
+            'Foto & Video' => ['Edit Reels/TikTok', 'Videografi Acara', 'Dokumentasi Event', 'Foto Acara Sekolah'],
+            'Konten & Media' => ['Bantu Presentasi', 'Desain Slides', 'Content Creator'],
         ];
 
         foreach ($categoriesData as $catName => $subcats) {
@@ -99,22 +97,46 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Editing video pendek 30-60 detik, caption auto, transisi trend, musik bebas hak cipta. Joki 5 video/bulan.',
             ],
             [
-                'title' => 'Article SEO Friendly 1000+ Kata',
-                'subcategory' => 'Article Writing',
-                'price' => 75000,
-                'description' => 'Artikel blog/website 1000+ kata, riset keyword, struktur H1-H3, meta description, plagiarism check. Topik bebas.',
-            ],
-            [
-                'title' => 'Jasa Social Media Manager Bulanan',
-                'subcategory' => 'Social Media Management',
-                'price' => 1000000,
-                'description' => 'Kelola IG/TikTok 1 bulan: 12 konten feed + 12 reels, jadwal posting, balas komentar, laporan insight mingguan.',
-            ],
-            [
                 'title' => 'Desain Poster Kegiatan Sekolah/OSIS',
                 'subcategory' => 'Desain Poster',
                 'price' => 50000,
                 'description' => 'Poster acara sekolah/OSIS/UKM: ukuran A3/A4, desain menarik, revisi 2x, file PDF + JPG siap cetak.',
+            ],
+            [
+                'title' => 'Buat Poster Acara Sekolah/OSIS',
+                'subcategory' => 'Desain Poster',
+                'price' => 30000,
+                'description' => 'Poster acara sekolah/OSIS/UKM: ukuran A3/A4, desain menarik, revisi 2x, file PDF + JPG siap cetak.',
+            ],
+            [
+                'title' => 'Desain Logo Sekolah/UKM',
+                'subcategory' => 'Desain Logo',
+                'price' => 100000,
+                'description' => 'Desain logo minimalis modern untuk UKM/sekolah. 3 konsep, revisi unlimited, file AI/EPS/PNG.',
+            ],
+            [
+                'title' => 'Edit Video Reels/TikTok',
+                'subcategory' => 'Edit Reels/TikTok',
+                'price' => 50000,
+                'description' => 'Editing video pendek 30-60 detik, caption auto, transisi trend, musik bebas hak cipta. Joki 3 video/bulan.',
+            ],
+            [
+                'title' => 'Video Promosi Sekolah/OSIS',
+                'subcategory' => 'Videografi Acara',
+                'price' => 150000,
+                'description' => 'Video promosi acara sekolah/OSIS: dokumentasi + editing + musik. Durasi 2-3 menit, siap share ke sosmed.',
+            ],
+            [
+                'title' => 'Jasa Desain Sosial Media',
+                'subcategory' => 'Desain Sosial Media',
+                'price' => 75000,
+                'description' => 'Desain IG Story/Feed/TikTok template untuk OSIS/UKM. 5 template + 3 revisi. Estetik kece.',
+            ],
+            [
+                'title' => 'Jasa Bantu Presentasi',
+                'subcategory' => 'Bantu Presentasi',
+                'price' => 40000,
+                'description' => 'Bantu buat slides PowerPoint/Google Slides presentasi sekolah. Desain menarik, konten rapi, siap ngajar.',
             ],
         ];
 

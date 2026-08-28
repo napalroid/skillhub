@@ -53,8 +53,7 @@ class HomeController extends Controller
             ->orderBy('name')
             ->take(8)
             ->get();
-        $accountNotifications = collect();
 
-        return view('welcome', compact('featuredServices', 'featuredServiceCards', 'categories', 'accountNotifications'));
+        return view('welcome', compact('featuredServices', 'featuredServiceCards', 'categories'));
     }
 }
