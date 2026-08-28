@@ -31,7 +31,7 @@ return [
     | Minimum amount (in Rupiah) that can be withdrawn.
     |
     */
-    'min_amount' => 50000,
+    'min_amount' => 5000,
 
     /*
     |--------------------------------------------------------------------------

@@ -17,6 +17,22 @@ class PayoutService
         try {
             $user = User::whereKey($payoutRequest->user_id)->lockForUpdate()->firstOrFail();
             
+            // CEK SALDO SEBELUM PROSES
+            if ($user->balance < $payoutRequest->amount) {
+                DB::rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Saldo tidak mencukupi',
+                    'status' => 'failed',
+                    'failure_reason' => 'Saldo tidak mencukupi',
+                ];
+            }
+            
+            // POTONG SALDO SEKARANG (saat proses)
+            $oldBalance = $user->balance;
+            $user->decrement('balance', $payoutRequest->amount);
+            $user->refresh();
+            
             $payoutRequest->update([
                 'status' => PayoutRequest::STATUS_PROCESSING,
                 'auto_processed' => true,
@@ -34,6 +50,15 @@ class PayoutService
                     'processed_at' => now(),
                 ]);
                 
+                // Update transaction status jadi completed
+                WalletTransaction::where('reference_id', $payoutRequest->id)
+                    ->where('reference_type', 'payout_request')
+                    ->where('type', 'debit')
+                    ->update([
+                        'status' => WalletTransaction::STATUS_COMPLETED,
+                        'balance_after' => $user->balance,
+                    ]);
+                
                 DB::commit();
                 
                 return [
@@ -50,22 +75,17 @@ class PayoutService
                     'processed_at' => now(),
                 ]);
                 
-                // Simpan balance sebelum increment
+                // Kembalikan saldo ke user (sudah dipotong di withdrawStore)
                 $oldBalance = $user->balance;
-                
-                // Kembalikan saldo ke user
                 $user->increment('balance', $payoutRequest->amount);
-                
-                // Refresh untuk mendapatkan balance terbaru
                 $user->refresh();
-                $newBalance = $user->balance;
                 
                 WalletTransaction::create([
                     'user_id' => $user->id,
                     'type' => 'credit',
                     'amount' => $payoutRequest->amount,
                     'balance_before' => $oldBalance,
-                    'balance_after' => $newBalance,
+                    'balance_after' => $user->balance,
                     'reference_type' => 'payout_request',
                     'reference_id' => $payoutRequest->id,
                     'description' => 'Refund penarikan gagal #WD-'.$payoutRequest->id.' - '.$failureReason,

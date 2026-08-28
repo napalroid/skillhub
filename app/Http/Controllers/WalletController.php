@@ -117,6 +117,7 @@ class WalletController extends Controller
             'payoutRequest' => $payoutRequest,
             'methods' => PayoutRequest::METHOD_LABELS,
             'processingDelay' => config('payout.processing_delay_seconds', 10),
+            'balance' => $user->balance,
         ]);
     }
 
@@ -201,7 +202,8 @@ class WalletController extends Controller
 
                 $oldBalance = $fresh->balance;
 
-                $fresh->decrement('balance', $data['amount']);
+                // TIDAK POTONG SALDO DULU - hanya simpan info
+                // $fresh->decrement('balance', $data['amount']);
 
                 $fresh->update([
                     'payout_type' => $data['method_type'],
@@ -223,7 +225,7 @@ class WalletController extends Controller
                     'type' => WalletTransaction::TYPE_DEBIT,
                     'amount' => $data['amount'],
                     'balance_before' => $oldBalance,
-                    'balance_after' => $fresh->balance,
+                    'balance_after' => $oldBalance,  // Belum dipotong, masih sama
                     'reference_type' => 'payout_request',
                     'reference_id' => $payoutRequest->id,
                     'description' => 'Penarikan saldo ke '.$data['method_type'].' '.$data['account_identifier'],
@@ -250,5 +252,40 @@ class WalletController extends Controller
         return redirect()->route('wallet.withdraw.confirm', [
             'payoutRequest' => $payoutRequest->id,
         ]);
+    }
+
+    public function withdrawCancel(Request $request, PayoutRequest $payoutRequest): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($payoutRequest->user_id !== $user->id) {
+            abort(403);
+        }
+
+        if ($payoutRequest->status !== PayoutRequest::STATUS_PENDING) {
+            return redirect()->route('wallet.index')->with('error', 'Penarikan ini sudah diproses atau dibatalkan.');
+        }
+
+        DB::transaction(function () use ($user, $payoutRequest) {
+            // TIDAK PERLU KEMBALIKAN SALDO karena belum dipotong
+            // Hanya update status saja
+            
+            // Update status payout request
+            $payoutRequest->update([
+                'status' => PayoutRequest::STATUS_REJECTED,
+                'failure_reason' => 'Dibatalkan oleh user',
+            ]);
+
+            // Update wallet transaction
+            WalletTransaction::where('reference_id', $payoutRequest->id)
+                ->where('reference_type', 'payout_request')
+                ->where('type', WalletTransaction::TYPE_DEBIT)
+                ->update([
+                    'status' => WalletTransaction::STATUS_FAILED,
+                    'description' => 'Penarikan dibatalkan oleh user #WD-'.$payoutRequest->id,
+                ]);
+        });
+
+        return redirect()->route('wallet.index')->with('success', 'Penarikan telah dibatalkan.');
     }
 }

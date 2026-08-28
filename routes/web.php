@@ -109,6 +109,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/dompet/tarik', [WalletController::class, 'withdrawStore'])->name('wallet.withdraw.store')->middleware('throttle:3,5');
     Route::get('/dompet/tarik/{payoutRequest}/verifikasi', [WalletController::class, 'withdrawVerify'])->name('wallet.withdraw.verify');
     Route::get('/dompet/tarik/{payoutRequest}/konfirmasi', [WalletController::class, 'withdrawConfirm'])->name('wallet.withdraw.confirm');
+    Route::delete('/dompet/tarik/{payoutRequest}/batal', [WalletController::class, 'withdrawCancel'])->name('wallet.withdraw.cancel');
     Route::post('/wallet/withdraw/{payoutRequest}/process', [WalletController::class, 'withdrawProcess'])->name('wallet.withdraw.process');
 
     // --- PAYOUT REQUEST (ADMIN) ---

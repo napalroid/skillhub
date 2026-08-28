@@ -53,10 +53,15 @@
                    class="block w-full bg-gray-900 hover:bg-black text-white text-sm font-bold py-4 rounded transition-all active:scale-[0.98] text-center">
                     LANJUTKAN PENARIKAN
                 </a>
-                <a href="{{ route('wallet.index') }}" 
-                   class="block w-full border border-gray-300 hover:border-gray-900 text-gray-900 text-sm font-bold py-4 rounded transition-all text-center">
-                    BATALKAN
-                </a>
+                <form method="POST" action="{{ route('wallet.withdraw.cancel', $payoutRequest) }}" style="display:inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" 
+                            class="block w-full border border-gray-300 hover:border-gray-900 text-gray-900 text-sm font-bold py-4 rounded transition-all text-center"
+                            onclick="return confirm('Yakin ingin membatalkan penarikan? Saldo akan dikembalikan.')">
+                        BATALKAN PENARIKAN
+                    </button>
+                </form>
             </div>
 
             <p class="text-center text-xs text-gray-400 mt-6">

@@ -3,112 +3,151 @@ document.addEventListener('DOMContentLoaded', function () {
     const countdownText = document.getElementById('countdown-text');
     const cancelBtn = document.getElementById('cancel-btn');
     const processingStatus = document.getElementById('processing-status');
+    const actions = document.getElementById('wh-confirm-actions');
+    const dialog = document.getElementById('wh-confirm-dialog');
     if (!progressBar || !countdownText) return;
+
+    if (dialog && typeof dialog.showModal === 'function' && !dialog.open) {
+        dialog.showModal();
+    }
 
     const processingDelay = parseInt(progressBar.dataset.delay || '10', 10);
     const payoutRequestId = progressBar.dataset.id;
     let countdown = processingDelay;
-    let countdownInterval, progressInterval;
+    let countdownInterval;
+    let progressInterval;
 
     function startCountdown() {
-        progressInterval = setInterval(() => {
+        countdown = processingDelay;
+        progressBar.style.width = '0%';
+
+        progressInterval = setInterval(function () {
             const elapsed = processingDelay - countdown;
             progressBar.style.width = (elapsed / processingDelay) * 100 + '%';
         }, 100);
 
-        countdownInterval = setInterval(() => {
+        countdownInterval = setInterval(function () {
             countdown--;
-            countdownText.textContent = `Memproses dalam ${countdown} detik...`;
+            countdownText.textContent = 'Memproses dalam ' + countdown + ' detik';
             if (countdown <= 0) {
                 clearInterval(countdownInterval);
                 clearInterval(progressInterval);
+                progressBar.style.width = '100%';
                 processTransfer();
             }
         }, 1000);
     }
 
     function processTransfer() {
-        cancelBtn && cancelBtn.classList.add('hidden');
-        countdownText.classList.add('hidden');
-        processingStatus && processingStatus.classList.remove('hidden');
+        if (cancelBtn) cancelBtn.hidden = true;
+        if (actions) actions.hidden = true;
+        countdownText.hidden = true;
+        if (processingStatus) processingStatus.hidden = false;
 
         const csrfToken = document.querySelector('meta[name="csrf-token"]');
         if (!csrfToken) {
-            showFailure({ message: 'Terjadi kesalahan sistem', failure_reason: 'CSRF token tidak ditemukan' });
+            finish(false, 'CSRF token tidak ditemukan');
             return;
         }
 
-        fetch(`/wallet/withdraw/${payoutRequestId}/process`, {
+        fetch('/wallet/withdraw/' + payoutRequestId + '/process', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
             },
         })
-        .then(r => {
-            if (!r.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return r.json();
-        })
-        .then(data => data.success ? showSuccess(data) : showFailure(data))
-        .catch((error) => showFailure({ 
-            message: 'Terjadi kesalahan sistem', 
-            failure_reason: error.message || 'Network error' 
-        }));
+            .then(function (r) {
+                if (!r.ok) throw new Error('Network response was not ok');
+                return r.json();
+            })
+            .then(function (data) {
+                if (data.success) finish(true, data);
+                else finish(false, data.failure_reason || data.message);
+            })
+            .catch(function (error) {
+                finish(false, error.message || 'Network error');
+            });
     }
 
-    function showSuccess(data) {
+    function finish(ok, payload) {
         const card = document.getElementById('result-card');
-        if (!card) return;
-        const amount = new Intl.NumberFormat('id-ID').format(parseInt(card.dataset.amount, 10));
-        card.innerHTML = `
-            <div class="text-center py-8">
-                <div class="flex items-center justify-center mb-6">
-                    <div class="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center">
-                        <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                    </div>
-                </div>
-                <h2 class="text-2xl font-thin text-gray-900 mb-2">Transfer Berhasil</h2>
-                <p class="text-sm text-gray-500 mb-8">Rp${amount} telah dikirim<br>ke ${card.dataset.method} (${card.dataset.account})</p>
-                <p class="text-xs text-gray-400 mb-8">Ref: #${card.dataset.ref}</p>
-                <a href="${card.dataset.wallet}" class="inline-block bg-gray-900 hover:bg-black text-white text-sm font-bold px-8 py-4 transition-all">KEMBALI KE WALLET</a>
-            </div>`;
-    }
+        const amount = card
+            ? new Intl.NumberFormat('id-ID').format(parseInt(card.dataset.amount, 10))
+            : '';
+        if (dialog && dialog.open) dialog.close();
 
-    function showFailure(data) {
-        const card = document.getElementById('result-card');
-        if (!card) return;
-        card.innerHTML = `
-            <div class="text-center py-8">
-                <div class="flex items-center justify-center mb-6">
-                    <div class="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center">
-                        <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                    </div>
-                </div>
-                <h2 class="text-2xl font-thin text-gray-900 mb-2">Transfer Gagal</h2>
-                <p class="text-sm text-gray-500 mb-4">Saldo telah dikembalikan ke wallet Anda</p>
-                <p class="text-xs text-gray-400 mb-8">Alasan: ${data.failure_reason || data.message}</p>
-                <div class="flex gap-3 justify-center">
-                    <a href="${card.dataset.retry}" class="inline-block bg-gray-900 hover:bg-black text-white text-sm font-bold px-6 py-3 transition-all">COBA LAGI</a>
-                    <a href="${card.dataset.wallet}" class="inline-block border border-gray-300 hover:border-gray-900 text-gray-900 text-sm font-bold px-6 py-3 transition-all">KEMBALI</a>
-                </div>
-            </div>`;
-    }
-
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-            if (confirm('Yakin ingin membatalkan penarikan?')) {
-                clearInterval(countdownInterval);
-                clearInterval(progressInterval);
-                window.location.href = cancelBtn.dataset.cancel;
+        if (typeof window.whNotifyPersist === 'function') {
+            if (ok) {
+                window.whNotifyPersist({
+                    type: 'success',
+                    title: 'Transfer berhasil',
+                    message: 'Rp' + amount + ' dikirim ke ' + (card.dataset.method || '') + ' (' + (card.dataset.account || '') + '). Ref #' + (card.dataset.ref || ''),
+                });
+            } else {
+                const reason = typeof payload === 'string' ? payload : '';
+                window.whNotifyPersist({
+                    type: 'error',
+                    title: 'Transfer gagal',
+                    message: reason || 'Saldo telah dikembalikan ke dompet.',
+                });
             }
-        });
+        } else if (typeof window.whNotify === 'function') {
+            if (ok) {
+                window.whNotify({
+                    type: 'success',
+                    title: 'Transfer berhasil',
+                    message: 'Rp' + amount + ' dikirim ke ' + (card.dataset.method || '') + ' (' + (card.dataset.account || '') + '). Ref #' + (card.dataset.ref || ''),
+                });
+            } else {
+                const reason = typeof payload === 'string' ? payload : '';
+                window.whNotify({
+                    type: 'error',
+                    title: 'Transfer gagal',
+                    message: reason || 'Saldo telah dikembalikan ke dompet.',
+                });
+            }
+        }
+
+        window.location.href = ok
+            ? (card && card.dataset.wallet) || '/dompet'
+            : (card && card.dataset.retry) || '/dompet/tarik';
     }
 
     startCountdown();
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function () {
+            clearInterval(countdownInterval);
+            clearInterval(progressInterval);
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/dompet/tarik/' + payoutRequestId + '/batal';
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = csrfToken.getAttribute('content');
+                form.appendChild(csrfInput);
+            }
+
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+            form.appendChild(methodInput);
+
+            document.body.appendChild(form);
+            form.submit();
+        });
+    }
+
+    if (dialog) {
+        dialog.addEventListener('cancel', function (event) {
+            event.preventDefault();
+        });
+    }
 });
