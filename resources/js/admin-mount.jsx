@@ -45,7 +45,6 @@ window.mountAdminComponents = (data) => {
   }
 };
 
-// Auto-mount if data attributes exist
 document.addEventListener('DOMContentLoaded', () => {
   const categoryEl = document.getElementById('category-grid-root');
   const subcategoryEl = document.getElementById('subcategory-grid-root');

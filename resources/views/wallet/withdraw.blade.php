@@ -13,10 +13,13 @@
                     <p class="wh-lede">Isi nominal dan tujuan. Kamu akan meninjau ringkasan sebelum permintaan diproses.</p>
 
                     <p class="wh-balance-label" style="margin-top:2rem;">Saldo tersedia</p>
-                    <p class="wh-balance-value" style="font-size:clamp(2rem,4.5vw,3.1rem);">
-                        <span class="wh-balance-currency">IDR</span>
-                        {{ number_format($balance, 0, ',', '.') }}
-                    </p>
+                    <div 
+                        data-decrypted-balance
+                        data-balance="{{ number_format($balance, 0, ',', '.') }}"
+                        data-currency="IDR"
+                        class="wh-balance-value"
+                        style="font-size:clamp(2rem,4.5vw,3.1rem);"
+                    ></div>
 
                     <ul class="wh-note-list">
                         <li>Minimal penarikan <b>Rp{{ number_format($minAmount, 0, ',', '.') }}</b>. Tidak ada biaya admin.</li>

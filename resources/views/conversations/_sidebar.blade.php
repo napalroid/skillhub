@@ -8,7 +8,7 @@
 @endphp
 
 <div class="flex flex-col">
-    <div class="border-b border-[#e5e5e5] px-5 py-4">
+    <div class="border-b border-[#e5e5e5] px-5 py-4 pt-20">
         <p class="text-[10px] font-bold uppercase tracking-[.18em] text-black/45">Urutkan pesan</p>
         <div class="mt-3 flex border border-[#e5e5e5]" role="group" aria-label="Filter pesan">
             @foreach ($filters as $key => $label)

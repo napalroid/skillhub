@@ -28,14 +28,14 @@ class Category extends Model
         $name = Str::lower($this->name);
 
         return match (true) {
-            Str::contains($name, ['desain', 'grafis', 'art']) => '🎨',
-            Str::contains($name, ['website', 'program', 'teknologi', 'coding']) => '💻',
-            Str::contains($name, ['foto', 'video', 'film']) => '📷',
-            Str::contains($name, ['musik', 'audio']) => '🎵',
-            Str::contains($name, ['tulis', 'bahasa', 'terjemah']) => '✍️',
-            Str::contains($name, ['belajar', 'kursus', 'pendidikan']) => '📚',
-            Str::contains($name, ['bisnis', 'marketing', 'promosi']) => '📈',
-            default => '✨',
+            Str::contains($name, ['desain', 'grafis', 'art']) => 'design',
+            Str::contains($name, ['website', 'program', 'teknologi', 'coding']) => 'code',
+            Str::contains($name, ['foto', 'video', 'film']) => 'camera',
+            Str::contains($name, ['musik', 'audio']) => 'music',
+            Str::contains($name, ['tulis', 'bahasa', 'terjemah']) => 'write',
+            Str::contains($name, ['belajar', 'kursus', 'pendidikan']) => 'learn',
+            Str::contains($name, ['bisnis', 'marketing', 'promosi']) => 'business',
+            default => 'star',
         };
     }
 }

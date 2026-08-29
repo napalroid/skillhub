@@ -39,22 +39,6 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans text-slate-900 antialiased min-h-screen bg-white">
-    <div id="skillhub-staggered-menu"
-         data-home="{{ route('home') }}"
-         data-marketplace="{{ route('services.index') }}"
-         data-chat="{{ route('conversations.seller-index') }}"
-         data-login="{{ route('login') }}"
-         data-register="{{ route('register') }}"
-         data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
-         data-user-name="{{ auth()->user()?->name ?? '' }}"
-         data-profile-url="{{ route('profile.edit') }}"
-         data-logout-url="{{ route('logout') }}"
-         data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
-         data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
-         data-dompet="{{ route('wallet.index') }}"
-         data-pesanan="{{ route('orders.index') }}"
-         data-csrf-token="{{ csrf_token() }}"></div>
-    <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)</script>
 
     <div class="min-h-screen flex flex-col lg:flex-row">
 
@@ -145,7 +129,14 @@
 
             <div class="flex-1 flex items-center justify-center px-4 sm:px-8 py-8 lg:py-12 bg-slate-50 lg:bg-white">
                 <div class="w-full max-w-md">
-                    {{-- Navigasi atas form dipindahkan ke hamburger menu global --}}
+                    <div class="mb-8 flex justify-start">
+                        <a href="{{ route('home') }}" class="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-blue-600 hover:underline transition-all">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                            </svg>
+                            <span>Kembali ke Beranda</span>
+                        </a>
+                    </div>
 
                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 sm:p-8">
                         @if ($title)

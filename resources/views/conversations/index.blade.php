@@ -30,13 +30,16 @@
          data-register="{{ route('register') }}"
          data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
          data-user-name="{{ auth()->user()?->name ?? '' }}"
+         data-avatar-url="{{ auth()->user()?->avatar_url ?? '' }}"
          data-profile-url="{{ route('profile.edit') }}"
          data-logout-url="{{ route('logout') }}"
          data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
          data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
-         data-dompet="{{ route('wallet.index') }}"
-         data-pesanan="{{ route('orders.index') }}"
-         data-csrf-token="{{ csrf_token() }}"></div>
+          data-dompet="{{ route('wallet.index') }}"
+          data-pesanan="{{ route('orders.index') }}"
+          data-csrf-token="{{ csrf_token() }}"
+          data-is-admin="{{ auth()->check() && auth()->user()->isAdmin() ? 'true' : 'false' }}"
+          data-admin-dashboard="{{ auth()->check() && auth()->user()->isAdmin() ? route('admin.dashboard') : '' }}"></div>
     <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)</script>
     <main x-data="{ offerModal: false, mobileView: '{{ $conversation ? 'chat' : 'list' }}' }" class="flex min-h-screen flex-col bg-white">
         <div class="grid min-h-0 flex-1 lg:grid-cols-[360px_1fr]">
@@ -51,5 +54,7 @@
             </div>
         </div>
     </main>
+    
+    <x-site-footer />
 </body>
 </html>

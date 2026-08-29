@@ -1,5 +1,4 @@
 
-
 import Alpine from 'alpinejs';
 import './echo';
 import './chat-realtime';
@@ -11,6 +10,9 @@ import './skillhub-featured-services.jsx';
 import './skillhub-review-motion.jsx';
 import './skillhub-how-we-work.jsx';
 import './admin-mount.jsx';
+import './skillhub-decrypted-balance.jsx';
+import './skillhub-decrypted-greeting.jsx';
 
 window.Alpine = Alpine;
 Alpine.start();
+

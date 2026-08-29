@@ -100,11 +100,8 @@ class AdminController extends Controller
         $escrowBalance = Payment::where('status', 'verified')
             ->sum('amount');
 
-        // Laporan pending dari order yang sudah dibayar
+        // Laporan pending
         $pendingReports = Report::where('status', 'open')
-            ->whereHas('order', function ($q) {
-                $q->where('payment_status', 'paid');
-            })
             ->with(['order.service', 'reporter', 'reportedUser'])
             ->latest()
             ->take(5)
@@ -157,21 +154,32 @@ class AdminController extends Controller
     // ==================== REJECT JASA ====================
     public function rejectService(Service $service)
     {
-        if ($service->status !== 'pending') {
-            return back()->with('error', 'Jasa ini sudah diproses.');
+        $previousStatus = $service->status;
+        
+        if ($service->status === 'rejected') {
+            return back()->with('error', 'Jasa ini sudah ditolak.');
         }
+        
         $service->update(['status' => 'rejected']);
+
+        $message = $previousStatus === 'pending' 
+            ? "Mohon maaf, jasa kamu \"{$service->title}\" ditolak admin. Kamu dapat mengajukan ulang."
+            : "Jasa kamu \"{$service->title}\" telah dinonaktifkan oleh admin.";
 
         UserNotification::create([
             'user_id' => $service->user_id,
             'service_id' => $service->id,
             'type' => 'rejected',
-            'title' => "Jasa ditolak ({$service->title})",
-            'message' => "Mohon maaf, jasa kamu \"{$service->title}\" ditolak admin. Kamu dapat mengajukan ulang.",
+            'title' => $previousStatus === 'pending' ? "Jasa ditolak ({$service->title})" : "Jasa dinonaktifkan ({$service->title})",
+            'message' => $message,
             'is_read' => false,
         ]);
 
-        return back()->with('success', 'Jasa ditolak. User dapat mengajukan ulang.');
+        $successMessage = $previousStatus === 'pending' 
+            ? 'Jasa ditolak. User dapat mengajukan ulang.'
+            : 'Jasa berhasil dinonaktifkan dan notifikasi telah dikirim ke pemilik jasa.';
+
+        return back()->with('success', $successMessage);
     }
 
     // ==================== RELEASE DANA (ESCROW) ====================

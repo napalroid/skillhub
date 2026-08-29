@@ -11,10 +11,12 @@
                     <p class="wh-lede">Saldo hasil kerja di SkillHub. Tarik kapan siap, cek setiap pergerakan dari satu daftar.</p>
 
                     <p class="wh-balance-label" style="margin-top: 2.25rem;">Saldo tersedia</p>
-                    <p class="wh-balance-value">
-                        <span class="wh-balance-currency">IDR</span>
-                        {{ number_format($balance, 0, ',', '.') }}
-                    </p>
+                    <div 
+                        data-decrypted-balance
+                        data-balance="{{ number_format($balance, 0, ',', '.') }}"
+                        data-currency="IDR"
+                        class="wh-balance-value"
+                    ></div>
                 </div>
 
                 <aside class="wh-hero-aside">
@@ -94,9 +96,6 @@
                                 </li>
                             @endforeach
                         </ul>
-                        <div class="wh-pager">
-                            {{ $transactions->links() }}
-                        </div>
                     @else
                         <div class="wh-empty">
                             <h3>Belum ada pergerakan</h3>

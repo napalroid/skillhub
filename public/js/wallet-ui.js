@@ -121,5 +121,22 @@
             const trigger = form.querySelector('[type="submit"]');
             if (trigger) trigger.focus();
         });
+
+        // Enhanced select animation
+        document.querySelectorAll('.wh-select').forEach(function (select) {
+            select.addEventListener('mousedown', function () {
+                select.classList.add('wh-select-opening');
+            });
+            select.addEventListener('blur', function () {
+                select.classList.remove('wh-select-opening');
+            });
+            select.addEventListener('change', function () {
+                select.classList.remove('wh-select-opening');
+                select.classList.add('wh-select-changed');
+                setTimeout(function () {
+                    select.classList.remove('wh-select-changed');
+                }, 300);
+            });
+        });
     });
 })();

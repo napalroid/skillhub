@@ -161,5 +161,8 @@ class DatabaseSeeder extends Seeder
         $this->command->info('Admin: naufalnail58@gmail.com / password123');
         $this->command->info('Seller: seller@example.com / password123');
         $this->command->info('Buyer: buyer@example.com / password123');
+        
+        // Run DummyReportsSeeder
+        $this->call(DummyReportsSeeder::class);
     }
 }

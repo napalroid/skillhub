@@ -26,6 +26,9 @@
     min-height: calc(100dvh - 4rem);
     padding-bottom: 4.5rem;
 }
+body:has(.wh-page) {
+    background: var(--wh-bg) !important;
+}
 .wh-page * { box-sizing: border-box; }
 .wh-inner {
     max-width: 1180px;
@@ -386,11 +389,34 @@
     color: var(--wh-ink);
     font-size: 1rem;
     font-family: var(--wh-font-text);
+    transition: border-color var(--wh-dur-fast) ease, box-shadow var(--wh-dur-fast) ease;
 }
 .wh-input:focus,
 .wh-select:focus {
     outline: 2px solid var(--wh-ink);
     outline-offset: 2px;
+}
+.wh-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23111' stroke-width='1.5' stroke-linecap='square'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right .85rem center;
+    background-size: 12px 8px;
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
+.wh-select:hover {
+    border-color: var(--wh-ink);
+}
+.wh-select:focus {
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 6.5L6 1.5L1 6.5' stroke='%23111' stroke-width='1.5' stroke-linecap='square'/%3E%3C/svg%3E");
+    animation: wh-select-open var(--wh-dur) var(--wh-ease);
+}
+.wh-select-opening {
+    transform: translateY(-1px);
+}
+.wh-select-changed {
+    animation: wh-select-confirm var(--wh-dur) var(--wh-ease);
 }
 .wh-input.is-invalid { border-width: 2px; }
 .wh-amount-wrap { position: relative; }
@@ -582,8 +608,21 @@
     from { opacity: 0; }
     to { opacity: 1; }
 }
+@keyframes wh-select-open {
+    0% { transform: translateY(0); }
+    30% { transform: translateY(-2px); }
+    100% { transform: translateY(0); }
+}
+@keyframes wh-select-confirm {
+    0% { border-color: var(--wh-line-strong); }
+    50% { border-color: var(--wh-ink); background-color: var(--wh-soft); }
+    100% { border-color: var(--wh-line-strong); background-color: #fff; }
+}
 @media (prefers-reduced-motion: reduce) {
     .wh-dialog[open], .wh-dialog::backdrop, .wh-notice { animation: none; transition: none; }
+    .wh-select:focus { animation: none; }
+    .wh-select-opening { transform: none; }
+    .wh-select-changed { animation: none; }
 }
 @media (max-width: 640px) {
     .wh-notice-host {

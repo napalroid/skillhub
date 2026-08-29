@@ -42,7 +42,13 @@
                                     <p class="text-[10px] uppercase tracking-wider text-gray-500">Pesanan</p>
                                 </div>
                                 <div class="text-center">
-                                    <p class="text-lg font-extrabold text-blue-600">Rp{{ number_format($user->balance, 0, ',', '.') }}</p>
+                                    <div 
+                                        data-decrypted-balance
+                                        data-balance="{{ number_format($user->balance, 0, ',', '.') }}"
+                                        data-currency=""
+                                        class="text-lg font-extrabold text-blue-600"
+                                        style="display: inline-block;"
+                                    >Rp</div>
                                     <p class="text-[10px] uppercase tracking-wider text-gray-500">Saldo</p>
                                 </div>
                             </div>

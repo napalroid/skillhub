@@ -63,6 +63,17 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function getAvatarUrlAttribute(): string
+    {
+        $hash = strtolower(trim((string) $this->email));
+        return 'https://www.gravatar.com/avatar/' . md5($hash) . '?d=mp&s=128';
+    }
+
+    public function getInitialAttribute(): string
+    {
+        return mb_strtoupper(mb_substr((string) $this->name, 0, 1));
+    }
+
     public function notifications()
     {
         return $this->hasMany(UserNotification::class);

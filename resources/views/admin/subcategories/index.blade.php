@@ -109,9 +109,9 @@
                 <h3 class="font-heading font-semibold text-sm text-black" x-text="editingSubcategory ? 'Edit Subkategori' : 'Tambah Subkategori'"></h3>
                 <button type="button" @click="showCreateModal = false; editingSubcategory = null" class="btn-ghost p-1" aria-label="Tutup modal">&times;</button>
             </div>
-            <form method="POST" :action="editingSubcategory ? route('admin.subcategories.update', editingSubcategory.id) : route('admin.subcategories.store')">
+            <form method="POST" :action="editingSubcategory ? '{{ url('admin/subcategories') }}/' + editingSubcategory.id : '{{ route('admin.subcategories.store') }}'">
                 @csrf
-                @if (editingSubcategory) @method('PUT') @endif
+                <input type="hidden" name="_method" x-bind:value="editingSubcategory ? 'PUT' : 'POST'">
                 <div class="space-y-4">
                     <div>
                         <label class="label-field" for="sub-name">Nama Subkategori <span class="text-[#E4002B] font-normal">*</span></label>

@@ -342,16 +342,48 @@
                 <button onclick="document.getElementById('reportForm').classList.toggle('hidden')" class="text-sm font-bold uppercase tracking-wider text-red-600 hover:text-red-800 transition">
                     ⚠ Laporkan masalah pada pesanan ini
                 </button>
-                <form id="reportForm" method="POST" action="{{ route('reports.store') }}" class="hidden mt-4 card">
+                <form id="reportForm" method="POST" action="{{ route('reports.store') }}" class="hidden mt-4 card" x-data="{ selectedRole: '', selectedCategory: '' }">
                     @csrf
                     <input type="hidden" name="order_id" value="{{ $order->id }}">
                     <input type="hidden" name="reported_user_id" value="{{ $isBuyer ? $order->service->user_id : $order->buyer_id }}">
-                    <div class="space-y-3">
+                    
+                    <div class="space-y-4">
+                        {{-- Role Selection --}}
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider mb-2">Jelaskan masalahnya</label>
-                            <textarea name="reason" rows="4" placeholder="Detail masalah yang terjadi..." class="w-full rounded-lg border-gray-300 px-4 py-3 text-sm"></textarea>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">Anda melaporkan sebagai <span class="text-red-600">*</span></label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="relative flex items-center justify-center px-4 py-3 border-2 rounded-lg cursor-pointer transition"
+                                       :class="selectedRole === 'buyer' ? 'border-black bg-black text-white' : 'border-gray-300 hover:border-gray-400'">
+                                    <input type="radio" name="reporter_role" value="buyer" required class="sr-only" x-model="selectedRole">
+                                    <span class="font-bold text-sm">BUYER</span>
+                                </label>
+                                <label class="relative flex items-center justify-center px-4 py-3 border-2 rounded-lg cursor-pointer transition"
+                                       :class="selectedRole === 'seller' ? 'border-black bg-black text-white' : 'border-gray-300 hover:border-gray-400'">
+                                    <input type="radio" name="reporter_role" value="seller" required class="sr-only" x-model="selectedRole">
+                                    <span class="font-bold text-sm">SELLER</span>
+                                </label>
+                            </div>
                         </div>
-                        <button type="submit" class="w-full bg-red-600 text-white px-6 py-3 font-bold uppercase tracking-wider text-sm hover:bg-red-700 transition">
+
+                        {{-- Category Selection --}}
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">Kategori Masalah <span class="text-red-600">*</span></label>
+                            <select name="category" required class="w-full rounded-lg border-gray-300 px-4 py-3 text-sm" x-model="selectedCategory">
+                                <option value="">Pilih kategori masalah</option>
+                                @foreach(\App\Models\Report::getCategories() as $category)
+                                    <option value="{{ $category }}">{{ $category }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Reason --}}
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">Jelaskan Detail Masalah <span class="text-red-600">*</span></label>
+                            <textarea name="reason" rows="4" required minlength="10" maxlength="500" placeholder="Jelaskan masalah yang Anda alami secara detail (minimal 10 karakter)..." class="w-full rounded-lg border-gray-300 px-4 py-3 text-sm"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Minimum 10 karakter, maksimum 500 karakter</p>
+                        </div>
+
+                        <button type="submit" class="w-full bg-red-600 text-white px-6 py-3 font-bold uppercase tracking-wider text-sm hover:bg-red-700 transition rounded-lg">
                             Kirim Laporan
                         </button>
                     </div>

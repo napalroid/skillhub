@@ -12,10 +12,13 @@
                     <h1 class="wh-display" style="font-size: clamp(2.2rem, 5.5vw, 3.6rem);">Tarik<br>saldo</h1>
                     <p class="wh-lede">Tinjau permintaan penarikan sebelum dana dikirim ke akun tujuan.</p>
                     <p class="wh-balance-label" style="margin-top:2rem;">Saldo tersedia</p>
-                    <p class="wh-balance-value" style="font-size:clamp(2rem,4.5vw,3.1rem);">
-                        <span class="wh-balance-currency">IDR</span>
-                        {{ number_format($balance ?? 0, 0, ',', '.') }}
-                    </p>
+                    <div 
+                        data-decrypted-balance
+                        data-balance="{{ number_format($balance ?? 0, 0, ',', '.') }}"
+                        data-currency="IDR"
+                        class="wh-balance-value"
+                        style="font-size:clamp(2rem,4.5vw,3.1rem);"
+                    ></div>
                 </div>
                 <div class="wh-form">
                     <div class="wh-field">

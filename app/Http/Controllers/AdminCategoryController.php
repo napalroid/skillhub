@@ -20,6 +20,10 @@ class AdminCategoryController extends Controller
         // Services count per category (via subcategories)
         $categories->each(function ($cat) {
             $cat->services_count = $cat->subcategories->sum('services_count');
+            $cat->image_url = $cat->image ? asset('storage/' . $cat->image) : null;
+            $cat->icon_url = $cat->icon ? asset('storage/' . $cat->icon) : null;
+            $cat->icon_is_file = $cat->iconIsFile();
+            $cat->display_icon = $cat->displayIcon();
         });
 
         return view('admin.categories.index', compact('categories'));

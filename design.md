@@ -1,4 +1,4 @@
-# DESIGN.md — SkillHub Design Reference
+  # DESIGN.md — SkillHub Design Reference
 
 > **Tujuan file ini:** Ini adalah *single source of truth* untuk styling website **SkillHub**.
 > Setiap kali AI (Claude, Copilot, Cursor, dll) membuat atau mengubah UI di project ini,
@@ -282,3 +282,15 @@ Sebelum membuat/mengedit komponen apapun di project SkillHub, pastikan:
 - Referensi visual: [adidas.co.id](https://www.adidas.co.id/) — gaya monokrom bold, tipografi besar, foto besar, white space luas, CTA tegas.
 - Referensi palet warna brand: kombinasi warna resmi Adidas (hitam #000000, putih #FFFFFF, merah #E4002B, kuning #EDE734, hijau #2C9F45, biru #0051BA) — dipetakan ulang menjadi token semantik di §2 supaya cocok untuk kebutuhan UI SkillHub (bukan e-commerce sepatu, tapi platform edukasi).
 - Kalau ada kebutuhan komponen baru yang belum diatur di sini, **tambahkan token/aturan baru ke file ini terlebih dahulu**, baru implementasikan — jangan langsung hardcode nilai baru di kode.
+
+KETENTUAN STYLE WEBSITE
+
+PAKAI REFRENSI WEBSITE ADIDAS.CO.ID MULAI DARI COLOUR PALLETE, FONT, SPACING, BORDERING DLL
+JANGAN ADA SIMBOL SIMBOL ANEH
+BOLEH MENAMBAHKAN GAMBAR JIKA MEMANG DESIGN NYA AKAN TERLIHAT LEBIH BAGUS.
+STYLE TIDAK HARUS MEMNGGUNAKAN KOTAK SOFT SUDUT SEBAGAI KOLOM.
+STYLE TIDAK HARUS SIMETRIS TERUS, BOLEH BERKARYA SESUAI STANDAR WEBSITE PROFESIONAL
+BUAT SEPERTI WEBSITE YANG PROFESIONAL YANG MEREFRENSIKAN ADIDAS.CO.ID
+GUNAKAN SKILLS YANG SUDAH TERINSTALL DI GLOBAL PROJECT.
+
+HANYA UNTUK TAMPILAN YANG SAYA TUJUKAN SAJA.

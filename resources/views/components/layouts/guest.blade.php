@@ -77,11 +77,11 @@
                 <div class="w-full max-w-md">
                     {{-- Navigasi atas form --}}
                     <div class="flex items-center justify-between mb-6">
-                        <a href="{{ route('home') }}" class="hidden lg:inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 transition-colors">
+                        <a href="{{ route('home') }}" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 transition-colors">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                             </svg>
-                            Kembali ke beranda
+                            Kembali ke Beranda
                         </a>
                         <div class="flex items-center gap-2 ml-auto">
                             @if ($variant !== 'login')

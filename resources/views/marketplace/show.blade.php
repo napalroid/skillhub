@@ -60,6 +60,7 @@
          data-register="{{ route('register') }}"
          data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
          data-user-name="{{ auth()->user()?->name ?? '' }}"
+         data-avatar-url="{{ auth()->user()?->avatar_url ?? '' }}"
          data-profile-url="{{ route('profile.edit') }}"
          data-logout-url="{{ route('logout') }}"
          data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"

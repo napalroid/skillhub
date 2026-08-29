@@ -14,9 +14,10 @@
         </a>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-100 divide-y divide-gray-100 shadow-sm overflow-hidden">
+        <div class="bg-white rounded-xl border border-gray-100 divide-y divide-gray-100 shadow-sm overflow-hidden">
         @forelse ($notifications as $notification)
             @php
+                $showBadge = !in_array($notification->type, ['service_removed_from_subcategory', 'service_deleted']);
                 $badge = match ($notification->type) {
                     'approved' => ['text' => 'Disetujui', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500'],
                     'rejected' => ['text' => 'Ditolak', 'class' => 'bg-red-50 text-red-700 border-red-200', 'dot' => 'bg-red-500'],
@@ -35,7 +36,21 @@
                     'escrow_ready' => '⚡',
                     'order_confirmed' => '▶',
                     'order_escrow' => '●',
+                    'service_removed_from_subcategory' => 'ⓘ',
+                    'service_deleted' => 'ⓘ',
                     default   => '•••',
+                };
+                $iconColor = match ($notification->type) {
+                    'approved' => 'bg-emerald-100 text-emerald-600',
+                    'rejected' => 'bg-red-100 text-red-600',
+                    'message'  => 'bg-blue-100 text-blue-600',
+                    'payment_paid' => 'bg-black text-white',
+                    'escrow_ready' => 'bg-emerald-100 text-emerald-600',
+                    'order_confirmed' => 'bg-emerald-100 text-emerald-600',
+                    'order_escrow' => 'bg-[#E4002B]/10 text-[#E4002B]',
+                    'service_removed_from_subcategory' => 'bg-gray-100 text-gray-600',
+                    'service_deleted' => 'bg-gray-100 text-gray-600',
+                    default => 'bg-amber-100 text-amber-600',
                 };
 
                 $notificationLink = null;
@@ -50,16 +65,18 @@
             @else
                 <div class="p-5 flex items-start gap-4 {{ $notification->isUnread() ? 'bg-blue-50/60' : '' }}">
             @endif
-                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg font-bold {{ $notification->type === 'approved' ? 'bg-emerald-100 text-emerald-600' : ($notification->type === 'rejected' ? 'bg-red-100 text-red-600' : ($notification->type === 'message' ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600')) }}">
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg font-bold {{ $iconColor }}">
                     {{ $icon }}
                 </span>
                 <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
                         <h3 class="font-semibold text-gray-800">{{ $notification->title }}</h3>
-                        <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-bold {{ $badge['class'] }}">
-                            <span class="h-1.5 w-1.5 rounded-full {{ $badge['dot'] }}"></span>
-                            {{ $badge['text'] }}
-                        </span>
+                        @if ($showBadge)
+                            <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-bold {{ $badge['class'] }}">
+                                <span class="h-1.5 w-1.5 rounded-full {{ $badge['dot'] }}"></span>
+                                {{ $badge['text'] }}
+                            </span>
+                        @endif
                         @if ($notification->isUnread())
                             <span class="inline-flex rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">Baru</span>
                         @endif

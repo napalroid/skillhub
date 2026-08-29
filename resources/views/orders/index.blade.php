@@ -114,16 +114,32 @@
          data-register="{{ route('register') }}"
          data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
          data-user-name="{{ auth()->user()?->name ?? '' }}"
+         data-avatar-url="{{ auth()->user()?->avatar_url ?? '' }}"
          data-profile-url="{{ route('profile.edit') }}"
          data-logout-url="{{ route('logout') }}"
          data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
          data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
-         data-dompet="{{ route('wallet.index') }}"
-         data-pesanan="{{ route('orders.index') }}"
-         data-csrf-token="{{ csrf_token() }}"></div>
+          data-dompet="{{ route('wallet.index') }}"
+          data-pesanan="{{ route('orders.index') }}"
+          data-csrf-token="{{ csrf_token() }}"
+          data-is-admin="{{ auth()->check() && auth()->user()->isAdmin() ? 'true' : 'false' }}"
+          data-admin-dashboard="{{ auth()->check() && auth()->user()->isAdmin() ? route('admin.dashboard') : '' }}"></div>
     <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)</script>
 
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {{-- HERO SECTION - Like Wallet --}}
+        <div class="mb-10">
+            <p class="text-[11px] font-bold uppercase tracking-[.16em] text-black/45 mb-2">Transaksi</p>
+            <div class="w-10 h-px bg-black mb-4"></div>
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-black leading-[1.1] uppercase mb-4">
+                Pesanan
+            </h1>
+            <p class="text-base sm:text-lg text-slate-600 max-w-xl">
+                Lacak semua pesanan jasa di satu tempat. Cek status, kelola progres, dan selesaikan transaksi dengan mudah.
+            </p>
+        </div>
+
         {{-- SUMMARY SECTION --}}
         <div class="grid grid-cols-2 gap-4 mb-10 md:grid-cols-4">
             <a href="{{ route('orders.index', ['status' => 'all', 'role' => $role]) }}"
@@ -148,238 +164,166 @@
             </a>
         </div>
 
-        {{-- FILTER SECTION --}}
-        <div class="mb-8">
-            <div class="mb-4 flex flex-wrap items-center gap-3">
-                <span class="text-[11px] font-bold uppercase tracking-[.14em] text-black/45">Tampilkan sebagai</span>
-                <div class="flex border border-[#080808]">
-                    @foreach (['all' => 'Semua', 'buyer' => 'Pembeli', 'seller' => 'Penjual'] as $key => $label)
-                        <a href="{{ route('orders.index', ['role' => $key, 'status' => $statusFilter]) }}"
-                           class="px-4 py-2 text-xs font-bold uppercase tracking-[.06em] transition
-                                  {{ $role === $key ? 'bg-black text-white' : 'bg-white text-black hover:bg-black hover:text-white' }}
-                                  {{ $key !== 'all' ? 'border-l border-[#080808]' : '' }}">
-                            {{ $label }}
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="flex flex-wrap gap-2 md:gap-3">
-                @php
-                    $filterLabels = [
-                        'all' => 'Semua',
-                        'pending' => 'Menunggu',
-                        'processing' => 'Diproses',
-                        'in_progress' => 'Berlangsung',
-                        'completed' => 'Selesai',
-                        'cancelled' => 'Dibatalkan',
-                    ];
-                @endphp
-                @foreach ($filterLabels as $key => $label)
-                    <a href="{{ route('orders.index', ['status' => $key, 'role' => $role]) }}"
-                       class="px-5 py-2.5 text-sm font-bold border border-[#080808] transition-all focus:outline-none focus:ring-2 focus:ring-black/20 {{ $statusFilter === $key ? 'bg-black text-white' : 'bg-white text-black hover:bg-black hover:text-white' }}">
-                        {{ $label }}
-                    </a>
-                @endforeach
-            </div>
-        </div>
-
-        {{-- ORDER LIST SECTION --}}
-        <div class="bg-white border border-[#e5e5e5] overflow-hidden min-h-[400px]">
-            @if ($orders->count() > 0)
-                <div class="divide-y divide-[#e5e5e5]">
-                    @foreach ($orders as $order)
+        {{-- SPLIT LAYOUT - Like Wallet --}}
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            
+            {{-- MAIN ORDER LIST --}}
+            <div class="lg:col-span-8">
+                {{-- FILTER SECTION --}}
+                <div class="mb-6">
+                    <div class="flex flex-wrap gap-2 md:gap-3">
                         @php
-                            $isBuyer = $order->buyer_id === auth()->id();
-                            $isSeller = $order->is_seller ?? false;
-                            $counterparty = $isBuyer ? $order->service->seller : $order->buyer;
-                            $counterpartyName = $counterparty?->name ?? '-';
-                            
-                            // Status mapping for display
-                            $statusMapping = [
-                                'menunggu_pembayaran' => ['label' => 'Menunggu Pembayaran', 'class' => 'bg-amber-100 text-amber-800'],
-                                'menunggu_verifikasi' => ['label' => 'Menunggu Verifikasi', 'class' => 'bg-orange-100 text-orange-800'],
-                                'dibayar' => ['label' => 'Dibayar', 'class' => 'bg-blue-100 text-blue-800'],
-                                'dikerjakan' => ['label' => 'Sedang Dikerjakan', 'class' => 'bg-blue-100 text-blue-800'],
-                                'menunggu_persetujuan' => ['label' => 'Menunggu Persetujuan', 'class' => 'bg-purple-100 text-purple-800'],
-                                'selesai' => ['label' => 'Selesai', 'class' => 'bg-emerald-100 text-emerald-800'],
-                                'dibatalkan' => ['label' => 'Dibatalkan', 'class' => 'bg-gray-200 text-gray-800'],
+                            $filterLabels = [
+                                'all' => 'Semua',
+                                'pending' => 'Menunggu',
+                                'processing' => 'Diproses',
+                                'in_progress' => 'Berlangsung',
+                                'completed' => 'Selesai',
+                                'cancelled' => 'Dibatalkan',
                             ];
-                            $statusInfo = $statusMapping[$order->status] ?? ['label' => $order->status, 'class' => 'bg-gray-100 text-gray-800'];
                         @endphp
-                        
-                        <div class="p-6 sm:p-8 hover:bg-gray-50 transition-colors group">
-                            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-                                {{-- Left side: Order info --}}
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 flex-wrap mb-2">
-                                        <p class="font-black text-gray-900 text-lg sm:text-xl truncate">
+                        @foreach ($filterLabels as $key => $label)
+                            <a href="{{ route('orders.index', ['status' => $key, 'role' => $role]) }}"
+                               class="px-5 py-2.5 text-sm font-bold border border-[#080808] transition-all focus:outline-none focus:ring-2 focus:ring-black/20 {{ $statusFilter === $key ? 'bg-black text-white' : 'bg-white text-black hover:bg-black hover:text-white' }}">
+                                {{ $label }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- ORDER LIST - Like Wallet Transaction List --}}
+                <div class="border-t border-black">
+                    @if ($orders->count() > 0)
+                        @foreach ($orders as $order)
+                            @php
+                                $isBuyer = $order->buyer_id === auth()->id();
+                                $isSeller = $order->is_seller ?? false;
+                                $counterparty = $isBuyer ? $order->service->seller : $order->buyer;
+                                $counterpartyName = $counterparty?->name ?? '-';
+                                
+                                $statusMapping = [
+                                    'menunggu_pembayaran' => ['label' => 'Menunggu Pembayaran', 'class' => 'border-dashed'],
+                                    'menunggu_verifikasi' => ['label' => 'Menunggu Verifikasi', 'class' => 'border-dashed'],
+                                    'dibayar' => ['label' => 'Dibayar', 'class' => ''],
+                                    'dikerjakan' => ['label' => 'Dikerjakan', 'class' => ''],
+                                    'menunggu_persetujuan' => ['label' => 'Menunggu Persetujuan', 'class' => ''],
+                                    'selesai' => ['label' => 'Selesai', 'class' => ''],
+                                    'dibatalkan' => ['label' => 'Dibatalkan', 'class' => 'bg-black text-white'],
+                                ];
+                                $statusInfo = $statusMapping[$order->status] ?? ['label' => $order->status, 'class' => ''];
+                            @endphp
+                            
+                            <div class="py-5 border-b border-slate-200 hover:bg-slate-50 transition-colors">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 flex-wrap mb-1">
+                                            <span class="text-xs font-bold uppercase tracking-wider {{ $isBuyer ? 'text-blue-600' : 'text-green-600' }}">
+                                                {{ $isBuyer ? 'Sebagai Pembeli' : 'Sebagai Penjual' }}
+                                            </span>
+                                        </div>
+                                        <p class="font-bold text-black text-base truncate">
                                             {{ $order->service->title }}
                                         </p>
-                                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-none {{ $isBuyer ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
-                                            {{ $isBuyer ? 'Sebagai Pembeli' : 'Sebagai Penjual' }}
-                                        </span>
+                                        <p class="text-xs text-slate-500 mt-1">
+                                            {{ $isBuyer ? 'Penjual' : 'Pembeli' }}: {{ $counterpartyName }} · #{{ sprintf('%05d', $order->id) }} · {{ $order->created_at->format('d M Y, H:i') }}
+                                        </p>
                                     </div>
                                     
-                                    <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600 mt-2">
-                                        <span class="font-medium">
-                                            {{ $isBuyer ? 'Penjual' : 'Pembeli' }}: {{ $counterpartyName }}
-                                        </span>
-                                        <span class="text-gray-400">•</span>
-                                        <span class="font-medium">Pesanan #{{ sprintf('%05d', $order->id) }}</span>
-                                        <span class="text-gray-400">•</span>
-                                        <span class="font-medium text-gray-900">{{ $order->created_at->translatedFormat('d F Y, H:i') }}</span>
-                                    </div>
-
-                                    <span class="inline-block mt-3 text-xs px-3 py-1 rounded-none {{ $statusInfo['class'] }}">
-                                        {{ $statusInfo['label'] }}
-                                    </span>
-                                </div>
-
-                                {{-- Right side: Price and Action --}}
-                                <div class="flex flex-col md:items-end md:justify-center gap-3 min-w-[180px]">
-                                    <p class="text-2xl sm:text-3xl font-black text-black">
-                                        Rp{{ number_format($order->final_price, 0, ',', '.') }}
-                                    </p>
-
-                                    @php
-                                        $actions = [];
+                                    <div class="flex items-center gap-4 sm:gap-6">
+                                        <div class="text-right">
+                                            <p class="text-lg font-extrabold text-black">
+                                                Rp{{ number_format($order->final_price, 0, ',', '.') }}
+                                            </p>
+                                            <span class="inline-block mt-1 text-[10px] px-2 py-0.5 border border-black {{ $statusInfo['class'] }}">
+                                                {{ $statusInfo['label'] }}
+                                            </span>
+                                        </div>
                                         
-                                        // Buyer actions
-                                        if ($isBuyer) {
-                                            if ($order->status === 'menunggu_pembayaran') {
-                                                $actions[] = [
-                                                    'label' => 'Bayar Sekarang',
-                                                    'url' => route('orders.payment.show', $order),
-                                                    'primary' => true
-                                                ];
-                                            } elseif ($order->status === 'menunggu_persetujuan') {
-                                                $actions[] = [
-                                                    'label' => 'Selesaikan',
-                                                    'form' => true,
-                                                    'action' => route('order-files.approve', $order),
-                                                    'confirm' => 'Yakin hasil sudah sesuai? Pesanan akan selesai & dana cair otomatis 1 jam kemudian.'
-                                                ];
-                                            }
-                                        }
-                                        
-                                        // Seller actions
-                                        if ($isSeller) {
-                                            if ($order->status === 'dibayar') {
-                                                $actions[] = [
-                                                    'label' => 'Mulai Kerjakan',
-                                                    'form' => true,
-                                                    'action' => route('orders.start-work', $order)
-                                                ];
-                                            } elseif (in_array($order->status, ['dibayar', 'dikerjakan'])) {
-                                                $actions[] = [
-                                                    'label' => 'Upload Hasil',
-                                                    'href' => route('orders.show', $order) . '#upload-results'
-                                                ];
-                                            } elseif ($order->status === 'menunggu_persetujuan') {
-                                                $actions[] = [
-                                                    'label' => 'Hasil Dikirim',
-                                                    'disabled' => true
-                                                ];
-                                            }
-                                        }
-
-                                        // Common actions
-                                        $actions[] = [
-                                            'label' => 'Detail',
-                                            'href' => route('orders.show', $order)
-                                        ];
-
-                                        // Review CTA for completed orders by buyer
-                                        if ($isBuyer && $order->status === 'selesai' && ! $order->review) {
-                                            $actions[] = [
-                                                'label' => 'Beri Ulasan',
-                                                'href' => route('orders.show', $order) . '#review-section'
-                                            ];
-                                        }
-
-                                        // Remove duplicate "Detail" action if already present
-                                        $hasDetail = false;
-                                        $finalActions = [];
-                                        foreach ($actions as $action) {
-                                            if ($action['label'] === 'Detail' && $hasDetail) {
-                                                continue;
-                                            }
-                                            if ($action['label'] === 'Detail') {
-                                                $hasDetail = true;
-                                            }
-                                            $finalActions[] = $action;
-                                        }
-                                        $actions = $finalActions;
-                                    @endphp
-
-                                    <div class="flex flex-col sm:flex-row gap-2">
-                                        @foreach ($actions as $action)
-                                            @if ($action['form'] ?? false)
-                                                <form method="POST" action="{{ $action['action'] }}" 
-                                                      onsubmit="return confirm('{{ $action['confirm'] ?? '' }}')">
-                                                    @csrf
-                                                    <button type="submit"
-                                                        class="{{ $action['primary'] ?? false ? 'bg-black text-white' : 'bg-white text-black border border-[#080808]' }} 
-                                                               px-4 py-2 text-sm font-bold transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
-                                                        {{ $action['label'] }}
-                                                    </button>
-                                                </form>
-                                            @elseif($action['disabled'] ?? false)
-                                                <button disabled
-                                                        class="bg-gray-100 text-gray-400 px-4 py-2 text-sm font-bold cursor-not-allowed">
-                                                    {{ $action['label'] }}
-                                                </button>
-                                            @else
-                                                <a href="{{ $action['href'] }}"
-                                                   class="{{ $action['primary'] ?? false ? 'bg-black text-white' : 'bg-white text-black border border-[#080808]' }} 
-                                                          px-4 py-2 text-sm font-bold transition hover:bg-black hover:text-white">
-                                                    {{ $action['label'] }}
-                                                </a>
-                                            @endif
-                                        @endforeach
+                                        <a href="{{ route('orders.show', $order) }}"
+                                           class="text-sm font-bold text-black hover:underline whitespace-nowrap">
+                                            Detail →
+                                        </a>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
-                </div>
+                        @endforeach
 
-                {{-- PAGINATION --}}
-                <div class="p-6 sm:p-8 border-t border-[#e5e5e5] bg-gray-50">
-                    {{ $orders->links() }}
+                        {{-- PAGINATION --}}
+                        <div class="pt-6">
+                            {{ $orders->links() }}
+                        </div>
+                    @else
+                        <div class="py-12 text-center">
+                            <p class="text-lg font-bold text-black mb-2">Belum ada pesanan</p>
+                            @if ($statusFilter === 'all')
+                                <p class="text-sm text-slate-500 mb-6">Pesanan kamu akan muncul di sini setelah melakukan transaksi jasa.</p>
+                                <a href="{{ route('services.index') }}"
+                                   class="inline-block px-6 py-3 bg-black hover:bg-slate-800 text-white text-sm font-bold uppercase tracking-wide transition">
+                                    Jelajahi Jasa
+                                </a>
+                            @else
+                                <p class="text-sm text-slate-500 mb-6">Belum ada pesanan dengan status "{{ $filterLabels[$statusFilter] }}".</p>
+                                <a href="{{ route('orders.index') }}"
+                                   class="inline-block px-6 py-3 border-2 border-black hover:bg-black hover:text-white text-black text-sm font-bold uppercase tracking-wide transition">
+                                    Lihat Semua
+                                </a>
+                            @endif
+                        </div>
+                    @endif
                 </div>
-            @else
-                <div class="p-12 sm:p-20 text-center">
-                    <div class="max-w-md mx-auto">
-                        <p class="text-2xl font-bold text-gray-500 mb-4">
-                            Belum ada pesanan
-                        </p>
-                        @if ($statusFilter === 'all')
-                            <p class="text-gray-400 mb-6">
-                                Pesanan kamu akan muncul di sini setelah melakukan transaksi jasa.
-                            </p>
-                            <a href="{{ route('services.index') }}"
-                               class="inline-block px-6 py-3 bg-black hover:bg-gray-800 text-white text-base font-bold uppercase tracking-wide transition">
-                                Jelajahi Jasa
+            </div>
+
+            {{-- SIDEBAR - Like Wallet Rail --}}
+            <div class="lg:col-span-4">
+                {{-- Role Filter --}}
+                <div class="mb-8">
+                    <h2 class="text-xs font-bold uppercase tracking-[.14em] text-black/60 mb-4">Tampilkan sebagai</h2>
+                    <div class="flex border border-[#080808]">
+                        @foreach (['all' => 'Semua', 'buyer' => 'Pembeli', 'seller' => 'Penjual'] as $key => $label)
+                            <a href="{{ route('orders.index', ['role' => $key, 'status' => $statusFilter]) }}"
+                               class="flex-1 text-center px-3 py-2.5 text-xs font-bold uppercase tracking-[.06em] transition
+                                      {{ $role === $key ? 'bg-black text-white' : 'bg-white text-black hover:bg-black hover:text-white' }}
+                                      {{ $key !== 'all' ? 'border-l border-[#080808]' : '' }}">
+                                {{ $label }}
                             </a>
-                        @else
-                            <p class="text-gray-400 mb-6">
-                                Belum ada pesanan dengan status "{{ $filterLabels[$statusFilter] }}".
-                            </p>
-                            <a href="{{ route('orders.index') }}"
-                               class="inline-block px-6 py-3 bg-transparent hover:bg-gray-50 text-black text-base font-bold uppercase tracking-wide border-2 border-black transition">
-                                Lihat Semua Pesanan
-                            </a>
-                        @endif
+                        @endforeach
                     </div>
                 </div>
-            @endif
-        </div>
 
-        {{-- RESPONSIVE PAGINATION (bottom) --}}
-        <div class="mt-6 md:hidden">
-            {{ $orders->links() }}
+                {{-- Tips --}}
+                <div class="border-t border-slate-200 pt-6">
+                    <h2 class="text-xs font-bold uppercase tracking-[.14em] text-black/60 mb-4">Tips</h2>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                        Sebagai pembeli, kamu bisa membayar, mengunggah brief, dan menyetujui hasil jasa.
+                    </p>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Sebagai penjual, kerjakan pesanan, upload hasil, dan terima pembayaran otomatis setelah disetujui.
+                    </p>
+                </div>
+
+                {{-- Quick Stats --}}
+                <div class="border-t border-slate-200 pt-6 mt-6">
+                    <h2 class="text-xs font-bold uppercase tracking-[.14em] text-black/60 mb-4">Ringkasan</h2>
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Total transaksi</span>
+                            <span class="font-bold">{{ number_format($totalOrders) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Selesai</span>
+                            <span class="font-bold text-green-600">{{ number_format($completedCount) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Berlangsung</span>
+                            <span class="font-bold text-blue-600">{{ number_format($inProgressCount) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Menunggu</span>
+                            <span class="font-bold text-amber-600">{{ number_format($pendingCount) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 

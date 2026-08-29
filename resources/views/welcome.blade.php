@@ -101,13 +101,16 @@
          data-get-started="#cara-kerja"
          data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
          data-user-name="{{ auth()->user()?->name ?? '' }}"
+         data-avatar-url="{{ auth()->user()?->avatar_url ?? '' }}"
          data-profile-url="{{ route('profile.edit') }}"
          data-logout-url="{{ route('logout') }}"
           data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
           data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
           data-dompet="{{ route('wallet.index') }}"
           data-pesanan="{{ route('orders.index') }}"
-          data-csrf-token="{{ csrf_token() }}"></div>
+          data-csrf-token="{{ csrf_token() }}"
+          data-is-admin="{{ auth()->check() && auth()->user()->isAdmin() ? 'true' : 'false' }}"
+          data-admin-dashboard="{{ auth()->check() && auth()->user()->isAdmin() ? route('admin.dashboard') : '' }}"></div>
     <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT)</script>
 
     <x-notification-toast />
@@ -124,10 +127,17 @@
 
             <div class="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
                 <div>
-                    <span class="inline-flex items-center gap-2 rounded-full border border-black bg-white/90 px-4 py-2 text-xs font-bold text-black">
-                        <span class="h-2 w-2 rounded-full bg-black"></span>
-                        Marketplace jasa khusus siswa
-                    </span>
+                    @auth
+                        <div id="greeting-decrypted" 
+                             data-text="{{ auth()->user()->name }}"
+                             class="text-lg font-bold text-black">
+                        </div>
+                    @else
+                        <span class="inline-flex items-center gap-2 rounded-full border border-black bg-white/90 px-4 py-2 text-xs font-bold text-black">
+                            <span class="h-2 w-2 rounded-full bg-black"></span>
+                            Marketplace jasa khusus siswa
+                        </span>
+                    @endauth
 
                     <h1 class="mt-6 max-w-2xl text-4xl font-bold leading-[.9] tracking-[-.07em] text-black sm:text-5xl lg:text-7xl">
                         Ubah keahlianmu menjadi <span class="text-black/45">peluang.</span>
@@ -256,27 +266,27 @@
 
         {{-- GALERI FOTO (ADIDAS STYLE) --}}
         <section style="width:100vw; margin-left:calc(50% - 50vw);">
-            <div class="grid grid-cols-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3">
                 <div class="relative block aspect-[3/4] overflow-hidden bg-black">
                     <img src="{{ asset('storage/marketplace-image/EDGARDAVIDSKILLHUB.jpeg') }}"
                          alt="SkillHub"
                          loading="lazy"
                          class="h-full w-full object-cover object-left">
-                    <div class="absolute bottom-12 left-1/3 flex flex-col gap-2">
+                    <div class="absolute bottom-6 left-4 sm:bottom-12 sm:left-1/3 flex flex-col gap-1.5 sm:gap-2">
                         <div class="bg-white px-2 py-0.5 w-fit">
-                            <h3 class="font-display text-2xl sm:text-3xl font-black uppercase leading-none text-black" style="font-family:'Archivo',sans-serif;letter-spacing:.12em">SKILLHUB</h3>
+                            <h3 class="font-display text-sm sm:text-2xl lg:text-3xl font-black uppercase leading-none text-black" style="font-family:'Archivo',sans-serif;letter-spacing:.12em">SKILLHUB</h3>
                         </div>
-                        <div class="bg-white px-2 py-0.5 w-fit">
-                            <p class="text-sm text-black leading-relaxed">
+                        <div class="bg-white px-2 py-0.5 w-fit max-w-[220px] sm:max-w-none">
+                            <p class="text-[10px] sm:text-sm text-black leading-tight sm:leading-relaxed">
                                 Tempat anda menemukan jasa dari teman
                             </p>
                         </div>
-                        <div class="bg-white px-2 py-0.5 w-fit">
-                            <p class="text-sm text-black leading-relaxed">
+                        <div class="bg-white px-2 py-0.5 w-fit max-w-[220px] sm:max-w-none">
+                            <p class="text-[10px] sm:text-sm text-black leading-tight sm:leading-relaxed">
                                 sekolah dengan beragam keahlian.
                             </p>
                         </div>
-                        <a href="{{ route('services.index') }}" class="inline-flex items-center gap-2 bg-black px-6 py-3 text-sm font-bold text-white uppercase tracking-wider transition hover:bg-black/80 w-fit">
+                        <a href="{{ route('services.index') }}" class="inline-flex items-center gap-1.5 sm:gap-2 bg-black px-3 py-1.5 sm:px-6 sm:py-3 text-[10px] sm:text-sm font-bold text-white uppercase tracking-wider transition hover:bg-black/80 w-fit mt-1 sm:mt-0">
                             Beli sekarang <span aria-hidden="true">→</span>
                         </a>
                     </div>

@@ -146,7 +146,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/orders/{order}/refund', [AdminController::class, 'refundOrder'])->name('orders.refund');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::post('/reports/{report}/resolve', [ReportController::class, 'resolve'])->name('reports.resolve');
+Route::post('/reports/{report}/resolve', [ReportController::class, 'resolve'])->name('reports.resolve');
 
     // Pencairan dana (PAYOUT)
     Route::get('/payouts', [AdminController::class, 'payoutIndex'])->name('payouts.index');
@@ -170,6 +170,11 @@ Route::post('/subcategories', [App\Http\Controllers\AdminSubcategoryController::
 Route::get('/subcategories/{subcategory}/edit', [App\Http\Controllers\AdminSubcategoryController::class, 'edit'])->name('subcategories.edit');
 Route::put('/subcategories/{subcategory}', [App\Http\Controllers\AdminSubcategoryController::class, 'update'])->name('subcategories.update');
 Route::delete('/subcategories/{subcategory}', [App\Http\Controllers\AdminSubcategoryController::class, 'destroy'])->name('subcategories.destroy');
+
+// Service management in subcategory
+Route::get('/subcategories/{subcategory}/services/available', [App\Http\Controllers\AdminSubcategoryController::class, 'availableServices'])->name('subcategories.services.available');
+Route::post('/subcategories/{subcategory}/services/{service}/add', [App\Http\Controllers\AdminSubcategoryController::class, 'addService'])->name('subcategories.services.add');
+Route::delete('/subcategories/{subcategory}/services/{service}/remove', [App\Http\Controllers\AdminSubcategoryController::class, 'removeService'])->name('subcategories.services.remove');
 });
 
 // ==============================================

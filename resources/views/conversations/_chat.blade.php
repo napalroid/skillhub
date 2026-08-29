@@ -13,7 +13,7 @@
              data-user-id="{{ auth()->id() }}"
              data-is-seller="{{ $isSeller ? '1' : '0' }}"
              class="flex min-h-0 flex-1 flex-col bg-white">
-        <header class="flex items-center justify-between gap-4 border-b border-[#e5e5e5] px-5 py-4 sm:px-8">
+        <header class="flex items-center justify-between gap-4 border-b border-[#e5e5e5] px-5 py-4 sm:px-8 pt-20">
             <div class="min-w-0">
                 <button type="button" @click="mobileView = 'list'" class="mb-1 text-[11px] font-bold uppercase tracking-[.06em] text-black/50 hover:text-black lg:hidden">&larr; Daftar</button>
                 <h1 class="truncate text-lg font-extrabold uppercase tracking-[-.02em]">{{ $partner->name }}</h1>
@@ -94,7 +94,7 @@
         </div>
     @endif
 @else
-    <section class="flex min-h-0 flex-1 flex-col items-center justify-center bg-white px-6 text-center">
+    <section class="flex min-h-0 flex-1 flex-col items-center justify-center bg-white px-6 text-center pt-20">
         <p class="text-[11px] font-bold uppercase tracking-[.2em] text-black/35">SkillHub Messages</p>
         <h2 class="mt-4 text-2xl font-extrabold uppercase tracking-[-.03em] text-black/80">Pilih percakapan</h2>
         <p class="mt-2 max-w-xs text-xs font-medium text-black/45">Pilih satu sesi di sebelah kiri untuk mulai membaca dan membalas pesan.</p>
