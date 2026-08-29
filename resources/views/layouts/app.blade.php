@@ -30,6 +30,7 @@
                  data-login="{{ route('login') }}"
                  data-register="{{ route('register') }}"
                  data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
+                 data-user-id="{{ auth()->id() ?? '' }}"
                  data-user-name="{{ auth()->user()?->name ?? '' }}"
                  data-avatar-url="{{ auth()->user()?->avatar_url ?? '' }}"
                  data-profile-url="{{ route('profile.edit') }}"
@@ -38,7 +39,9 @@
                  data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
                  data-dompet="{{ route('wallet.index') }}"
                  data-pesanan="{{ route('orders.index') }}"
-                 data-csrf-token="{{ csrf_token() }}"></div>
+                 data-csrf-token="{{ csrf_token() }}"
+                 data-is-admin="{{ auth()->user()?->isAdmin() ? 'true' : 'false' }}"
+                 data-admin-dashboard="{{ auth()->user()?->isAdmin() ? route('admin.dashboard') : '' }}"></div>
             <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)</script>
         @endunless
 

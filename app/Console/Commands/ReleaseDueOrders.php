@@ -92,14 +92,27 @@ class ReleaseDueOrders extends Command
                     return; // idempoten: sudah diproses di Runnable lain
                 }
 
-                $fresh->update([
-                    'status' => 'released',
-                    'released_at' => now(),
-                ]);
+            $fresh->update([
+                'status' => 'released',
+                'released_at' => now(),
+            ]);
 
-                User::whereKey($seller->id)->lockForUpdate()->increment('balance', $fresh->amount);
+            $oldBalance = $seller->balance;
+            User::whereKey($seller->id)->lockForUpdate()->increment('balance', $fresh->amount);
 
-                UserNotification::create([
+            WalletTransaction::create([
+                'user_id' => $seller->id,
+                'type' => 'credit',
+                'amount' => $fresh->amount,
+                'balance_before' => $oldBalance,
+                'balance_after' => $seller->fresh()->balance,
+                'reference_type' => 'order',
+                'reference_id' => $order->id,
+                'description' => 'Pendapatan dari pesanan #'.$order->id.' - '.($order->service?->title ?? 'jasa'),
+                'status' => 'completed',
+            ]);
+
+            UserNotification::create([
                     'user_id' => $seller->id,
                     'order_id' => $order->id,
                     'payment_id' => $fresh->id,

@@ -158,6 +158,8 @@
             return {
                 mobileMenuOpen: false,
                 showCategoryModal: false,
+                showCreateModal: false,
+                showSubCreateModal: false,
                 activeRoute: window.location.pathname,
                 pageTitle: 'Dashboard',
                 authUser: @json(auth()->user() ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT),

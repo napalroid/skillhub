@@ -59,6 +59,7 @@
          data-login="{{ route('login') }}"
          data-register="{{ route('register') }}"
          data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
+         data-user-id="{{ auth()->id() ?? '' }}"
          data-user-name="{{ auth()->user()?->name ?? '' }}"
          data-avatar-url="{{ auth()->user()?->avatar_url ?? '' }}"
          data-profile-url="{{ route('profile.edit') }}"
@@ -215,7 +216,6 @@
     </div>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('productPage', (photos, reviews, flash) => ({

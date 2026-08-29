@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { PageTransition } from './PageTransition';
 import { SkeletonRow } from './Skeleton';
 
-const CategoryCard = ({ category, index }) => {
+const CategoryRow = ({ category }) => {
   const hasImage = !!category.image_url;
   const hasIcon = !!category.icon_url;
   const isFileIcon = hasIcon && category.icon_is_file;
 
-  // Map display_icon to actual SVG icon
   const getIconSvg = (iconName) => {
     const icons = {
       design: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"/></svg>,
@@ -22,80 +21,94 @@ const CategoryCard = ({ category, index }) => {
     return icons[iconName] || icons.star;
   };
 
+  const subs = category.subcategories || [];
+
   return (
-    <div className="bg-white border border-[#DDDDDD] rounded-lg p-5 shadow-sm hover:shadow-md hover:border-[#000000] hover:-translate-y-1 transition-all duration-200">
-      <div className="flex items-start gap-3 mb-4">
-        <div className="w-12 h-12 rounded-lg bg-[#F5F5F5] flex items-center justify-center shrink-0 overflow-hidden border border-[#DDDDDD] text-black">
+    <article className="group border border-transparent bg-transparent px-5 py-5 transition-colors duration-200 hover:border-black sm:px-6 sm:py-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden border border-[#DDDDDD] text-black transition-transform duration-200 group-hover:-translate-y-0.5">
           {hasImage ? (
-            <img src={category.image_url} alt={category.name} className="w-full h-full object-cover" />
+            <img src={category.image_url} alt={category.name} className="h-full w-full object-cover" />
           ) : hasIcon ? (
-            <img src={category.icon_url} alt={category.name} className="w-8 h-8 object-contain" />
+            <img src={category.icon_url} alt={category.name} className="h-7 w-7 object-contain" />
           ) : (
             getIconSvg(category.display_icon)
           )}
         </div>
+
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-black truncate font-heading">{category.name}</p>
-          <p className="text-[10px] text-[#999999] mt-1">
-            {category.subcategories_count} subkategori • {category.services_count} jasa
+          <h3 className="font-heading text-lg font-bold uppercase tracking-tight text-black sm:text-xl">
+            {category.name}
+          </h3>
+          <p className="mt-1 text-xs font-medium text-[#999999]">
+            {category.subcategories_count} subkategori &nbsp;•&nbsp; {category.services_count} jasa
           </p>
         </div>
+
+        <div className="flex shrink-0 items-center gap-2">
+          <a href={`/admin/categories/${category.id}/edit`}
+             className="inline-flex items-center gap-1.5 px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-black transition-colors duration-150 hover:text-[#555555] font-heading">
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/></svg>
+            Edit
+          </a>
+          <form action={`/admin/categories/${category.id}`} method="POST" className="inline">
+            <input type="hidden" name="_method" value="DELETE" />
+            <input type="hidden" name="_token" value={window.csrfToken || ''} />
+            <button type="submit"
+                    onClick={(e) => { if (!confirm('PERINGATAN: Akan menghapus kategori, SEMUA subkategori, DAN jasanya! Yakin?')) e.preventDefault(); }}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-[#E4002B] transition-colors duration-150 hover:text-[#E4002B]/80 font-heading">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+              Hapus
+            </button>
+          </form>
+        </div>
       </div>
 
-      {category.subcategories && category.subcategories.length > 0 && (
-        <div className="space-y-2 mb-4">
-          {category.subcategories.map((sub) => (
-            <div key={sub.id} className="flex items-center justify-between px-3 py-2 bg-[#F5F5F5] rounded-md border border-[#DDDDDD]">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <span className="w-5 h-5 rounded bg-[#F5F5F5] flex items-center justify-center text-xs font-bold shrink-0 border border-[#DDDDDD] font-heading">
-                  {sub.name.charAt(0).toUpperCase()}
-                </span>
-                <span className="text-xs font-medium text-black truncate">{sub.name}</span>
-                <span className="text-[10px] font-bold text-[#555555] bg-[#EAEAEA] px-1.5 py-0.5 rounded border border-[#DDDDDD] font-heading">
+      <div className="mt-5 border-t border-[#DDDDDD] pt-4 sm:mt-6 sm:pt-5">
+        {subs.length > 0 ? (
+          <ul className="flex flex-col gap-2.5">
+            {subs.map((sub) => (
+              <li key={sub.id} className="flex items-center gap-3 border border-transparent px-2 -mx-2 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#DDDDDD] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.10)]">
+                <span className="h-1.5 w-1.5 shrink-0 rotate-45 bg-black" aria-hidden="true"></span>
+                <span className="min-w-0 flex-1 truncate text-sm font-medium text-black">{sub.name}</span>
+                <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-[#999999]">
                   {sub.services_count} jasa
                 </span>
-              </div>
-              <div className="flex gap-1 shrink-0">
-                <a href={`/admin/subcategories/${sub.id}/edit`}
-                   className="text-[10px] font-bold text-black hover:text-[#E4002B] border border-[#DDDDDD] rounded px-2 py-1 transition hover:bg-[#F5F5F5] font-heading">
-                  Edit
-                </a>
-                <form action={`/admin/subcategories/${sub.id}`} method="POST" className="inline">
-                  <input type="hidden" name="_method" value="DELETE" />
-                  <input type="hidden" name="_token" value={window.Laravel?.csrfToken || ''} />
-                  <button type="submit" 
-                          onClick={(e) => { if (!confirm('PERINGATAN: Akan menghapus subkategori INI DAN SEMUA JASANYA! Yakin?')) e.preventDefault(); }}
-                          className="text-[10px] font-bold text-[#E4002B] hover:bg-[#E4002B]/5 border border-[#E4002B]/20 rounded px-2 py-1 transition font-heading">
-                  Hapus
-                </button>
-              </form>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="flex gap-2">
-        <a href={`/admin/categories/${category.id}/edit`}
-           className="flex-1 text-center text-[10px] font-bold text-black border-2 border-[#000000] rounded px-3 py-2 transition hover:bg-[#000000] hover:text-white font-heading">
-          Edit Kategori
-        </a>
-        <form action={`/admin/categories/${category.id}`} method="POST" className="inline flex-1">
-          <input type="hidden" name="_method" value="DELETE" />
-          <input type="hidden" name="_token" value={window.Laravel?.csrfToken || ''} />
-          <button type="submit" 
-                  onClick={(e) => { if (!confirm('PERINGATAN: Akan menghapus kategori, SEMUA subkategori, DAN jasanya! Yakin?')) e.preventDefault(); }}
-                  className="w-full text-center text-[10px] font-bold text-[#E4002B] border-2 border-[#E4002B] rounded px-3 py-2 transition hover:bg-[#E4002B] hover:text-white font-heading">
-            Hapus Semua
-          </button>
-        </form>
+                <div className="flex shrink-0 items-center gap-1">
+                  <a href={`/admin/subcategories/${sub.id}/edit`}
+                     className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-black transition-colors duration-150 hover:text-[#555555] font-heading">
+                    Edit
+                  </a>
+                  <form action={`/admin/subcategories/${sub.id}`} method="POST" className="inline">
+                    <input type="hidden" name="_method" value="DELETE" />
+                    <input type="hidden" name="_token" value={window.csrfToken || ''} />
+                    <button type="submit"
+                            onClick={(e) => { if (!confirm('PERINGATAN: Akan menghapus subkategori INI DAN SEMUA JASANYA! Yakin?')) e.preventDefault(); }}
+                            className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#E4002B] transition-colors duration-150 hover:text-[#E4002B]/80 font-heading"
+                            aria-label={`Hapus subkategori ${sub.name}`}>
+                      Hapus
+                    </button>
+                  </form>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-[#999999]">Belum ada subkategori.</p>
+            <a href="/admin/subcategories/create"
+               className="inline-flex w-fit items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-black hover:text-[#555555] font-heading">
+              <span className="text-base leading-none">+</span> Tambahkan Subkategori
+            </a>
+          </div>
+        )}
       </div>
-    </div>
+    </article>
   );
 };
 
-export const CategoryGrid = ({ 
-  initialCategories = [], 
+export const CategoryGrid = ({
+  initialCategories = [],
   initialLoading = false,
   fetchUrl = '/admin/categories/data'
 }) => {
@@ -126,29 +139,35 @@ export const CategoryGrid = ({
   return (
     <PageTransition staggerItems={Array.from({ length: categories.length || 6 }, (_, i) => i)}>
       {loading ? (
-        <SkeletonRow columns={3} />
+        <SkeletonRow columns={1} />
       ) : error ? (
-        <div className="col-span-full text-center py-12">
-          <p className="text-[#E4002B]">Gagal memuat data: {error}</p>
-          <button onClick={() => window.location.reload()} className="mt-2 text-black underline">Coba lagi</button>
+        <div className="border border-[#E4002B]/20 bg-[#E4002B]/5 px-4 py-8 text-center">
+          <p className="text-sm text-[#E4002B]">Gagal memuat data: {error}</p>
+          <button onClick={() => window.location.reload()} className="mt-2 text-sm font-bold text-black underline">Coba lagi</button>
         </div>
       ) : categories.length === 0 ? (
-        <div className="lg:col-span-3 text-center py-16">
-          <div className="w-12 h-12 rounded-full bg-[#E4002B]/5 border-2 border-[#E4002B]/20 flex items-center justify-center mx-auto mb-3">
-            <svg className="w-6 h-6 text-[#999999]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4.5v15m7.5-7.5h-15" />
+        <div className="border border-[#DDDDDD] bg-white px-6 py-16 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center border border-[#DDDDDD] bg-[#F5F5F5]">
+            <svg className="h-6 w-6 text-[#999999]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" />
             </svg>
           </div>
-          <p className="text-sm text-[#999999]">Belum ada kategori.</p>
-          <button onClick={() => document.getElementById('create-category-modal')?.classList.remove('hidden')} 
-                  className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-[#E4002B] hover:text-black font-heading">
-            <span>+</span> Buat kategori pertama
+          <h3 className="font-heading text-lg font-bold uppercase tracking-tight text-black">Belum ada kategori</h3>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-[#999999]">
+            Tambahkan kategori pertama untuk mulai mengatur struktur SkillHub.
+          </p>
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('skillhub:open-category-modal'))}
+            className="mt-5 inline-flex items-center gap-1.5 bg-black px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-black/80 font-heading">
+            <span className="text-base leading-none">+</span> Tambahkan Kategori
           </button>
         </div>
       ) : (
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categories.map((category, index) => (
-            <CategoryCard key={category.id} category={category} index={index} />
+        <section className="flex flex-col">
+          {categories.map((category, i) => (
+            <div key={category.id} className={i > 0 ? 'border-t border-[#E5E5E5]' : ''}>
+              <CategoryRow category={category} />
+            </div>
           ))}
         </section>
       )}

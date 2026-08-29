@@ -44,7 +44,7 @@
         [
             'title' => 'Solusi proyek & kebutuhan sekolah cepat dan terpercaya.',
             'subtitle' => 'Portofolio teruji dengan komunikasi langsung bersama kreator siswa yang siap membantu.',
-            'image' => asset('images/skillhub-hero.png'),
+            'image' => asset('storage/marketplace-image/ITSKILLHUB.png'),
             'tag' => 'Karya Nyata',
         ],
     ];
@@ -57,7 +57,6 @@
     <title>Eksplorasi Jasa Siswa | SkillHub</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -275,6 +274,7 @@
          data-register="{{ route('register') }}"
          data-get-started="{{ route('home') }}#cara-kerja"
          data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
+         data-user-id="{{ auth()->id() ?? '' }}"
          data-user-name="{{ auth()->user()?->name ?? '' }}"
          data-avatar-url="{{ auth()->user()?->avatar_url ?? '' }}"
          data-profile-url="{{ route('profile.edit') }}"

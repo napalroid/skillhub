@@ -28,11 +28,33 @@
                 @endforeach
             </div>
 
-            {{-- Search --}}
+            {{-- Category + Subcategory Filter --}}
             <form method="GET" action="{{ route('admin.services.index') }}" class="flex items-center gap-2">
-                @foreach (request()->except(['search', 'page']) as $key => $value)
+                @foreach (request()->except(['search', 'page', 'category', 'subcategory']) as $key => $value)
                     <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                 @endforeach
+                <select name="category" id="category-filter" onchange="this.form.submit()" class="input-field w-auto py-2">
+                    <option value="">Semua Kategori</option>
+                    @foreach ($categories as $cat)
+                        <option value="{{ $cat->id }}" {{ $categoryFilter == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                    @endforeach
+                </select>
+                <select name="subcategory" id="subcategory-filter" onchange="this.form.submit()"
+                        class="input-field w-auto py-2" {{ $categoryFilter ? '' : 'disabled' }}>
+                    <option value="">Semua Subkategori</option>
+                    @foreach (\App\Models\Subcategory::where('category_id', $categoryFilter)->orderBy('name')->get() as $sub)
+                        <option value="{{ $sub->id }}" {{ $subcategoryFilter == $sub->id ? 'selected' : '' }}>{{ $sub->name }}</option>
+                    @endforeach
+                </select>
+            </form>
+
+            {{-- Search --}}
+            <form method="GET" action="{{ route('admin.services.index') }}" class="flex items-center gap-2">
+                @foreach (request()->except(['search', 'page', 'category', 'subcategory']) as $key => $value)
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endforeach
+                <input type="hidden" name="category" value="{{ $categoryFilter }}">
+                <input type="hidden" name="subcategory" value="{{ $subcategoryFilter }}">
                 <label for="service-search" class="sr-only">Cari jasa</label>
                 <input type="search" id="service-search" name="search" value="{{ $searchQuery }}"
                     placeholder="Cari judul, deskripsi, penjual..."
@@ -45,13 +67,18 @@
             </form>
 
             {{-- Sort --}}
-            <select name="sort" onchange="this.form.submit()" class="input-field w-auto py-2">
-                <option value="latest" {{ $sortBy === 'latest' ? 'selected' : '' }}>Terbaru</option>
-                <option value="oldest" {{ $sortBy === 'oldest' ? 'selected' : '' }}>Terlama</option>
-                <option value="price_high" {{ $sortBy === 'price_high' ? 'selected' : '' }}>Harga Tertinggi</option>
-                <option value="price_low" {{ $sortBy === 'price_low' ? 'selected' : '' }}>Harga Terendah</option>
-                <option value="title_asc" {{ $sortBy === 'title_asc' ? 'selected' : '' }}>Judul A-Z</option>
-            </select>
+            <form method="GET" action="{{ route('admin.services.index') }}" class="flex items-center gap-2">
+                @foreach (request()->except(['page', 'sort']) as $key => $value)
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endforeach
+                <select name="sort" onchange="this.form.submit()" class="input-field w-auto py-2">
+                    <option value="latest" {{ $sortBy === 'latest' ? 'selected' : '' }}>Terbaru</option>
+                    <option value="oldest" {{ $sortBy === 'oldest' ? 'selected' : '' }}>Terlama</option>
+                    <option value="price_high" {{ $sortBy === 'price_high' ? 'selected' : '' }}>Harga Tertinggi</option>
+                    <option value="price_low" {{ $sortBy === 'price_low' ? 'selected' : '' }}>Harga Terendah</option>
+                    <option value="title_asc" {{ $sortBy === 'title_asc' ? 'selected' : '' }}>Judul A-Z</option>
+                </select>
+            </form>
         </div>
     </div>
 
@@ -127,10 +154,10 @@
                                                     </button>
                                                 </form>
                                             @elseif ($service->status === 'approved')
-                                                <form action="{{ route('admin.services.reject', $service) }}" method="POST" class="inline" onsubmit="return confirm('Nonaktifkan jasa ini?')">
+                                                <form action="{{ route('admin.services.reject', $service) }}" method="POST" class="inline" onsubmit="return confirm('Nonaktifkan jasa ini? Jasa akan disembunyikan, namun data pesanan & review tetap tersimpan.')">
                                                     @csrf
-                                                    <button type="submit" class="btn-danger text-[10px] px-2 py-1" title="Nonaktifkan">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 14 20 4M10 14l-6 6m0 0-6-6m6 6H4"/></svg>
+                                                    <button type="submit" class="btn-danger text-[10px] px-2 py-1" title="Nonaktifkan dari marketplace">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/></svg>
                                                     </button>
                                                 </form>
                                             @elseif ($service->status === 'rejected')
@@ -176,7 +203,16 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        
+
+        // Reset subkategori saat kategori berubah agar tidak mengirim id milik kategori lain
+        const categorySelect = document.getElementById('category-filter');
+        const subcategorySelect = document.getElementById('subcategory-filter');
+        if (categorySelect && subcategorySelect) {
+            categorySelect.addEventListener('change', function () {
+                subcategorySelect.value = '';
+            });
+        }
+
         // Stagger table rows
         if (!prefersReduced && window.gsap) {
             gsap.from('.row-enter', {

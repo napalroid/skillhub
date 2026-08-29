@@ -1,6 +1,7 @@
 
 import Alpine from 'alpinejs';
 import './echo';
+import './notification-listener';
 import './chat-realtime';
 import './skillhub-feature-motion.jsx';
 import './skillhub-staggered-menu.jsx';

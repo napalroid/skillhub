@@ -11,8 +11,11 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\UserNotification;
 use App\Models\WalletTransaction;
+use App\Events\NotificationCreated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -139,7 +142,7 @@ class AdminController extends Controller
         }
         $service->update(['status' => 'approved']);
 
-        UserNotification::create([
+        $notification = UserNotification::create([
             'user_id' => $service->user_id,
             'service_id' => $service->id,
             'type' => 'approved',
@@ -147,6 +150,8 @@ class AdminController extends Controller
             'message' => "Selamat! Jasa kamu \"{$service->title}\" telah disetujui dan tampil di marketplace.",
             'is_read' => false,
         ]);
+
+        \Event::dispatch(new \App\Events\NotificationCreated($notification));
 
         return back()->with('success', 'Jasa berhasil disetujui dan dipublikasikan.');
     }
@@ -162,18 +167,21 @@ class AdminController extends Controller
         
         $service->update(['status' => 'rejected']);
 
-        $message = $previousStatus === 'pending' 
+        $isDisable = $previousStatus === 'approved';
+        $message = $previousStatus === 'pending'
             ? "Mohon maaf, jasa kamu \"{$service->title}\" ditolak admin. Kamu dapat mengajukan ulang."
             : "Jasa kamu \"{$service->title}\" telah dinonaktifkan oleh admin.";
 
-        UserNotification::create([
+        $notification = UserNotification::create([
             'user_id' => $service->user_id,
             'service_id' => $service->id,
-            'type' => 'rejected',
+            'type' => $isDisable ? 'service_disabled' : 'rejected',
             'title' => $previousStatus === 'pending' ? "Jasa ditolak ({$service->title})" : "Jasa dinonaktifkan ({$service->title})",
             'message' => $message,
             'is_read' => false,
         ]);
+
+        \Event::dispatch(new \App\Events\NotificationCreated($notification));
 
         $successMessage = $previousStatus === 'pending' 
             ? 'Jasa ditolak. User dapat mengajukan ulang.'
@@ -232,7 +240,7 @@ class AdminController extends Controller
                 'status' => 'completed',
             ]);
 
-            UserNotification::create([
+            $notification = UserNotification::create([
                 'user_id' => $seller->id,
                 'order_id' => $order->id,
                 'payment_id' => $fresh->id,
@@ -242,6 +250,8 @@ class AdminController extends Controller
                 'message' => 'Dana pesanan #'.$order->id.' "'.($order->service?->title ?? 'jasa').'" sebesar Rp'.number_format($fresh->amount, 0, ',', '.').' telah cair ke saldo dompet Anda. Cek & tarik di halaman Dompet.',
                 'is_read' => false,
             ]);
+
+            \Event::dispatch(new \App\Events\NotificationCreated($notification));
 
             $released = true;
         });
@@ -333,19 +343,38 @@ class AdminController extends Controller
             return back()->with('error', 'Permintaan ini sudah diproses.');
         }
 
-        $payoutRequest->update([
-            'status' => PayoutRequest::STATUS_COMPLETED,
-            'processed_by' => auth()->id(),
-            'processed_at' => now(),
-        ]);
+        DB::transaction(function () use ($payoutRequest) {
+            $user = User::whereKey($payoutRequest->user_id)->lockForUpdate()->firstOrFail();
+            $oldBalance = $user->balance;
 
-        UserNotification::create([
-            'user_id' => $payoutRequest->user_id,
-            'type' => 'payout_completed',
-            'title' => 'Pencairan diproses',
-            'message' => 'Permintaan pencairan Rp'.number_format($payoutRequest->amount, 0, ',', '.').' ke '.$payoutRequest->methodLabel().' ('.$payoutRequest->account_identifier.') telah diproses dan dananya dikirim.',
-            'is_read' => false,
-        ]);
+            $user->decrement('balance', $payoutRequest->amount);
+
+            $payoutRequest->update([
+                'status' => PayoutRequest::STATUS_COMPLETED,
+                'processed_by' => auth()->id(),
+                'processed_at' => now(),
+            ]);
+
+            WalletTransaction::create([
+                'user_id' => $payoutRequest->user_id,
+                'type' => 'debit',
+                'amount' => $payoutRequest->amount,
+                'balance_before' => $oldBalance,
+                'balance_after' => $user->fresh()->balance,
+                'reference_type' => 'payout_request',
+                'reference_id' => $payoutRequest->id,
+                'description' => 'Pencairan dana #WD-'.$payoutRequest->id.' - '.$payoutRequest->methodLabel(),
+                'status' => 'completed',
+            ]);
+
+            UserNotification::create([
+                'user_id' => $payoutRequest->user_id,
+                'type' => 'payout_completed',
+                'title' => 'Pencairan diproses',
+                'message' => 'Permintaan pencairan Rp'.number_format($payoutRequest->amount, 0, ',', '.').' ke '.$payoutRequest->methodLabel().' ('.$payoutRequest->account_identifier.') telah diproses dan dananya dikirim.',
+                'is_read' => false,
+            ]);
+        });
 
         return back()->with('success', 'Pencairan ditandai selesai.');
     }
@@ -388,8 +417,6 @@ class AdminController extends Controller
         DB::transaction(function () use ($payoutRequest, $request) {
             $user = User::whereKey($payoutRequest->user_id)->lockForUpdate()->firstOrFail();
             $oldBalance = $user->balance;
-            
-            $user->increment('balance', $payoutRequest->amount);
 
             $payoutRequest->update([
                 'status' => PayoutRequest::STATUS_REJECTED,
@@ -398,30 +425,17 @@ class AdminController extends Controller
                 'processed_at' => now(),
             ]);
 
-            // Create wallet transaction for refund
-            WalletTransaction::create([
-                'user_id' => $payoutRequest->user_id,
-                'type' => 'credit',
-                'amount' => $payoutRequest->amount,
-                'balance_before' => $oldBalance,
-                'balance_after' => $user->fresh()->balance,
-                'reference_type' => 'payout_request',
-                'reference_id' => $payoutRequest->id,
-                'description' => 'Pengembalian dana penarikan ditolak #WD-'.$payoutRequest->id,
-                'status' => 'completed',
-            ]);
-
             UserNotification::create([
                 'user_id' => $payoutRequest->user_id,
                 'type' => 'payout_rejected',
                 'title' => 'Pencairan ditolak',
                 'message' => 'Permintaan pencairan Rp'.number_format($payoutRequest->amount, 0, ',', '.').' ditolak'.
-                    ($request->admin_note ? ': '.$request->admin_note : '.').' Saldo dikembalikan ke dompet Anda.',
+                    ($request->admin_note ? ': '.$request->admin_note : '.'),
                 'is_read' => false,
             ]);
         });
 
-        return back()->with('success', 'Pencairan ditolak & saldo dikembalikan.');
+        return back()->with('success', 'Pencairan ditolak.');
     }
 
     // ==================== PENDING SERVICES ====================
@@ -443,6 +457,16 @@ class AdminController extends Controller
         // Status filter
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
+        }
+
+        // Category filter (via subcategory)
+        if ($request->filled('category')) {
+            $query->whereHas('subcategory', fn ($q) => $q->where('category_id', $request->category));
+        }
+
+        // Subcategory filter
+        if ($request->filled('subcategory')) {
+            $query->where('subcategory_id', $request->subcategory);
         }
 
         // Search
@@ -467,6 +491,15 @@ class AdminController extends Controller
 
         $services = $query->paginate(15)->withQueryString();
 
-        return view('admin.services.index', compact('services'));
+        $categories = Category::with('subcategories')->orderBy('name')->get();
+        $subcategoriesByCategory = $categories->mapWithKeys(
+            fn ($c) => [$c->id => $c->subcategories->map(fn ($s) => ['id' => $s->id, 'name' => $s->name])->toArray()]
+        );
+        $categoryFilter = $request->category;
+        $subcategoryFilter = $request->subcategory;
+
+        return view('admin.services.index', compact(
+            'services', 'categories', 'subcategoriesByCategory', 'categoryFilter', 'subcategoryFilter'
+        ));
     }
 }

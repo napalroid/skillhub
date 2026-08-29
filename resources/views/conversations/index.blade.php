@@ -29,6 +29,7 @@
          data-login="{{ route('login') }}"
          data-register="{{ route('register') }}"
          data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
+         data-user-id="{{ auth()->id() ?? '' }}"
          data-user-name="{{ auth()->user()?->name ?? '' }}"
          data-avatar-url="{{ auth()->user()?->avatar_url ?? '' }}"
          data-profile-url="{{ route('profile.edit') }}"

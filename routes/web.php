@@ -112,12 +112,6 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/dompet/tarik/{payoutRequest}/batal', [WalletController::class, 'withdrawCancel'])->name('wallet.withdraw.cancel');
     Route::post('/wallet/withdraw/{payoutRequest}/process', [WalletController::class, 'withdrawProcess'])->name('wallet.withdraw.process');
 
-    // --- PAYOUT REQUEST (ADMIN) ---
-    Route::get('/admin/payouts', [AdminController::class, 'payoutIndex'])->name('admin.payouts.index');
-    Route::post('/admin/payout/{payoutRequest}/process', [AdminController::class, 'payoutProcess'])->name('admin.payout.process');
-    Route::post('/admin/payout/{payoutRequest}/reject', [AdminController::class, 'payoutReject'])->name('admin.payout.reject');
-    Route::post('/admin/payout/{payoutRequest}/retry', [AdminController::class, 'payoutRetry'])->name('admin.payout.retry');
-
     // --- PROFIL ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -150,8 +144,8 @@ Route::post('/reports/{report}/resolve', [ReportController::class, 'resolve'])->
 
     // Pencairan dana (PAYOUT)
     Route::get('/payouts', [AdminController::class, 'payoutIndex'])->name('payouts.index');
-    Route::post('/payouts/{payoutRequest}/process', [AdminController::class, 'payoutProcess'])->name('payouts.process');
-    Route::post('/payouts/{payoutRequest}/reject', [AdminController::class, 'payoutReject'])->name('payouts.reject');
+    Route::post('/payouts/{payoutRequest}/process', [AdminController::class, 'payoutProcess'])->name('payout.process');
+    Route::post('/payouts/{payoutRequest}/reject', [AdminController::class, 'payoutReject'])->name('payout.reject');
 
     // Kelola Kategori
 Route::get('/categories', [App\Http\Controllers\AdminCategoryController::class, 'index'])->name('categories.index');
@@ -170,11 +164,6 @@ Route::post('/subcategories', [App\Http\Controllers\AdminSubcategoryController::
 Route::get('/subcategories/{subcategory}/edit', [App\Http\Controllers\AdminSubcategoryController::class, 'edit'])->name('subcategories.edit');
 Route::put('/subcategories/{subcategory}', [App\Http\Controllers\AdminSubcategoryController::class, 'update'])->name('subcategories.update');
 Route::delete('/subcategories/{subcategory}', [App\Http\Controllers\AdminSubcategoryController::class, 'destroy'])->name('subcategories.destroy');
-
-// Service management in subcategory
-Route::get('/subcategories/{subcategory}/services/available', [App\Http\Controllers\AdminSubcategoryController::class, 'availableServices'])->name('subcategories.services.available');
-Route::post('/subcategories/{subcategory}/services/{service}/add', [App\Http\Controllers\AdminSubcategoryController::class, 'addService'])->name('subcategories.services.add');
-Route::delete('/subcategories/{subcategory}/services/{service}/remove', [App\Http\Controllers\AdminSubcategoryController::class, 'removeService'])->name('subcategories.services.remove');
 });
 
 // ==============================================

@@ -80,7 +80,7 @@
                                 @if ($user->email_verified_at)
                                     <p class="mt-2 text-xs text-emerald-600">✓ Email sudah diverifikasi</p>
                                 @else
-                                    <p class="mt-2 text-xs text-amber-600">⚠ Belum diverifikasi — <a href="#" class="font-semibold hover:underline">Kirim ulang</a></p>
+                                    <p class="mt-2 text-xs text-amber-600">⚠ Belum diverifikasi — <a href="{{ route('verification.send') }}" class="font-semibold hover:underline">Kirim ulang</a></p>
                                 @endif
                             </div>
 
@@ -120,9 +120,13 @@
                             </div>
 
                             <div class="flex flex-col-reverse gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                                <button type="button" onclick="confirm('Apakah Anda yakin ingin menghapus akun? Semua data akan hilang permanen.')" class="rounded-2xl px-5 py-3 text-center text-sm font-bold text-red-600 transition hover:bg-red-50">
-                                    Hapus akun
-                                </button>
+                                <form method="post" action="{{ route('profile.destroy') }}" class="m-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun? Semua data akan hilang permanen.')">
+                                    @csrf
+                                    @method('delete')
+                                    <button type="submit" class="rounded-2xl px-5 py-3 text-center text-sm font-bold text-red-600 transition hover:bg-red-50">
+                                        Hapus akun
+                                    </button>
+                                </form>
                                 <button type="submit"
                                         class="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/10 transition duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/20 active:scale-[0.98]">
                                     Simpan perubahan

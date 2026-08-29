@@ -21,15 +21,78 @@
         })->values()->all();
     @endphp
 
-    {{-- HEADER --}}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8" data-stagger-item>
-        <div>
-            <h1 class="font-heading font-bold text-2xl text-black uppercase tracking-tight">Kelola Kategori</h1>
-            <p class="text-sm text-[#555555] mt-1">Tambah, edit, hapus kategori beserta subkategori dan gambar/icon marketplace</p>
+    {{-- HERO --}}
+    <section class="border border-[#DDDDDD] bg-white px-6 py-8 sm:px-8 sm:py-10 mb-8" data-stagger-item>
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-2xl">
+                <p class="text-[11px] font-bold uppercase tracking-[0.22em] text-[#999999]">SkillHub Admin</p>
+                <h1 class="mt-2 font-heading text-3xl font-bold uppercase leading-[0.95] tracking-tight text-black sm:text-4xl lg:text-5xl">
+                    CRUD Kategori &amp; Subkategori
+                </h1>
+                <p class="mt-3 text-sm leading-relaxed text-[#555555] sm:text-base">
+                    Kelola kategori dan struktur subkategori SkillHub dari satu tempat.
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button @click="showSubCreateModal = true" class="inline-flex items-center gap-2 border border-[#DDDDDD] bg-white px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-black transition-colors duration-150 hover:border-black hover:bg-black hover:text-white font-heading">
+                    <span class="inline-flex h-4 w-4 items-center justify-center text-base leading-none">+</span> Tambah Subkategori
+                </button>
+                <button @click="showCreateModal = true" class="inline-flex items-center gap-2 bg-black px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-colors duration-150 hover:bg-black/80 font-heading">
+                    <span class="inline-flex h-4 w-4 items-center justify-center text-base leading-none">+</span> Tambah Kategori
+                </button>
+            </div>
         </div>
-        <button @click="showCreateModal = true" class="btn-primary text-xs">
-            <span class="inline-flex items-center justify-center w-5 h-5">+</span> Tambah Kategori
-        </button>
+    </section>
+
+    @php
+        $categoriesForSelect = $categories->map(function ($cat) {
+            return ['id' => $cat->id, 'name' => $cat->name];
+        })->values()->all();
+    @endphp
+
+    {{-- CREATE SUBKATEGORI MODAL --}}
+    <div x-show="showSubCreateModal" x-cloak @click.outside="showSubCreateModal = false"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div @click.stop class="w-full max-w-md bg-white rounded-md border border-[#DDDDDD] p-6 shadow-lg"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="font-heading font-semibold text-sm text-black">Tambah Subkategori</h3>
+                <button type="button" @click="showSubCreateModal = false" class="btn-ghost p-1" aria-label="Tutup modal">&times;</button>
+            </div>
+            <form method="POST" action="{{ route('admin.subcategories.store') }}">
+                @csrf
+                <div class="space-y-4">
+                    <div>
+                        <label class="label-field" for="sub-name">Nama Subkategori <span class="text-[#E4002B] font-normal">*</span></label>
+                        <input type="text" id="sub-name" name="name" required class="input-field" placeholder="Contoh: Desain Logo">
+                    </div>
+                    <div>
+                        <label class="label-field" for="sub-category">Kategori <span class="text-[#E4002B] font-normal">*</span></label>
+                        <select id="sub-category" name="category_id" required class="input-field">
+                            <option value="">Pilih Kategori</option>
+                            @foreach ($categoriesForSelect as $cat)
+                                <option value="{{ $cat['id'] }}">{{ $cat['name'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-2 border-t border-[#DDDDDD]">
+                        <button type="button" @click="showSubCreateModal = false" class="btn-outline text-xs px-4 py-2">Batal</button>
+                        <button type="submit" class="btn-primary text-xs px-4 py-2">Tambah Subkategori</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
     {{-- CATEGORY GRID --}}
@@ -140,9 +203,16 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        
-        // Page transition handled by layout
-        // React component will handle animations
+
+        // Bridge: React empty-state CTA -> Alpine modal
+        window.addEventListener('skillhub:open-category-modal', function() {
+            const root = document.querySelector('[x-data]');
+            if (!root || !window.Alpine) return;
+            const data = window.Alpine.$data(root);
+            if (data && typeof data.showCreateModal !== 'undefined') {
+                data.showCreateModal = true;
+            }
+        });
     });
     </script>
     @endsection

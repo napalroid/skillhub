@@ -6,7 +6,6 @@
     <title>Pesanan Saya | SkillHub</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -113,6 +112,7 @@
          data-login="{{ route('login') }}"
          data-register="{{ route('register') }}"
          data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
+         data-user-id="{{ auth()->id() ?? '' }}"
          data-user-name="{{ auth()->user()?->name ?? '' }}"
          data-avatar-url="{{ auth()->user()?->avatar_url ?? '' }}"
          data-profile-url="{{ route('profile.edit') }}"
