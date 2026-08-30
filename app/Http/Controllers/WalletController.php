@@ -201,9 +201,13 @@ class WalletController extends Controller
                 }
 
                 $oldBalance = $fresh->balance;
-
-                // TIDAK POTONG SALDO DULU - hanya simpan info
-                // $fresh->decrement('balance', $data['amount']);
+                
+                // POTONG SALDO DULU
+                $fresh->decrement('balance', $data['amount']);
+                
+                $fresh->refresh();
+                
+                $newBalance = $fresh->balance;
 
                 $fresh->update([
                     'payout_type' => $data['method_type'],
@@ -225,7 +229,7 @@ class WalletController extends Controller
                     'type' => WalletTransaction::TYPE_DEBIT,
                     'amount' => $data['amount'],
                     'balance_before' => $oldBalance,
-                    'balance_after' => $oldBalance,  // Belum dipotong, masih sama
+                    'balance_after' => $newBalance,  // Sudah dipotong
                     'reference_type' => 'payout_request',
                     'reference_id' => $payoutRequest->id,
                     'description' => 'Penarikan saldo ke '.$data['method_type'].' '.$data['account_identifier'],

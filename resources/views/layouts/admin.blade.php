@@ -11,6 +11,7 @@
     </script>
 </head>
 <body class="min-h-screen bg-white font-body antialiased" x-data="adminLayout()" x-init="init()">
+    <x-loading-screen />
     <div id="page-transition-overlay" aria-hidden="true" class="fixed inset-0 bg-white z-[9999] opacity-0 pointer-events-none transition-opacity duration-300"></div>
 
     <!-- TOP NAVBAR - Black solid like adidas.co.id -->
@@ -24,7 +25,7 @@
                     </a>
                     
                     <!-- Desktop Navigation -->
-                    <nav class="flex items-center gap-2" aria-label="Navigasi utama admin">
+                    <nav class="hidden lg:flex items-center gap-2" aria-label="Navigasi utama admin">
                         <template x-for="item in navItems" :key="item.route">
                             <a 
                                 :href="item.route" 
@@ -46,13 +47,12 @@
                     
                     <!-- Mobile Menu Toggle -->
                     <button 
-                        @click="toggleMobileMenu()" 
+                        @click="mobileMenuOpen = !mobileMenuOpen" 
                         class="lg:hidden px-3 py-2.5 rounded-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors duration-150"
-                        aria-label="Buka menu"
-                        aria-expanded="false"
+                        aria-label="Toggle menu"
                         :aria-expanded="mobileMenuOpen.toString()">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="!mobileMenuOpen"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="mobileMenuOpen"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="mobileMenuOpen" x-cloak><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
 
                     <!-- User Menu -->
@@ -87,22 +87,23 @@
         x-show="mobileMenuOpen" 
         x-transition.opacity 
         class="fixed inset-0 bg-black/50 z-40 lg:hidden" 
-        @click="toggleMobileMenu()" 
+        @click="mobileMenuOpen = false"
         aria-hidden="true"></div>
 
     <!-- MOBILE SIDEBAR -->
     <aside 
         x-show="mobileMenuOpen" 
-        x-transition 
-        class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-[#DDDDDD] lg:hidden flex flex-col"
-        @click.outside="toggleMobileMenu()">
+        x-transition
+        @click.away="mobileMenuOpen = false"
+        class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-[#DDDDDD] lg:hidden flex flex-col shadow-xl"
+        x-on:keydown.escape.window="mobileMenuOpen = false">
         <nav class="flex-1 p-6 space-y-1 overflow-y-auto">
             <template x-for="item in navItems" :key="item.route">
                 <a 
                     :href="item.route" 
                     :class="['nav-link-side', 'flex', 'items-center', 'gap-3', 'px-4', 'py-3', 'rounded-sm', 'text-sm', 'font-medium', 'uppercase', 'tracking-wide', 'transition-colors', 'duration-150',
                         activeRoute === item.route ? 'text-black bg-[#F5F5F5]' : 'text-[#555555] hover:text-black hover:bg-[#F5F5F5]']"
-                    @click="setActiveRoute(item.route); toggleMobileMenu()">
+                    @click="activeRoute = item.route; mobileMenuOpen = false">
                     <span x-html="item.icon"></span>
                     <span x-text="item.label"></span>
                 </a>

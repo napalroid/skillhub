@@ -269,7 +269,7 @@
         <section style="width:100vw; margin-left:calc(50% - 50vw);">
             <div class="grid grid-cols-1 sm:grid-cols-3">
                 <div class="relative block aspect-[3/4] overflow-hidden bg-black">
-                    <img src="{{ asset('storage/marketplace-image/EDGARDAVIDSKILLHUB.jpeg') }}"
+                    <img src="{{ asset('storage/marketplace-image/EDGARDAVIDSKILLHUB.webp') }}"
                          alt="SkillHub"
                          loading="lazy"
                          class="h-full w-full object-cover object-left">
@@ -293,13 +293,13 @@
                     </div>
                 </div>
                 <div class="relative block aspect-[3/4] overflow-hidden bg-black">
-                    <img src="{{ asset('storage/marketplace-image/ZINEDINEZIDANESKILLHUB.jpeg') }}"
+                    <img src="{{ asset('storage/marketplace-image/ZINEDINEZIDANESKILLHUB.webp') }}"
                          alt="SkillHub"
                          loading="lazy"
                          class="h-full w-full object-cover object-center">
                 </div>
                 <div class="relative block aspect-[3/4] overflow-hidden bg-black">
-                    <img src="{{ asset('storage/marketplace-image/messiskillhub2.jpeg') }}"
+                    <img src="{{ asset('storage/marketplace-image/messiskillhub2.webp') }}"
                          alt="SkillHub"
                          loading="lazy"
                          class="h-full w-full object-cover object-right">

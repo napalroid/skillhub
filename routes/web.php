@@ -128,6 +128,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Services Management (ALL services)
     Route::get('/services', [AdminController::class, 'servicesIndex'])->name('services.index');
     Route::get('/services/pending', [AdminController::class, 'pendingServices'])->name('services.pending');
+    Route::get('/services/{service}/preview', [AdminController::class, 'previewService'])->name('services.preview');
     Route::post('/services/{service}/approve', [AdminController::class, 'approveService'])->name('services.approve');
     Route::post('/services/{service}/reject', [AdminController::class, 'rejectService'])->name('services.reject');
 
@@ -146,6 +147,7 @@ Route::post('/reports/{report}/resolve', [ReportController::class, 'resolve'])->
     Route::get('/payouts', [AdminController::class, 'payoutIndex'])->name('payouts.index');
     Route::post('/payouts/{payoutRequest}/process', [AdminController::class, 'payoutProcess'])->name('payout.process');
     Route::post('/payouts/{payoutRequest}/reject', [AdminController::class, 'payoutReject'])->name('payout.reject');
+    Route::post('/payouts/{payoutRequest}/retry', [AdminController::class, 'payoutRetry'])->name('payout.retry');
 
     // Kelola Kategori
 Route::get('/categories', [App\Http\Controllers\AdminCategoryController::class, 'index'])->name('categories.index');

@@ -132,7 +132,7 @@
                                         @elseif ($paymentStatus === 'pending')
                                             <span class="badge badge-pending">Pending</span>
                                         @elseif ($paymentStatus === 'rejected')
-                                            <span class="badge badge-accent">Ditolak</span>
+                                            <span class="badge badge-error">Ditolak</span>
                                         @else
                                             <span class="badge badge-neutral">{{ $paymentStatus }}</span>
                                         @endif
@@ -154,7 +154,7 @@
                                                     <form action="{{ route('admin.payments.reject', $payment) }}" method="POST" class="flex-1" onsubmit="return confirm('Tolak pembayaran ini?')">
                                                         @csrf
                                                         <input type="hidden" name="rejection_reason" value="Saldo tidak masuk / bukti tidak valid">
-                                                        <button type="submit" class="w-full btn-outline text-[10px] px-2 py-1.5 justify-center border-[#E4002B] text-[#E4002B] hover:bg-[#E4002B] hover:text-white">Tolak</button>
+                                                        <button type="submit" class="w-full btn-danger text-[10px] px-2 py-1.5 justify-center">Tolak</button>
                                                     </form>
                                                     <a href="{{ route('orders.show', $payment->order) }}" class="flex-1 btn-ghost text-[10px] px-2 py-1.5 justify-center border border-[#DDDDDD]">Detail</a>
                                                 </div>

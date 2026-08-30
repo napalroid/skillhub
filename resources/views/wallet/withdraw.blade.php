@@ -28,7 +28,7 @@
                     </ul>
                 </div>
 
-                <form id="withdraw-form" method="POST" action="{{ route('wallet.withdraw.store') }}" class="wh-form">
+                <form id="withdraw-form" method="POST" action="{{ route('wallet.withdraw.store') }}" class="wh-form" data-server="true">
                     @csrf
 
                     <div class="wh-field">
@@ -93,13 +93,13 @@
                         </div>
                     </dl>
 
-                    <button type="submit" class="wh-btn wh-btn-block">Lanjutkan penarikan</button>
+                     <button type="submit" id="wh-confirm-actions" class="wh-btn wh-btn-block">Lanjutkan penarikan</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <dialog id="wh-confirm-dialog" class="wh-dialog" aria-labelledby="wh-confirm-title">
+    <dialog id="wh-confirm-dialog" class="wh-dialog" aria-labelledby="wh-confirm-title" data-delay="{{ config('payout.processing_delay_seconds', 10) }}">
         <div class="wh-dialog-body">
             <h2 id="wh-confirm-title">Konfirmasi penarikan</h2>
             <p class="wh-dialog-copy">Periksa tujuan dan nominal sebelum permintaan dikirim.</p>
@@ -129,6 +129,7 @@
     </dialog>
 
     <script src="{{ asset('js/wallet-ui.js') }}"></script>
+    <script src="{{ asset('js/payout-countdown.js') }}"></script>
     <script>
         (function () {
             var amount = document.getElementById('amount');

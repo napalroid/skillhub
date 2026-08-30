@@ -137,23 +137,44 @@ class AdminController extends Controller
     // ==================== APPROVE JASA ====================
     public function approveService(Service $service)
     {
-        if ($service->status !== 'pending') {
-            return back()->with('error', 'Jasa ini sudah diproses.');
+        if ($service->status === 'approved') {
+            return back()->with('error', 'Jasa ini sudah aktif.');
         }
+
+        $previousStatus = $service->status;
         $service->update(['status' => 'approved']);
+
+        $notificationMessage = in_array($previousStatus, ['rejected', 'disabled'])
+            ? "Jasa kamu \"{$service->title}\" telah diaktifkan kembali dan tampil di marketplace."
+            : "Selamat! Jasa kamu \"{$service->title}\" telah disetujui dan tampil di marketplace.";
 
         $notification = UserNotification::create([
             'user_id' => $service->user_id,
             'service_id' => $service->id,
             'type' => 'approved',
             'title' => "Jasa disetujui ({$service->title})",
-            'message' => "Selamat! Jasa kamu \"{$service->title}\" telah disetujui dan tampil di marketplace.",
+            'message' => $notificationMessage,
             'is_read' => false,
         ]);
 
         \Event::dispatch(new \App\Events\NotificationCreated($notification));
 
-        return back()->with('success', 'Jasa berhasil disetujui dan dipublikasikan.');
+        $successMessage = in_array($previousStatus, ['rejected', 'disabled'])
+            ? 'Jasa berhasil diaktifkan kembali dan notifikasi telah dikirim ke pemilik jasa.'
+            : 'Jasa berhasil disetujui dan dipublikasikan.';
+
+        return back()->with('success', $successMessage);
+    }
+
+    // ==================== PREVIEW JASA (ADMIN) ====================
+    public function previewService(Service $service)
+    {
+        $service->load(['seller', 'subcategory.category', 'reviews.order.buyer']);
+        $service->loadCount(['orders', 'reviews']);
+        $service->loadAvg('reviews', 'rating');
+        $portfolios = collect($service->portfolio_images ?? [])->take(3);
+
+        return view('admin.services.preview', compact('service', 'portfolios'));
     }
 
     // ==================== REJECT JASA ====================
@@ -165,7 +186,12 @@ class AdminController extends Controller
             return back()->with('error', 'Jasa ini sudah ditolak.');
         }
         
-        $service->update(['status' => 'rejected']);
+        if ($service->status === 'disabled') {
+            return back()->with('error', 'Jasa ini sudah dinonaktifkan.');
+        }
+        
+        $newStatus = $previousStatus === 'approved' ? 'disabled' : 'rejected';
+        $service->update(['status' => $newStatus]);
 
         $isDisable = $previousStatus === 'approved';
         $message = $previousStatus === 'pending'
@@ -180,8 +206,6 @@ class AdminController extends Controller
             'message' => $message,
             'is_read' => false,
         ]);
-
-        \Event::dispatch(new \App\Events\NotificationCreated($notification));
 
         $successMessage = $previousStatus === 'pending' 
             ? 'Jasa ditolak. User dapat mengajukan ulang.'
@@ -318,7 +342,7 @@ class AdminController extends Controller
 
         $query = PayoutRequest::with('user')->latest();
         
-        $validStatuses = ['pending', 'processing', 'completed', 'failed', 'rejected'];
+        $validStatuses = ['pending', 'processing', 'completed', 'failed', 'rejected', 'cancelled'];
         if (in_array($status, $validStatuses, true)) {
             $query->where('status', $status);
         }
@@ -330,6 +354,7 @@ class AdminController extends Controller
             'completed' => PayoutRequest::where('status', 'completed')->count(),
             'failed' => PayoutRequest::where('status', 'failed')->count(),
             'rejected' => PayoutRequest::where('status', 'rejected')->count(),
+            'cancelled' => PayoutRequest::where('status', 'cancelled')->count(),
         ];
 
         $payouts = $query->paginate(15)->withQueryString();

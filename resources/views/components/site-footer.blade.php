@@ -7,7 +7,7 @@
         ['label' => 'TikTok', 'href' => '#', 'icon' => 'tabler:brand-tiktok'],
     ];
 
-    $skillhubscarfaceUrl = asset('storage/marketplace-image/skillhubscarfaceasli.png');
+    $skillhubscarfaceUrl = asset('storage/marketplace-image/skillhubscarfaceasli.webp');
 @endphp
 
 <footer class="site-footer">

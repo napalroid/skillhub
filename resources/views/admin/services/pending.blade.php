@@ -34,7 +34,7 @@
                         <tbody>
                             @foreach ($services as $service)
                                 @php
-                                    $mainImage = $service->image ? asset('storage/' . $service->image) : asset('images/skillhub-hero.png');
+                                    $mainImage = $service->image ? asset('storage/' . $service->image) : asset('images/skillhub-hero.webp');
                                 @endphp
                                 <tr class="row-enter" data-stagger-item>
                                     <td>
@@ -64,17 +64,17 @@
                                     </td>
                                     <td>
                                         <div class="flex items-center gap-1">
-                                            <a href="{{ route('services.show', $service) }}" target="_blank"
-                                               class="btn-ghost p-1.5 text-[10px]" aria-label="Lihat di marketplace">
+                                            <a href="{{ route('admin.services.preview', $service) }}"
+                                               class="btn-ghost p-1.5 text-[10px]" aria-label="Lihat detail jasa">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             </a>
+                                            <form action="{{ route('admin.services.approve', $service) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" class="btn-success text-[10px] px-3 py-1.5">Setujui</button>
+                                            </form>
                                             <form action="{{ route('admin.services.reject', $service) }}" method="POST" class="inline" onsubmit="return confirm('Tolak jasa ini?')">
                                                 @csrf
                                                 <button type="submit" class="btn-danger text-[10px] px-3 py-1.5">Tolak</button>
-                                            </form>
-                                            <form action="{{ route('admin.services.approve', $service) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit" class="btn-primary text-[10px] px-3 py-1.5">Setujui</button>
                                             </form>
                                         </div>
                                     </td>

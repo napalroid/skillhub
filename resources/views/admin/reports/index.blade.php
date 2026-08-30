@@ -15,12 +15,12 @@
     </div>
 
     {{-- STATISTICS SUMMARY --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-0 border border-[#DDDDDD] mb-8">
-        <div class="p-6 border-r border-[#DDDDDD]">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-0 border border-[#DDDDDD] mb-8">
+        <div class="p-6 sm:border-r border-b sm:border-b-0 border-[#DDDDDD]">
             <p class="text-xs font-heading font-bold uppercase tracking-wider text-[#999999]">Open</p>
             <p class="font-heading font-bold text-4xl text-black mt-2">{{ $stats['open'] }}</p>
         </div>
-        <div class="p-6 border-r border-[#DDDDDD]">
+        <div class="p-6 sm:border-r border-b sm:border-b-0 border-[#DDDDDD]">
             <p class="text-xs font-heading font-bold uppercase tracking-wider text-[#999999]">Reviewed</p>
             <p class="font-heading font-bold text-4xl text-black mt-2">{{ $stats['reviewed'] }}</p>
         </div>
@@ -91,25 +91,25 @@
     @endif
 
     {{-- FILTER TABS --}}
-    <div class="border-b border-[#DDDDDD] mb-6" x-data="{ activeTab: '{{ $status }}' }">
-        <div class="flex gap-0">
+    <div class="border-b border-[#DDDDDD] mb-6 overflow-x-auto" x-data="{ activeTab: '{{ $status }}' }">
+        <div class="flex gap-0 min-w-max">
             <a href="{{ route('admin.reports.index', ['status' => 'all']) }}" 
-               class="px-5 py-3 text-xs font-heading font-bold uppercase tracking-wider transition border-b-2"
+               class="px-4 lg:px-5 py-3 text-xs font-heading font-bold uppercase tracking-wider transition border-b-2 whitespace-nowrap"
                :class="'{{ $status }}' === 'all' ? 'border-black text-black' : 'border-transparent text-[#999999] hover:text-black'">
                 Semua
             </a>
             <a href="{{ route('admin.reports.index', ['status' => 'open']) }}" 
-               class="px-5 py-3 text-xs font-heading font-bold uppercase tracking-wider transition border-b-2"
+               class="px-4 lg:px-5 py-3 text-xs font-heading font-bold uppercase tracking-wider transition border-b-2 whitespace-nowrap"
                :class="'{{ $status }}' === 'open' ? 'border-black text-black' : 'border-transparent text-[#999999] hover:text-black'">
                 Open
             </a>
             <a href="{{ route('admin.reports.index', ['status' => 'reviewed']) }}" 
-               class="px-5 py-3 text-xs font-heading font-bold uppercase tracking-wider transition border-b-2"
+               class="px-4 lg:px-5 py-3 text-xs font-heading font-bold uppercase tracking-wider transition border-b-2 whitespace-nowrap"
                :class="'{{ $status }}' === 'reviewed' ? 'border-black text-black' : 'border-transparent text-[#999999] hover:text-black'">
                 Reviewed
             </a>
             <a href="{{ route('admin.reports.index', ['status' => 'closed']) }}" 
-               class="px-5 py-3 text-xs font-heading font-bold uppercase tracking-wider transition border-b-2"
+               class="px-4 lg:px-5 py-3 text-xs font-heading font-bold uppercase tracking-wider transition border-b-2 whitespace-nowrap"
                :class="'{{ $status }}' === 'closed' ? 'border-black text-black' : 'border-transparent text-[#999999] hover:text-black'">
                 Closed
             </a>
@@ -122,7 +122,8 @@
             @foreach($reports as $report)
                 <div class="border-b border-[#DDDDDD] py-5 hover:bg-[#F5F5F5] transition cursor-pointer"
                      onclick="openReportModal({{ $report->id }})">
-                    <div class="flex items-start gap-4">
+                    {{-- DESKTOP VIEW --}}
+                    <div class="hidden lg:flex items-start gap-4">
                         {{-- REPORTER --}}
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1">
@@ -154,6 +155,39 @@
                                 @endif">
                                 {{ $report->status }}
                             </span>
+                        </div>
+                    </div>
+
+                    {{-- MOBILE VIEW --}}
+                    <div class="lg:hidden space-y-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                    <p class="font-heading font-bold text-sm text-black">{{ $report->reporter->name ?? 'N/A' }}</p>
+                                    <span class="text-[10px] px-2 py-0.5 border border-[#DDDDDD] uppercase font-bold">{{ $report->reporter_role }}</span>
+                                </div>
+                                <p class="text-xs text-[#999999]">melaporkan</p>
+                            </div>
+                            <span class="inline-block text-[10px] px-2 py-0.5 uppercase font-bold border shrink-0
+                                @if($report->status === 'open') border-[#E4002B] text-[#E4002B]
+                                @elseif($report->status === 'reviewed') border-[#0051BA] text-[#0051BA]
+                                @else border-[#999999] text-[#999999]
+                                @endif">
+                                {{ $report->status }}
+                            </span>
+                        </div>
+
+                        <div class="border-t border-[#EEEEEE] pt-3">
+                            <p class="font-heading font-bold text-sm text-black mb-1">{{ $report->category }}</p>
+                            <p class="text-xs text-[#555555] line-clamp-2">{{ $report->reason }}</p>
+                        </div>
+
+                        <div class="flex items-center justify-between border-t border-[#EEEEEE] pt-3">
+                            <div>
+                                <p class="text-[10px] text-[#999999] uppercase font-bold tracking-wider">Dilaporkan</p>
+                                <p class="font-medium text-sm text-black mt-0.5">{{ $report->reportedUser->name ?? 'N/A' }}</p>
+                            </div>
+                            <p class="text-xs text-[#999999]">{{ $report->created_at->format('d M Y') }}</p>
                         </div>
                     </div>
                 </div>

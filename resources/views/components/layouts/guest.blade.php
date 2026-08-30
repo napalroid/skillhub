@@ -39,6 +39,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans text-slate-900 antialiased min-h-screen bg-white">
+    <x-loading-screen />
 
     <div class="min-h-screen flex flex-col lg:flex-row">
 

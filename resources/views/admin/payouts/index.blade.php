@@ -5,7 +5,8 @@
             'processing' => 'badge badge-processing',
             'completed' => 'badge badge-success',
             'failed' => 'badge badge-error',
-            'rejected' => 'badge badge-accent',
+            'rejected' => 'badge badge-error',
+            'cancelled' => 'badge badge-error',
         ];
         $statusLabels = [
             'pending' => 'Menunggu',
@@ -13,6 +14,7 @@
             'completed' => 'Selesai',
             'failed' => 'Gagal',
             'rejected' => 'Ditolak',
+            'cancelled' => 'Dibatalkan',
         ];
         $filterLabels = [
             'all' => 'Semua',
@@ -21,6 +23,7 @@
             'completed' => 'Selesai',
             'failed' => 'Gagal',
             'rejected' => 'Ditolak',
+            'cancelled' => 'Dibatalkan',
         ];
     @endphp
 
@@ -51,12 +54,16 @@
                     </div>
                     <div class="rounded-sm border border-[#DDDDDD] bg-[#F5F5F5] px-3 py-2">
                         <p class="text-[9px] font-heading font-bold uppercase tracking-wider text-[#999999]">Ditolak</p>
-                        <p class="font-heading font-bold text-sm text-[#999999]">{{ $counts['rejected'] }}</p>
+                        <p class="font-heading font-bold text-sm text-[#E4002B]">{{ $counts['rejected'] }}</p>
+                    </div>
+                    <div class="rounded-sm border border-[#DDDDDD] bg-[#F5F5F5] px-3 py-2">
+                        <p class="text-[9px] font-heading font-bold uppercase tracking-wider text-[#999999]">Dibatalkan</p>
+                        <p class="font-heading font-bold text-sm text-[#E4002B]">{{ $counts['cancelled'] }}</p>
                     </div>
                 </div>
             </div>
             <div class="flex flex-wrap gap-3">
-                @foreach (['all' => 'Semua', 'pending' => 'Menunggu', 'processing' => 'Memproses', 'completed' => 'Selesai', 'failed' => 'Gagal', 'rejected' => 'Ditolak'] as $key => $label)
+                @foreach (['all' => 'Semua', 'pending' => 'Menunggu', 'processing' => 'Memproses', 'completed' => 'Selesai', 'failed' => 'Gagal', 'rejected' => 'Ditolak', 'cancelled' => 'Dibatalkan'] as $key => $label)
                     <a href="{{ route('admin.payouts.index', ['status' => $key]) }}"
                        class="px-4 py-2 rounded-full text-[10px] font-heading font-bold uppercase tracking-wider border transition-colors {{ $status === $key ? 'bg-black border-black text-white' : 'bg-white border-[#DDDDDD] text-[#555555] hover:border-black hover:text-black' }}">
                         {{ $label }} <span class="opacity-60">({{ $counts[$key] }})</span>
@@ -112,7 +119,7 @@
                                                 <form action="{{ route('admin.payouts.reject', $payout) }}" method="POST" onsubmit="return confirm('Tolak pencairan ini? Saldo akan dikembalikan ke seller.')">
                                                     @csrf
                                                     <input type="hidden" name="admin_note" value="Data tujuan tidak valid">
-                                                    <button type="submit" class="w-full btn-outline text-[10px] px-2 py-1.5 justify-center border-[#E4002B] text-[#E4002B] hover:bg-[#E4002B] hover:text-white">Tolak</button>
+                                                    <button type="submit" class="w-full btn-danger text-[10px] px-2 py-1.5 justify-center">Tolak</button>
                                                 </form>
                                             @elseif ($payout->status === 'failed')
                                                 <form action="{{ route('admin.payout.retry', $payout) }}" method="POST" onsubmit="return confirm('Ulangi pencairan ini? Saldo akan dikurangi lagi dan ditransfer ke user.')">

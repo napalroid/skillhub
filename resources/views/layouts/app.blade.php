@@ -19,6 +19,7 @@
     </style>
 </head>
 <body class="font-sans antialiased h-full bg-gray-50 pt-16 text-gray-900">
+    <x-loading-screen />
     <div class="min-h-screen flex flex-col">
         
         <!-- Navigation -->

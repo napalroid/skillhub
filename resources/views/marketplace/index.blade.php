@@ -32,19 +32,19 @@
         [
             'title' => 'Wujudkan ide besar dengan talenta terbaik.',
             'subtitle' => 'Temukan ribuan karya dan layanan digital berkualitas langsung dari siswa berprestasi.',
-            'image' => asset('storage/marketplace-image/SKILLHUB_1920x1080.png'),
+            'image' => asset('storage/marketplace-image/SKILLHUB_1920x1080.webp'),
             'tag' => 'Eksplorasi Jasa',
         ],
         [
             'title' => 'Jasa kreatif, koding & desain untuk kebutuhanmu.',
             'subtitle' => 'Dari pembuatan website responsif, desain grafis modern, hingga video editing profesional.',
-            'image' => asset('storage/marketplace-image/skillhubsitemap.png'),
+            'image' => asset('storage/marketplace-image/skillhubsitemap.webp'),
             'tag' => 'Talenta Digital',
         ],
         [
             'title' => 'Solusi proyek & kebutuhan sekolah cepat dan terpercaya.',
             'subtitle' => 'Portofolio teruji dengan komunikasi langsung bersama kreator siswa yang siap membantu.',
-            'image' => asset('storage/marketplace-image/ITSKILLHUB.png'),
+            'image' => asset('storage/marketplace-image/ITSKILLHUB.webp'),
             'tag' => 'Karya Nyata',
         ],
     ];
