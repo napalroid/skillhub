@@ -7,6 +7,7 @@ use App\Models\PayoutRequest;
 use App\Models\User;
 use App\Models\UserNotification;
 use App\Models\WalletTransaction;
+use App\Services\NotificationService;
 use App\Services\PayoutService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -142,21 +143,19 @@ class WalletController extends Controller
         $result = $this->payoutService->processAutomaticPayout($payoutRequest);
 
         if ($result['success']) {
-            UserNotification::create([
-                'user_id' => $user->id,
-                'type' => 'payout_completed',
-                'title' => 'Transfer Berhasil',
-                'message' => 'Penarikan Rp'.number_format($payoutRequest->amount, 0, ',', '.').' ke '.$payoutRequest->methodLabel().' ('.$payoutRequest->account_identifier.') telah berhasil.',
-                'is_read' => false,
-            ]);
+            NotificationService::createAndDispatch(
+                userId: $user->id,
+                type: 'payout_completed',
+                title: 'Transfer Berhasil',
+                message: 'Penarikan Rp'.number_format($payoutRequest->amount, 0, ',', '.').' ke '.$payoutRequest->methodLabel().' ('.$payoutRequest->account_identifier.') telah berhasil.',
+            );
         } else {
-            UserNotification::create([
-                'user_id' => $user->id,
-                'type' => 'payout_failed',
-                'title' => 'Transfer Gagal',
-                'message' => $result['message'],
-                'is_read' => false,
-            ]);
+            NotificationService::createAndDispatch(
+                userId: $user->id,
+                type: 'payout_failed',
+                title: 'Transfer Gagal',
+                message: $result['message'],
+            );
         }
 
         return response()->json($result);
@@ -270,17 +269,31 @@ class WalletController extends Controller
             return redirect()->route('wallet.index')->with('error', 'Penarikan ini sudah diproses atau dibatalkan.');
         }
 
-        DB::transaction(function () use ($user, $payoutRequest) {
-            // TIDAK PERLU KEMBALIKAN SALDO karena belum dipotong
-            // Hanya update status saja
+        DB::transaction(function () use ($payoutRequest) {
+            $user = User::whereKey($payoutRequest->user_id)->lockForUpdate()->firstOrFail();
+
+            $oldBalance = $user->balance;
             
-            // Update status payout request
+            $user->increment('balance', $payoutRequest->amount);
+            $user->refresh();
+            
+            WalletTransaction::create([
+                'user_id' => $user->id,
+                'type' => WalletTransaction::TYPE_REFUND,
+                'amount' => $payoutRequest->amount,
+                'balance_before' => $oldBalance,
+                'balance_after' => $user->balance,
+                'reference_type' => 'payout_request',
+                'reference_id' => $payoutRequest->id,
+                'description' => 'Refund penarikan dibatalkan #WD-'.$payoutRequest->id,
+                'status' => WalletTransaction::STATUS_COMPLETED,
+            ]);
+
             $payoutRequest->update([
                 'status' => PayoutRequest::STATUS_REJECTED,
                 'failure_reason' => 'Dibatalkan oleh user',
             ]);
 
-            // Update wallet transaction
             WalletTransaction::where('reference_id', $payoutRequest->id)
                 ->where('reference_type', 'payout_request')
                 ->where('type', WalletTransaction::TYPE_DEBIT)

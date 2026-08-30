@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\UserNotification;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 // app/Http/Controllers/OrderFileController.php
@@ -105,15 +105,16 @@ class OrderFileController extends Controller
         ]);
 
         // Beri tahu seller agar tidak "buta" status: dananya akan cair otomatis 1 jam kemudian.
-        UserNotification::create([
-            'user_id' => $order->service->user_id,
-            'order_id' => $order->id,
-            'service_id' => $order->service_id,
-            'type' => 'order_approved',
-            'title' => 'Hasil kerja disetujui',
-            'message' => 'Buyer menyetujui hasil pesanan #'.$order->id.'. Dana akan cair otomatis ke saldo dompet Anda 1 jam setelah penyelesaian.',
-            'is_read' => false,
-        ]);
+        NotificationService::createAndDispatch(
+            userId: $order->service->user_id,
+            type: 'order_approved',
+            title: 'Hasil kerja disetujui',
+            message: 'Buyer menyetujui hasil pesanan #'.$order->id.'. Dana akan cair otomatis ke saldo dompet Anda 1 jam setelah penyelesaian.',
+            extraData: [
+                'order_id' => $order->id,
+                'service_id' => $order->service_id,
+            ]
+        );
 
         return back()->with('success', 'Hasil kerja disetujui! Dana akan cair otomatis 1 jam setelah penyelesaian.');
     }

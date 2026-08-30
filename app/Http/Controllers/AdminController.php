@@ -9,12 +9,10 @@ use App\Models\Payment;
 use App\Models\Report;
 use App\Models\Service;
 use App\Models\User;
-use App\Models\UserNotification;
 use App\Models\WalletTransaction;
-use App\Events\NotificationCreated;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
@@ -148,16 +146,15 @@ class AdminController extends Controller
             ? "Jasa kamu \"{$service->title}\" telah diaktifkan kembali dan tampil di marketplace."
             : "Selamat! Jasa kamu \"{$service->title}\" telah disetujui dan tampil di marketplace.";
 
-        $notification = UserNotification::create([
-            'user_id' => $service->user_id,
-            'service_id' => $service->id,
-            'type' => 'approved',
-            'title' => "Jasa disetujui ({$service->title})",
-            'message' => $notificationMessage,
-            'is_read' => false,
-        ]);
-
-        \Event::dispatch(new \App\Events\NotificationCreated($notification));
+        NotificationService::createAndDispatch(
+            userId: $service->user_id,
+            type: 'approved',
+            title: "Jasa disetujui ({$service->title})",
+            message: $notificationMessage,
+            extraData: [
+                'service_id' => $service->id,
+            ]
+        );
 
         $successMessage = in_array($previousStatus, ['rejected', 'disabled'])
             ? 'Jasa berhasil diaktifkan kembali dan notifikasi telah dikirim ke pemilik jasa.'
@@ -171,7 +168,6 @@ class AdminController extends Controller
     {
         $service->load(['seller', 'subcategory.category', 'reviews.order.buyer']);
         $service->loadCount(['orders', 'reviews']);
-        $service->loadAvg('reviews', 'rating');
         $portfolios = collect($service->portfolio_images ?? [])->take(3);
 
         return view('admin.services.preview', compact('service', 'portfolios'));
@@ -198,14 +194,15 @@ class AdminController extends Controller
             ? "Mohon maaf, jasa kamu \"{$service->title}\" ditolak admin. Kamu dapat mengajukan ulang."
             : "Jasa kamu \"{$service->title}\" telah dinonaktifkan oleh admin.";
 
-        $notification = UserNotification::create([
-            'user_id' => $service->user_id,
-            'service_id' => $service->id,
-            'type' => $isDisable ? 'service_disabled' : 'rejected',
-            'title' => $previousStatus === 'pending' ? "Jasa ditolak ({$service->title})" : "Jasa dinonaktifkan ({$service->title})",
-            'message' => $message,
-            'is_read' => false,
-        ]);
+        NotificationService::createAndDispatch(
+            userId: $service->user_id,
+            type: $isDisable ? 'service_disabled' : 'rejected',
+            title: $previousStatus === 'pending' ? "Jasa ditolak ({$service->title})" : "Jasa dinonaktifkan ({$service->title})",
+            message: $message,
+            extraData: [
+                'service_id' => $service->id,
+            ]
+        );
 
         $successMessage = $previousStatus === 'pending' 
             ? 'Jasa ditolak. User dapat mengajukan ulang.'
@@ -264,18 +261,17 @@ class AdminController extends Controller
                 'status' => 'completed',
             ]);
 
-            $notification = UserNotification::create([
-                'user_id' => $seller->id,
-                'order_id' => $order->id,
-                'payment_id' => $fresh->id,
-                'service_id' => $order->service_id,
-                'type' => 'payout_released',
-                'title' => 'Dana pesanan cair',
-                'message' => 'Dana pesanan #'.$order->id.' "'.($order->service?->title ?? 'jasa').'" sebesar Rp'.number_format($fresh->amount, 0, ',', '.').' telah cair ke saldo dompet Anda. Cek & tarik di halaman Dompet.',
-                'is_read' => false,
-            ]);
-
-            \Event::dispatch(new \App\Events\NotificationCreated($notification));
+            NotificationService::createAndDispatch(
+                userId: $seller->id,
+                type: 'payout_released',
+                title: 'Dana pesanan cair',
+                message: 'Dana pesanan #'.$order->id.' "'.($order->service?->title ?? 'jasa').'" sebesar Rp'.number_format($fresh->amount, 0, ',', '.').' telah cair ke saldo dompet Anda. Cek & tarik di halaman Dompet.',
+                extraData: [
+                    'order_id' => $order->id,
+                    'payment_id' => $fresh->id,
+                    'service_id' => $order->service_id,
+                ]
+            );
 
             $released = true;
         });
@@ -320,16 +316,17 @@ class AdminController extends Controller
                 }
             }
 
-            UserNotification::create([
-                'user_id' => $order->buyer_id,
-                'order_id' => $order->id,
-                'payment_id' => $payment?->id,
-                'service_id' => $order->service_id,
-                'type' => 'order_refunded',
-                'title' => 'Pesanan dikembalikan',
-                'message' => 'Pesanan #'.$order->id.' dibatalkan dan dana dikembalikan ke Anda.',
-                'is_read' => false,
-            ]);
+            NotificationService::createAndDispatch(
+                userId: $order->buyer_id,
+                type: 'order_refunded',
+                title: 'Pesanan dikembalikan',
+                message: 'Pesanan #'.$order->id.' dibatalkan dan dana dikembalikan ke Anda.',
+                extraData: [
+                    'order_id' => $order->id,
+                    'payment_id' => $payment?->id,
+                    'service_id' => $order->service_id,
+                ]
+            );
         });
 
         return back()->with('success', 'Pesanan dibatalkan dan dana dikembalikan ke buyer.');

@@ -7,12 +7,29 @@ use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $notifications = auth()->user()->notifications()
             ->with(['service', 'conversation', 'order', 'payment'])
             ->latest()
             ->paginate(15);
+
+        if ($request->query('json') === '1') {
+            return response()->json([
+                'notifications' => auth()->user()->notifications()
+                    ->latest()
+                    ->limit(5)
+                    ->get()
+                    ->map(fn ($n) => [
+                        'id' => $n->id,
+                        'title' => $n->title,
+                        'message' => $n->message,
+                        'type' => $n->type,
+                        'is_read' => $n->is_read,
+                        'time' => $n->created_at->diffForHumans(),
+                    ])
+            ]);
+        }
 
         return view('notifications.index', compact('notifications'));
     }

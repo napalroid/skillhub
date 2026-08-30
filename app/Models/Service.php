@@ -38,7 +38,14 @@ class Service extends Model
 
     public function reviews()
     {
-        return $this->hasManyThrough(Review::class, Order::class);
+        return $this->hasMany(Review::class);
+    }
+
+    public function updateRatingCache()
+    {
+        $this->average_rating = $this->reviews()->avg('rating') ?? 0;
+        $this->reviews_count = $this->reviews()->count();
+        $this->saveQuietly();
     }
 
     public function conversations()

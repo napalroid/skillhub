@@ -28,11 +28,13 @@
         'id' => $review->id,
         'rating' => (int) $review->rating,
         'comment' => $review->comment ?? '',
-        'buyer' => $review->order?->buyer?->name ?? 'Pembeli terverifikasi',
+        'buyer' => $review->user?->name ?? 'Anonymous',
         'date' => $review->created_at?->format('d M Y'),
+        'verified' => $review->is_verified_buyer ?? false,
     ])->values();
     $reviewCount = (int) $service->reviews_count;
-    $averageRating = $service->reviews_avg_rating ? number_format($service->reviews_avg_rating, 1) : '0.0';
+    $averageRating = $service->average_rating ? number_format($service->average_rating, 1) : '0.0';
+    $userReview = auth()->check() ? $service->reviews->firstWhere('user_id', auth()->id()) : null;
 @endphp
 <!doctype html>
 <html lang="id">
@@ -110,11 +112,11 @@
                     <h1 class="mt-2 text-3xl font-semibold tracking-[-.06em] sm:text-[34px]">{{ $service->title }}</h1>
                     <p class="mt-1.5 text-sm font-semibold">Rp{{ number_format($service->price, 0, ',', '.') }}</p>
 
-                    <div class="mt-5 overflow-hidden rounded-[15px] border border-black/15 bg-[#f7f7f6]" x-data="{ open: true }">
-                        <button type="button" @click="open = !open" class="flex w-full items-center justify-between px-4 py-3 text-left text-xs font-bold">
-                            Deskripsi <i data-lucide="chevron-up" class="h-4 w-4 transition-transform duration-300" :class="open ? '' : 'rotate-180'"></i>
+                    <div class="mt-5 overflow-hidden rounded-[15px] border border-black/15 bg-[#f7f7f6]">
+                        <button type="button" @click="descOpen = !descOpen" class="flex w-full items-center justify-between px-4 py-3 text-left text-xs font-bold">
+                            Deskripsi <i data-lucide="chevron-up" class="h-4 w-4 transition-transform duration-300" :class="descOpen ? '' : 'rotate-180'"></i>
                         </button>
-                        <div x-show="open" x-transition class="px-4 pb-4 text-xs leading-[1.55] text-black/60">{{ $service->description }}</div>
+                        <div x-show="descOpen" x-transition class="px-4 pb-4 text-xs leading-[1.55] text-black/60">{{ $service->description }}</div>
                     </div>
 
                     <div class="mt-5">
@@ -155,18 +157,108 @@
                         <button type="button" @click="workflowOpen = !workflowOpen" class="flex w-full items-center justify-between px-4 py-3 text-left text-xs font-bold">
                             Cara kerja SkillHub <i data-lucide="chevron-up" class="h-4 w-4 transition-transform duration-300" :class="workflowOpen ? '' : 'rotate-180'"></i>
                         </button>
-                        <div x-show="workflowOpen" x-transition class="grid grid-cols-2 gap-x-5 gap-y-4 border-t border-black/10 px-4 py-4 text-[10px] text-black/55">
-                            <p><span class="block font-bold text-black">1. Pesan & bayar</span>Dana ditahan aman di escrow.</p>
-                            <p><span class="block font-bold text-black">2. Diskusikan</span>Sepakati detail dengan seller.</p>
-                            <p><span class="block font-bold text-black">3. Terima hasil</span>Seller mengirim hasil jasa.</p>
-                            <p><span class="block font-bold text-black">4. Beri review</span>Dana cair setelah disetujui.</p>
+                        <div x-show="workflowOpen" x-transition class="px-4 pb-4">
+                            <div class="space-y-3 text-[11px]">
+                                <div class="flex gap-3">
+                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white">1</span>
+                                    <div>
+                                        <p class="font-bold text-black">Pesan & bayar</p>
+                                        <p class="text-black/60">Dana ditahan aman di escrow.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white">2</span>
+                                    <div>
+                                        <p class="font-bold text-black">Diskusikan</p>
+                                        <p class="text-black/60">Sepakati detail dengan seller.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white">3</span>
+                                    <div>
+                                        <p class="font-bold text-black">Terima hasil</p>
+                                        <p class="text-black/60">Seller mengirim hasil jasa.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white">4</span>
+                                    <div>
+                                        <p class="font-bold text-black">Beri review</p>
+                                        <p class="text-black/60">Dana cair setelah disetujui.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
             </div>
 
             <section class="mt-12 grid gap-8 border-t border-black/15 pt-9 lg:grid-cols-[1.45fr_.85fr]">
-                <div x-data="reviewPanel(@js($reviewData))">
+                @auth
+                    @php
+                        $userReview = $service->reviews->firstWhere('user_id', auth()->id());
+                    @endphp
+                    
+                    @if($userReview)
+                        <div class="col-span-full">
+                            <div class="rounded-xl bg-green-50 border border-green-200 p-4">
+                                <p class="text-sm font-semibold text-green-800">✓ Anda sudah memberi review</p>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <span class="font-bold">{{ $userReview->rating }}/5</span>
+                                    @if($userReview->is_verified_buyer)
+                                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Verified Buyer</span>
+                                    @endif
+                                </div>
+                                @if($userReview->comment)
+                                    <p class="mt-2 text-sm text-gray-700">{{ $userReview->comment }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    @else
+                        <div class="col-span-full">
+                            <form method="POST" action="{{ route('reviews.store', $service) }}" class="rounded-xl bg-gray-50 border border-gray-200 p-4" x-data="{ rating: 0, hoverRating: 0 }">
+                                @csrf
+                                <h3 class="font-bold mb-3">Beri Review</h3>
+                                
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium mb-2">Rating</label>
+                                    <div class="flex items-center gap-1">
+                                        <template x-for="star in 5" :key="star">
+                                            <button type="button" @click="rating = star" @mouseenter="hoverRating = star" @mouseleave="hoverRating = 0" class="group p-1 transition-transform duration-150 hover:scale-110">
+                                                <svg class="h-7 w-7 transition-all duration-200" :class="(hoverRating || rating) >= star ? 'text-amber-400' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                        <span class="ml-2 text-sm font-medium text-gray-600" x-text="rating ? rating + '/5' : 'Pilih rating'"></span>
+                                    </div>
+                                    <input type="hidden" name="rating" :value="rating" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="block text-sm font-medium mb-1">Komentar (opsional)</label>
+                                    <textarea name="comment" rows="3" maxlength="500" 
+                                        class="w-full rounded border-gray-300 px-3 py-2 text-sm transition-all duration-200 focus:border-black focus:ring-1 focus:ring-black" 
+                                        placeholder="Ceritakan pengalaman Anda..."></textarea>
+                                </div>
+                                
+                                <button type="submit" class="w-full bg-black text-white px-4 py-2.5 rounded font-medium hover:bg-gray-800 transition-all duration-200 hover:shadow-lg">
+                                    Kirim Review
+                                </button>
+                            </form>
+                        </div>
+                    @endif
+                @else
+                    <div class="col-span-full">
+                        <div class="rounded-xl bg-blue-50 border border-blue-200 p-4 text-center">
+                            <p class="text-sm text-blue-800">
+                                <a href="{{ route('login') }}" class="font-semibold underline">Login</a> untuk memberi review
+                            </p>
+                        </div>
+                    </div>
+                @endauth
+                
+                <div class="lg:col-span-1">
                     <h2 class="text-xl font-semibold tracking-[-.04em]">Rating & Reviews</h2>
                     <div class="mt-4 grid grid-cols-[auto_1fr] items-center gap-x-7">
                         <div><p class="text-6xl font-semibold tracking-[-.1em]">{{ $averageRating }}</p><p class="mt-1 text-[10px] text-black/45">({{ $reviewCount }} review)</p></div>
@@ -175,11 +267,21 @@
                         </div>
                     </div>
                 </div>
-                <div x-data="reviewPanel(@js($reviewData))" class="border-t border-black/15 pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-                    <div class="flex items-center justify-between"><h2 class="text-xl font-semibold tracking-[-.04em]">Review jasa</h2><div class="flex gap-1"><button @click="filter = 0" :class="filter === 0 ? 'bg-black text-white' : 'bg-white'" class="rounded-full border border-black/15 px-2.5 py-1 text-[10px] font-bold">Semua</button><button @click="filter = 5" :class="filter === 5 ? 'bg-black text-white' : 'bg-white'" class="rounded-full border border-black/15 px-2.5 py-1 text-[10px] font-bold">5★</button></div></div>
+                <div x-data="reviewPanel(@js($reviewData))" class="lg:col-span-1 border-t border-black/15 pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold tracking-[-.04em]">Review jasa</h2>
+                        <div class="flex gap-1 flex-wrap">
+                            <button @click="filter = 0" :class="filter === 0 ? 'bg-black text-white' : 'bg-white'" class="rounded-full border border-black/15 px-2.5 py-1 text-[10px] font-bold transition hover:bg-gray-100">Semua</button>
+                            <button @click="filter = 5" :class="filter === 5 ? 'bg-black text-white' : 'bg-white'" class="rounded-full border border-black/15 px-2.5 py-1 text-[10px] font-bold transition hover:bg-gray-100">5★</button>
+                            <button @click="filter = 4" :class="filter === 4 ? 'bg-black text-white' : 'bg-white'" class="rounded-full border border-black/15 px-2.5 py-1 text-[10px] font-bold transition hover:bg-gray-100">4★</button>
+                            <button @click="filter = 3" :class="filter === 3 ? 'bg-black text-white' : 'bg-white'" class="rounded-full border border-black/15 px-2.5 py-1 text-[10px] font-bold transition hover:bg-gray-100">3★</button>
+                            <button @click="filter = 2" :class="filter === 2 ? 'bg-black text-white' : 'bg-white'" class="rounded-full border border-black/15 px-2.5 py-1 text-[10px] font-bold transition hover:bg-gray-100">2★</button>
+                            <button @click="filter = 1" :class="filter === 1 ? 'bg-black text-white' : 'bg-white'" class="rounded-full border border-black/15 px-2.5 py-1 text-[10px] font-bold transition hover:bg-gray-100">1★</button>
+                        </div>
+                    </div>
                     <div class="mt-4 max-h-44 space-y-3 overflow-y-auto pr-1">
-                        <template x-for="review in visible" :key="review.id"><article class="rounded-xl bg-white p-3" x-transition><div class="flex items-center justify-between"><p class="text-xs font-bold" x-text="review.buyer"></p><span class="text-xs font-bold" x-text="'★'.repeat(review.rating)"></span></div><p x-show="review.comment" x-text="review.comment" class="mt-1 text-xs leading-5 text-black/55"></p></article></template>
-                        <p x-show="visible.length === 0" class="rounded-xl bg-white p-4 text-xs text-black/45">Belum ada review asli untuk ditampilkan.</p>
+                        <template x-for="review in visible" :key="review.id"><article class="rounded-xl bg-white p-3" x-transition><div class="flex items-center justify-between"><p class="text-xs font-bold" x-text="review.buyer"></p><span class="text-xs font-bold" x-text="'★'.repeat(review.rating)"></span></div><p x-show="review.comment" x-text="review.comment" class="mt-1 text-xs leading-5 text-black/55"></p><div class="mt-1" x-show="review.verified"><span class="text-[9px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">✓ Verified Buyer</span></div></article></template>
+                        <p x-show="visible.length === 0" class="rounded-xl bg-white p-4 text-xs text-black/45">Belum ada review untuk filter ini.</p>
                     </div>
                 </div>
             </section>
@@ -219,7 +321,7 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('productPage', (photos, reviews, flash) => ({
-                photos, reviews, activePhoto: 0, modalOpen: false, sidebarOpen: false, profileOpen: false, workflowOpen: true, toast: flash,
+                photos, reviews, activePhoto: 0, modalOpen: false, sidebarOpen: false, profileOpen: false, descOpen: true, workflowOpen: true, toast: flash,
                 init() { lucide.createIcons(); if (this.toast) setTimeout(() => this.toast = null, 4500); },
                 nextPhoto() { this.activePhoto = (this.activePhoto + 1) % this.photos.length; },
                 previousPhoto() { this.activePhoto = (this.activePhoto + this.photos.length - 1) % this.photos.length; },

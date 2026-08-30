@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { createRoot } from 'react-dom/client';
 
@@ -11,12 +11,64 @@ function getNotifications() {
     }
 }
 
-function AccountControl({ authenticated, userName, avatarUrl, profileUrl, loginUrl, registerUrl, logoutUrl, csrfToken, notifications, notificationsUrl, readAllUrl, menuOpen, onOpenMenu }) {
+function fetchNotifications() {
+    return fetch('/notifikasi?json=1', { credentials: 'include' })
+        .then(r => r.json())
+        .then(data => data.notifications || [])
+        .catch(err => {
+            console.error('[Notif] Fetch error:', err);
+            return [];
+        });
+}
+
+function AccountControl({ authenticated, userName, avatarUrl, profileUrl, loginUrl, registerUrl, logoutUrl, csrfToken, notifications: initialNotifications, notificationsUrl, readAllUrl, menuOpen, onOpenMenu }) {
     const [profileOpen, setProfileOpen] = useState(false);
+    const [notifications, setNotifications] = useState(initialNotifications);
     const accountRef = useRef(null);
     const initial = userName?.trim().charAt(0).toUpperCase();
     const unreadCount = notifications.filter((notification) => !notification.is_read).length;
     const dark = menuOpen ? ' is-dark' : '';
+
+    useEffect(() => {
+        const handleNotificationUpdate = async () => {
+            try {
+                const data = await fetchNotifications();
+                if (data && data.length > 0) {
+                    setNotifications(data.map(n => ({
+                        id: n.id,
+                        title: n.title,
+                        message: n.message,
+                        is_read: n.is_read,
+                        date: n.time,
+                        read_url: `/notifikasi/${n.id}/read`
+                    })));
+                    console.log('[Notif] Updated notifications:', data.length);
+                }
+            } catch (err) {
+                console.error('[Notif] Update error:', err);
+            }
+        };
+
+        window.addEventListener('notificationUpdate', handleNotificationUpdate);
+        
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch('/notifikasi?json=1', { credentials: 'include' });
+                const data = await res.json();
+                
+                if (data.notifications && data.notifications.length !== notifications.length) {
+                    handleNotificationUpdate();
+                }
+            } catch (err) {
+                console.error('[Notif] Poll error:', err);
+            }
+        }, 5000);
+
+        return () => {
+            window.removeEventListener('notificationUpdate', handleNotificationUpdate);
+            clearInterval(interval);
+        };
+    }, [notifications.length]);
 
     useEffect(() => { if (menuOpen) setProfileOpen(false); }, [menuOpen]);
     useEffect(() => {

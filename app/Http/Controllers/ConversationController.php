@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\MessageSent;
 use App\Models\Conversation;
 use App\Models\Service;
-use App\Models\UserNotification;
+use App\Services\NotificationService;
 use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -24,15 +24,16 @@ class ConversationController extends Controller
         ]);
 
         if ($conversation->wasRecentlyCreated) {
-            UserNotification::create([
-                'user_id' => $service->user_id,
-                'service_id' => $service->id,
-                'conversation_id' => $conversation->id,
-                'type' => 'message',
-                'title' => 'Percakapan baru dari ' . auth()->user()->name,
-                'message' => 'Membuka diskusi untuk jasa "' . $service->title . '".',
-                'is_read' => false,
-            ]);
+            NotificationService::createAndDispatch(
+                userId: $service->user_id,
+                type: 'message',
+                title: 'Percakapan baru dari ' . auth()->user()->name,
+                message: 'Membuka diskusi untuk jasa "' . $service->title . '".',
+                extraData: [
+                    'service_id' => $service->id,
+                    'conversation_id' => $conversation->id,
+                ]
+            );
         }
 
         return redirect()->route('conversations.show', $conversation);
@@ -111,15 +112,16 @@ class ConversationController extends Controller
         // Kirim notifikasi ke penerima (bukan pengirim) agar ia tahu ada pesan baru.
         $recipientId = $conversation->buyer_id === auth()->id() ? $conversation->seller_id : $conversation->buyer_id;
         if ($recipientId) {
-            UserNotification::create([
-                'user_id' => $recipientId,
-                'service_id' => $conversation->service_id,
-                'conversation_id' => $conversation->id,
-                'type' => 'message',
-                'title' => 'Pesan baru dari ' . auth()->user()->name,
-                'message' => Str::limit($message->message, 100),
-                'is_read' => false,
-            ]);
+            NotificationService::createAndDispatch(
+                userId: $recipientId,
+                type: 'message',
+                title: 'Pesan baru dari ' . auth()->user()->name,
+                message: Str::limit($message->message, 100),
+                extraData: [
+                    'service_id' => $conversation->service_id,
+                    'conversation_id' => $conversation->id,
+                ]
+            );
         }
 
         return response()->json(['message' => [

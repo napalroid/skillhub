@@ -158,8 +158,8 @@
                         <div class="flex justify-between items-baseline gap-4">
                             <dt class="text-xs text-[#555555] uppercase tracking-wide">Rating</dt>
                             <dd class="font-heading font-bold text-xs text-black">
-                                @if ($service->reviews_avg_rating)
-                                    {{ number_format($service->reviews_avg_rating, 1) }} / 5.0
+                                @if ($service->average_rating)
+                                    {{ number_format($service->average_rating, 1) }} / 5.0 ({{ $service->reviews_count ?? 0 }} review)
                                 @else
                                     Belum ada
                                 @endif

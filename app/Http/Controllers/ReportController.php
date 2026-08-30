@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Report;
-use App\Models\UserNotification;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
@@ -80,14 +80,13 @@ class ReportController extends Controller
         $report->update($validated);
         
         // Send notification to reporter
-        UserNotification::create([
-            'user_id' => $report->reporter_id,
-            'type' => 'report_update',
-            'title' => 'Laporan Anda telah ditinjau',
-            'message' => "Laporan Anda tentang '{$report->category}' telah diperbarui menjadi status '{$validated['status']}'. " . 
-                        ($validated['admin_notes'] ? "Catatan admin: {$validated['admin_notes']}" : ''),
-            'is_read' => false
-        ]);
+        NotificationService::createAndDispatch(
+            userId: $report->reporter_id,
+            type: 'report_update',
+            title: 'Laporan Anda telah ditinjau',
+            message: "Laporan Anda tentang '{$report->category}' telah diperbarui menjadi status '{$validated['status']}'. " . 
+                        ($validated['admin_notes'] ? "Catatan admin: {$validated['admin_notes']}" : '')
+        );
 
         return back()->with('success', 'Laporan berhasil diperbarui dan notifikasi telah dikirim ke pelapor.');
     }

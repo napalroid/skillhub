@@ -337,6 +337,15 @@
                 </div>
             @endif
             
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-sm text-gray-700">
+                    Ingin memberi review? 
+                    <a href="{{ route('services.show', $order->service) }}" class="font-bold text-blue-600 underline">
+                        Kunjungi halaman jasa
+                    </a>
+                </p>
+            </div>
+            
             {{-- REPORT SECTION --}} 
             <div class="text-center">
                 <button onclick="document.getElementById('reportForm').classList.toggle('hidden')" class="text-sm font-bold uppercase tracking-wider text-red-600 hover:text-red-800 transition">

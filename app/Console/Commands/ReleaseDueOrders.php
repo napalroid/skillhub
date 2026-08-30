@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
-use App\Models\UserNotification;
+use App\Services\NotificationService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -43,15 +43,16 @@ class ReleaseDueOrders extends Command
                     'completed_at' => now(),
                 ]);
 
-                UserNotification::create([
-                    'user_id' => $order->buyer_id,
-                    'order_id' => $order->id,
-                    'service_id' => $order->service_id,
-                    'type' => 'order_auto_completed',
-                    'title' => 'Pesanan otomatis selesai',
-                    'message' => 'Pesanan #'.$order->id.' otomatis diselesaikan karena tidak ada tanggapan dalam 3 hari. Dana akan cair ke seller.',
-                    'is_read' => false,
-                ]);
+                NotificationService::createAndDispatch(
+                    userId: $order->buyer_id,
+                    type: 'order_auto_completed',
+                    title: 'Pesanan otomatis selesai',
+                    message: 'Pesanan #'.$order->id.' otomatis diselesaikan karena tidak ada tanggapan dalam 3 hari. Dana akan cair ke seller.',
+                    extraData: [
+                        'order_id' => $order->id,
+                        'service_id' => $order->service_id,
+                    ]
+                );
 
                 $count++;
             }
@@ -112,16 +113,17 @@ class ReleaseDueOrders extends Command
                 'status' => 'completed',
             ]);
 
-            UserNotification::create([
-                    'user_id' => $seller->id,
-                    'order_id' => $order->id,
-                    'payment_id' => $fresh->id,
-                    'service_id' => $order->service_id,
-                    'type' => 'payout_released',
-                    'title' => 'Dana pesanan cair',
-                    'message' => 'Dana pesanan #'.$order->id.' "'.($order->service?->title ?? 'jasa').'" sebesar Rp'.number_format($fresh->amount, 0, ',', '.').' telah cair ke saldo dompet Anda.',
-                    'is_read' => false,
-                ]);
+            NotificationService::createAndDispatch(
+                    userId: $seller->id,
+                    type: 'payout_released',
+                    title: 'Dana pesanan cair',
+                    message: 'Dana pesanan #'.$order->id.' "'.($order->service?->title ?? 'jasa').'" sebesar Rp'.number_format($fresh->amount, 0, ',', '.').' telah cair ke saldo dompet Anda.',
+                    extraData: [
+                        'order_id' => $order->id,
+                        'payment_id' => $fresh->id,
+                        'service_id' => $order->service_id,
+                    ]
+                );
 
                 $count++;
             });

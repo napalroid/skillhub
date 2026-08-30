@@ -98,7 +98,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orders/{order}/payment/check', [PaymentController::class, 'checkStatus'])->name('orders.payment.check');
 
     // --- REVIEW ---
-    Route::post('/pesanan/{order}/review', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::post('/jasa/{service}/review', [ReviewController::class, 'store'])->name('reviews.store');
 
     // --- LAPORAN ---
     Route::post('/laporan', [ReportController::class, 'store'])->name('reports.store');

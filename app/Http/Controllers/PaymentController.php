@@ -6,8 +6,8 @@ use App\Http\Requests\StorePaymentRequest;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
-use App\Models\UserNotification;
 use App\Services\MidtransService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -190,16 +190,17 @@ class PaymentController extends Controller
                 $order->loadMissing('service');
                 $adminIds = User::where('role', 'admin')->pluck('id');
                 foreach ($adminIds as $adminId) {
-                    UserNotification::create([
-                        'user_id' => $adminId,
-                        'order_id' => $order->id,
-                        'payment_id' => $payment->id,
-                        'service_id' => $order->service_id,
-                        'type' => 'payment_paid',
-                        'title' => 'Jasa terbayarkan — perlu konfirmasi saldo',
-                        'message' => 'QRIS #'.$order->id.' "'.$order->service->title.'" lunas Rp'.number_format($order->final_price, 0, ',', '.').'. Konfirmasi bahwa dana masuk ke saldo admin.',
-                        'is_read' => false,
-                    ]);
+                    NotificationService::createAndDispatch(
+                        userId: $adminId,
+                        type: 'payment_paid',
+                        title: 'Jasa terbayarkan — perlu konfirmasi saldo',
+                        message: 'QRIS #'.$order->id.' "'.$order->service->title.'" lunas Rp'.number_format($order->final_price, 0, ',', '.').'. Konfirmasi bahwa dana masuk ke saldo admin.',
+                        extraData: [
+                            'order_id' => $order->id,
+                            'payment_id' => $payment->id,
+                            'service_id' => $order->service_id,
+                        ]
+                    );
                 }
             }
         });
@@ -254,16 +255,17 @@ class PaymentController extends Controller
         $order->loadMissing('service');
         $adminIds = User::where('role', 'admin')->pluck('id');
         foreach ($adminIds as $adminId) {
-            UserNotification::create([
-                'user_id' => $adminId,
-                'order_id' => $order->id,
-                'payment_id' => $order->payment?->id,
-                'service_id' => $order->service_id,
-                'type' => 'payment_paid',
-                'title' => 'Bukti pembayaran menunggu verifikasi',
-                'message' => 'Buyer mengunggah bukti pembayaran untuk Pesanan #'.$order->id.' "'.$order->service->title.'". Silakan verifikasi.',
-                'is_read' => false,
-            ]);
+            NotificationService::createAndDispatch(
+                userId: $adminId,
+                type: 'payment_paid',
+                title: 'Bukti pembayaran menunggu verifikasi',
+                message: 'Buyer mengunggah bukti pembayaran untuk Pesanan #'.$order->id.' "'.$order->service->title.'". Silakan verifikasi.',
+                extraData: [
+                    'order_id' => $order->id,
+                    'payment_id' => $order->payment?->id,
+                    'service_id' => $order->service_id,
+                ]
+            );
         }
 
         return back()->with('success', 'Bukti pembayaran berhasil diunggah, menunggu verifikasi admin.');
@@ -365,8 +367,8 @@ class PaymentController extends Controller
             return;
         }
 
-        // Hindari notifikasi ganda bila admin memverifikasi lebih dari sekali.
-        $already = UserNotification::where('user_id', $sellerId)
+        $already = \DB::table('user_notifications')
+            ->where('user_id', $sellerId)
             ->where('type', 'order_confirmed')
             ->where('order_id', $order->id)
             ->exists();
@@ -374,16 +376,17 @@ class PaymentController extends Controller
             return;
         }
 
-        UserNotification::create([
-            'user_id' => $sellerId,
-            'order_id' => $order->id,
-            'payment_id' => $order->payment?->id,
-            'service_id' => $order->service_id,
-            'type' => 'order_confirmed',
-            'title' => 'Pesanan jasa sudah dikonfirmasi',
-            'message' => 'Pemesanan jasa sudah terbayarkan dan sudah dikonfirmasi, kamu bisa mulai untuk memproses pesanan.',
-            'is_read' => false,
-        ]);
+        NotificationService::createAndDispatch(
+            userId: $sellerId,
+            type: 'order_confirmed',
+            title: 'Pesanan jasa sudah dikonfirmasi',
+            message: 'Pemesanan jasa sudah terbayarkan dan sudah dikonfirmasi, kamu bisa mulai untuk memproses pesanan.',
+            extraData: [
+                'order_id' => $order->id,
+                'payment_id' => $order->payment?->id,
+                'service_id' => $order->service_id,
+            ]
+        );
     }
 
     /**
@@ -397,7 +400,8 @@ class PaymentController extends Controller
             return;
         }
 
-        $already = UserNotification::where('user_id', $order->buyer_id)
+        $already = \DB::table('user_notifications')
+            ->where('user_id', $order->buyer_id)
             ->where('type', 'order_escrow')
             ->where('order_id', $order->id)
             ->exists();
@@ -405,16 +409,17 @@ class PaymentController extends Controller
             return;
         }
 
-        UserNotification::create([
-            'user_id' => $order->buyer_id,
-            'order_id' => $order->id,
-            'payment_id' => $order->payment?->id,
-            'service_id' => $order->service_id,
-            'type' => 'order_escrow',
-            'title' => 'Pembayaran dikonfirmasi admin',
-            'message' => 'Pesanan #'.$order->id.' "'.($order->service?->title ?? 'jasa').'" sudah dibayar & dikonfirmasi. Seller akan segera mengerjakan pesanan Anda.',
-            'is_read' => false,
-        ]);
+        NotificationService::createAndDispatch(
+            userId: $order->buyer_id,
+            type: 'order_escrow',
+            title: 'Pembayaran dikonfirmasi admin',
+            message: 'Pesanan #'.$order->id.' "'.($order->service?->title ?? 'jasa').'" sudah dibayar & dikonfirmasi. Seller akan segera mengerjakan pesanan Anda.',
+            extraData: [
+                'order_id' => $order->id,
+                'payment_id' => $order->payment?->id,
+                'service_id' => $order->service_id,
+            ]
+        );
     }
 
     public function confirmBalance(Payment $payment)

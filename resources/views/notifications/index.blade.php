@@ -7,7 +7,7 @@
     <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Riwayat Notifikasi</h1>
-            <p class="text-sm text-gray-500 mt-1">Riwayat pengajuan jasa dan statusnya dari admin.</p>
+            <p class="text-sm text-gray-500 mt-1">Daftar notifikasi terkini Anda.</p>
         </div>
         <a href="{{ route('dashboard') }}" class="text-sm font-semibold text-blue-600 hover:text-blue-800 transition">
             &larr; Kembali ke dashboard
@@ -17,7 +17,7 @@
         <div class="bg-white rounded-xl border border-gray-100 divide-y divide-gray-100 shadow-sm overflow-hidden">
         @forelse ($notifications as $notification)
             @php
-                $showBadge = !in_array($notification->type, ['service_removed_from_subcategory', 'service_deleted']);
+                $showBadge = !in_array($notification->type, ['service_removed_from_subcategory', 'service_deleted', 'new_review']);
                 $badge = match ($notification->type) {
                     'approved' => ['text' => 'Disetujui', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500'],
                     'rejected' => ['text' => 'Ditolak', 'class' => 'bg-red-50 text-red-700 border-red-200', 'dot' => 'bg-red-500'],
@@ -27,6 +27,7 @@
                     'escrow_ready' => ['text' => 'Saldo Masuk — Kerjakan', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500'],
                     'order_confirmed' => ['text' => 'Pesanan Dikonfirmasi', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500'],
                     'order_escrow' => ['text' => 'Konfirmasi Admin', 'class' => 'bg-[#E4002B]/10 text-[#E4002B] border-[#E4002B]/20', 'dot' => 'bg-[#E4002B]'],
+                    'new_review' => ['text' => 'Review Baru', 'class' => 'bg-yellow-50 text-yellow-700 border-yellow-200', 'dot' => 'bg-yellow-500'],
                     default   => ['text' => 'Menunggu Approval', 'class' => 'bg-amber-50 text-amber-700 border-amber-200', 'dot' => 'bg-amber-400'],
                 };
                 $icon = match ($notification->type) {
@@ -38,6 +39,7 @@
                     'escrow_ready' => '⚡',
                     'order_confirmed' => '▶',
                     'order_escrow' => '●',
+                    'new_review' => '⭐',
                     'service_removed_from_subcategory' => 'ⓘ',
                     'service_deleted' => 'ⓘ',
                     default   => '•••',
@@ -51,6 +53,7 @@
                     'escrow_ready' => 'bg-emerald-100 text-emerald-600',
                     'order_confirmed' => 'bg-emerald-100 text-emerald-600',
                     'order_escrow' => 'bg-[#E4002B]/10 text-[#E4002B]',
+                    'new_review' => 'bg-yellow-100 text-yellow-600',
                     'service_removed_from_subcategory' => 'bg-gray-100 text-gray-600',
                     'service_deleted' => 'bg-gray-100 text-gray-600',
                     default => 'bg-amber-100 text-amber-600',
@@ -61,6 +64,8 @@
                     $notificationLink = route('notifications.open', $notification);
                 } elseif (in_array($notification->type, ['payment_paid', 'escrow_ready', 'order_escrow', 'order_confirmed'], true) && $notification->order) {
                     $notificationLink = route('orders.show', $notification->order);
+                } elseif ($notification->type === 'new_review' && $notification->service_id) {
+                    $notificationLink = route('services.show', $notification->service_id);
                 }
             @endphp
             @if ($notificationLink)

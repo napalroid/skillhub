@@ -28,11 +28,6 @@ class PayoutService
                 ];
             }
             
-            // POTONG SALDO SEKARANG (saat proses)
-            $oldBalance = $user->balance;
-            $user->decrement('balance', $payoutRequest->amount);
-            $user->refresh();
-            
             $payoutRequest->update([
                 'status' => PayoutRequest::STATUS_PROCESSING,
                 'auto_processed' => true,

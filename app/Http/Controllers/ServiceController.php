@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Service;
 use App\Models\Category;
 use App\Models\Subcategory;
-use App\Models\UserNotification;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -83,7 +83,7 @@ class ServiceController extends Controller
     {
         $service = Service::query()
             ->approved()
-            ->with(['seller', 'subcategory.category', 'reviews.order.buyer'])
+            ->with(['seller', 'subcategory.category', 'reviews.user'])
             ->withCount(['orders', 'reviews'])
             ->withAvg('reviews', 'rating')
             ->findOrFail($id);
@@ -146,14 +146,15 @@ class ServiceController extends Controller
 
         $service = Service::create($data);
 
-        UserNotification::create([
-            'user_id' => auth()->id(),
-            'service_id' => $service->id,
-            'type' => 'submitted',
-            'title' => "Mengajukan jasa ({$service->title})",
-            'message' => "Jasa kamu \"{$service->title}\" telah terkirim ke admin dan sedang menunggu persetujuan.",
-            'is_read' => false,
-        ]);
+        NotificationService::createAndDispatch(
+            userId: auth()->id(),
+            type: 'submitted',
+            title: "Mengajukan jasa ({$service->title})",
+            message: "Jasa kamu \"{$service->title}\" telah terkirim ke admin dan sedang menunggu persetujuan.",
+            extraData: [
+                'service_id' => $service->id,
+            ]
+        );
 
         return redirect()->route('dashboard')
             ->with('success', 'Jasa berhasil dikirim dan sedang menunggu persetujuan admin.')
