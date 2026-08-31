@@ -34,6 +34,9 @@ class AdminController extends Controller
             $chartPeriod = 'monthly';
         }
 
+        $chartCategory = $request->query('category', 'all');
+        $chartSubcategory = $request->query('subcategory', 'all');
+
         [$chartBuckets, $chartMaxOffset] = match ($chartPeriod) {
             'daily' => [7, 1088],
             'weekly' => [8, 148],
@@ -57,6 +60,14 @@ class AdminController extends Controller
             ->selectRaw('COALESCE(SUM(final_price), 0) as total_revenue')
             ->whereBetween('created_at', [$chartStart, $chartEnd])
             ->where('status', '!=', 'menunggu_pembayaran');
+
+        if ($chartCategory !== 'all' && is_numeric($chartCategory)) {
+            $chartOrdersQuery->whereHas('service.subcategory', fn ($q) => $q->where('category_id', $chartCategory));
+        }
+
+        if ($chartSubcategory !== 'all' && is_numeric($chartSubcategory)) {
+            $chartOrdersQuery->whereHas('service', fn ($q) => $q->where('subcategory_id', $chartSubcategory));
+        }
 
         $chartGroupExpression = match ($chartPeriod) {
             'daily' => 'DATE(created_at)',
@@ -98,8 +109,8 @@ class AdminController extends Controller
         }
 
         // Saldo escrow (dana ditahan)
-        $escrowBalance = Payment::where('status', 'verified')
-            ->sum('amount');
+        $escrowService = app(\App\Services\EscrowService::class);
+        $escrowBalance = $escrowService->getCurrentBalance();
 
         // Laporan pending
         $pendingReports = Report::where('status', 'open')
@@ -119,6 +130,8 @@ class AdminController extends Controller
             'totalOrders',
             'pendingPayments',
             'chartPeriod',
+            'chartCategory',
+            'chartSubcategory',
             'chartOffset',
             'chartMaxOffset',
             'chartStart',
@@ -280,6 +293,9 @@ class AdminController extends Controller
             return back()->with('error', 'Dana sudah diproses atau belum di-escrow.');
         }
 
+        $escrowService = app(\App\Services\EscrowService::class);
+        $escrowService->debit($order, 'Pencairan dana ke seller');
+
         return back()->with('success', 'Dana berhasil dicairkan ke penjual.');
     }
 
@@ -328,6 +344,11 @@ class AdminController extends Controller
                 ]
             );
         });
+
+        if ($payment && in_array($payment->status, ['refunded', 'verified'], true)) {
+            $escrowService = app(\App\Services\EscrowService::class);
+            $escrowService->debit($order, 'Refund pesanan ke buyer');
+        }
 
         return back()->with('success', 'Pesanan dibatalkan dan dana dikembalikan ke buyer.');
     }

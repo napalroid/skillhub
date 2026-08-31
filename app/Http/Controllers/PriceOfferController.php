@@ -25,8 +25,8 @@ class PriceOfferController extends Controller
 
         try {
             broadcast(new PriceOfferCreated($offer))->toOthers();
-        } catch (BroadcastException $exception) {
-            report($exception);
+        } catch (\Exception $exception) {
+            \Log::warning('Broadcast PriceOffer failed but saved', ['offer_id' => $offer->id]);
         }
 
         if ($request->expectsJson()) {
@@ -41,7 +41,11 @@ class PriceOfferController extends Controller
     {
         $order = $priceOfferService->accept($priceOffer, request()->user());
         $priceOffer->refresh();
-        try { broadcast(new PriceOfferStatusChanged($priceOffer))->toOthers(); } catch (BroadcastException $exception) { report($exception); }
+        try { 
+            broadcast(new PriceOfferStatusChanged($priceOffer))->toOthers(); 
+        } catch (\Exception $exception) { 
+            \Log::warning('Broadcast accept failed but processed', ['offer_id' => $priceOffer->id]); 
+        }
 
         return redirect()->route('orders.payment.show', $order)
             ->with('success', 'Penawaran diterima. Silakan lanjutkan pembayaran.');
@@ -50,7 +54,11 @@ class PriceOfferController extends Controller
     public function reject(PriceOffer $priceOffer, PriceOfferService $priceOfferService)
     {
         $offer = $priceOfferService->reject($priceOffer, request()->user());
-        try { broadcast(new PriceOfferStatusChanged($offer))->toOthers(); } catch (BroadcastException $exception) { report($exception); }
+        try { 
+            broadcast(new PriceOfferStatusChanged($offer))->toOthers(); 
+        } catch (\Exception $exception) { 
+            \Log::warning('Broadcast reject failed but processed', ['offer_id' => $offer->id]); 
+        }
 
         return redirect()->route('conversations.show', $offer->conversation_id)
             ->with('success', 'Penawaran harga ditolak.');

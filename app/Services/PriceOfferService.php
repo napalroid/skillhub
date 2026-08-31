@@ -7,6 +7,7 @@ use App\Models\Conversation;
 use App\Models\Order;
 use App\Models\PriceOffer;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -50,7 +51,7 @@ class PriceOfferService
                 ->where('status', PriceOfferStatus::Pending->value)
                 ->update(['status' => PriceOfferStatus::Cancelled->value]);
 
-            return PriceOffer::create([
+            $offer = PriceOffer::create([
                 'conversation_id' => $conversation->id,
                 'service_id' => $conversation->service_id,
                 'seller_id' => $seller->id,
@@ -61,6 +62,19 @@ class PriceOfferService
                 'status' => PriceOfferStatus::Pending,
                 'expires_at' => $expiresAt,
             ]);
+            
+            NotificationService::createAndDispatch(
+                userId: $conversation->buyer_id,
+                type: 'price_offer',
+                title: 'Penawaran Harga Baru',
+                message: 'Harga kesepakatan: Rp' . number_format($offerPrice, 0, ',', '.') . ' untuk "' . $conversation->service->title . '"',
+                extraData: [
+                    'conversation_id' => $conversation->id,
+                    'price_offer_id' => $offer->id,
+                ]
+            );
+            
+            return $offer;
         });
     }
 

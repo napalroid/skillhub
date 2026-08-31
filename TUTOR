@@ -1,0 +1,92 @@
+📋 LANGKAH LENGKAP - SIAP PAKAI WEBSITE
+⚙️ PERSIAPAN AWAL (Sekali Saja)
+1. PASTIKAN XAMPP RUNNING
+1. Buka XAMPP Control Panel
+2. Klik "Start" di Apache → tunggu hijau
+3. Klik "Start" di MySQL → tunggu hijau
+2. PASTIKAN NGROK TERINSTALL
+Cek: buka terminal, ketik: ngrok version
+Jika error: download dari https://ngrok.com/download
+🚀 LANGKAH UTAMA (Setiap Kali Mau Testing)
+STEP 1: Buka Terminal
+# Masuk ke folder project
+cd 'D:\xampp\htdocs\UKK MODE SERIUS\skillhub'
+STEP 2: Jalankan Setup
+.\start-midtrans-setup.bat
+Akan muncul 4 windows:
+
+✅ Window 1: Reverb WebSocket (jangan ditutup)
+✅ Window 2: Queue Worker (jangan ditutup)
+✅ Window 3: Laravel Server (jangan ditutup)
+✅ Window 4: ngrok (cari URL disini)
+STEP 3: Copy ngrok URL
+Lihat Window 4 (ngrok), cari baris seperti ini:
+
+Forwarding    https://abc123.ngrok-free.app -> http://localhost:8000
+Copy URL: https://abc123.ngrok-free.app
+
+STEP 4: Update Midtrans Dashboard
+Buka browser → https://dashboard.midtrans.com
+Login dengan akun Midtrans kamu
+Klik Settings (menu kiri)
+Klik Configuration
+Cari bagian Payment Notification URL
+Paste URL: https://abc123.ngrok-free.app/midtrans/notification
+Klik Save
+STEP 5: Akses Website
+Buka browser baru:
+
+http://127.0.0.1:8000
+🧪 TESTING FITUR
+A. Test Midtrans Payment:
+Login ke website
+Buat order/transaksi
+Pilih metode pembayaran
+Bayar menggunakan Midtrans
+✅ Callback dari Midtrans akan masuk via ngrok
+B. Test Chat Real-time:
+Buka Chrome normal → Login User A
+Buka Chrome Incognito (Ctrl+Shift+N) → Login User B
+User A kirim chat ke User B
+✅ User B terima pesan LANGSUNG tanpa reload
+C. Test Notifikasi Real-time:
+Buka F12 (Console)
+Cek log: [Notif] ✅ WebSocket connected
+Buat aksi yang trigger notifikasi (review, pesan, dll)
+✅ Notifikasi muncul LANGSUNG tanpa reload
+🛑 STOP SERVICES (Setelah Selesai Testing)
+.\stop-setup-skillhub.bat
+Atau tutup semua 4 windows secara manual.
+
+⚠️ TROUBLESHOOTING
+Jika ngrok URL berubah:
+Setiap restart .\start-midtrans-setup.bat, ngrok URL bisa berubah
+Ulangi STEP 3 & 4 (copy URL baru → update Midtrans)
+Jika port bentrok:
+# Cek port 8000 atau 8080 dipakai
+netstat -ano | findstr :8000
+netstat -ano | findstr :8080
+
+# Kill process jika ada
+taskkill /PID [PID_NUMBER] /F
+Jika real-time tidak jalan:
+Refresh browser (Ctrl+Shift+R)
+Cek Console (F12) ada error?
+Pastikan 4 windows masih running
+✅ CHECKLIST WEBSITE SIAP PAKAI:
+[✓] XAMPP Apache & MySQL: RUNNING
+[✓] 4 Windows services: RUNNING
+[✓] ngrok URL: COPIED
+[✓] Midtrans Dashboard: UPDATED
+[✓] Website: http://127.0.0.1:8000 TERBUKA
+[✓] Console: "WebSocket connected" MUNCUL
+🎯 KESIMPULAN:
+Setiap kali mau testing:
+
+.\start-midtrans-setup.bat
+Copy ngrok URL → Update Midtrans (jika berubah)
+Akses http://127.0.0.1:8000
+Testing semua fitur! ✅
+Selesai testing:
+
+.\stop-setup-skillhub.bat atau tutup 4 windows

@@ -37,6 +37,8 @@
             $previousChartOffset = min($chartOffset + 1, $chartMaxOffset);
             $nextChartOffset = max($chartOffset - 1, 0);
             $periodLabels = ['daily' => 'Harian', 'weekly' => 'Mingguan', 'monthly' => 'Bulanan'];
+            $chartCategory = $chartCategory ?? 'all';
+            $chartSubcategory = $chartSubcategory ?? 'all';
         @endphp
         <div class="lg:col-span-2 admin-card overflow-hidden" data-stagger-item>
             <div class="p-4 sm:p-5 lg:p-6">
@@ -49,13 +51,54 @@
                     {{-- Period Switcher - Full width on mobile --}}
                     <div class="flex items-center gap-1 rounded-full border border-[#DDDDDD] bg-[#F5F5F5] p-1 w-full sm:w-auto">
                         @foreach ($periodLabels as $period => $label)
-                            <a href="{{ route('admin.dashboard', ['period' => $period, 'offset' => 0]) }}"
+                            <a href="{{ route('admin.dashboard', ['period' => $period, 'offset' => 0, 'category' => $chartCategory ?? 'all', 'subcategory' => $chartSubcategory ?? 'all']) }}"
                                class="flex-1 sm:flex-none px-3 sm:px-3.5 py-2 text-[10px] font-heading font-bold uppercase tracking-wider rounded-full transition-colors text-center {{ $chartPeriod === $period ? 'bg-black text-white shadow-sm' : 'text-[#555555] hover:text-black' }}">
                                 {{ $label }}
                             </a>
                         @endforeach
                     </div>
                 </div>
+
+                {{-- Category Filter --}}
+                <div class="mt-3 flex flex-col sm:flex-row gap-2 sm:items-center">
+                    <span class="text-[10px] font-heading font-bold uppercase tracking-wider text-[#999999]">Filter:</span>
+                    <div class="flex flex-wrap gap-2">
+                        <select name="chart_category" id="chart-category" onchange="updateChartFilter()" class="input-field text-[10px] py-1.5 px-3 w-auto">
+                            <option value="all" {{ $chartCategory === 'all' ? 'selected' : '' }}>Semua Kategori</option>
+                            @foreach ($categories as $cat)
+                                <option value="{{ $cat->id }}" {{ $chartCategory == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                        <select name="chart_subcategory" id="chart-subcategory" onchange="updateChartFilter()" class="input-field text-[10px] py-1.5 px-3 w-auto" {{ $chartCategory === 'all' ? 'disabled' : '' }}>
+                            <option value="all" {{ $chartSubcategory === 'all' ? 'selected' : '' }}>Semua Subkategori</option>
+                            @if($chartCategory !== 'all')
+                                @foreach (\App\Models\Subcategory::where('category_id', $chartCategory)->orderBy('name')->get() as $sub)
+                                    <option value="{{ $sub->id }}" {{ $chartSubcategory == $sub->id ? 'selected' : '' }}>{{ $sub->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                </div>
+
+                @push('scripts')
+                <script>
+                document.getElementById('chart-category').addEventListener('change', function() {
+                    const category = this.value;
+                    const subSelect = document.getElementById('chart-subcategory');
+                    const period = '{{ $chartPeriod }}';
+                    
+                    window.location.href = '{{ route('admin.dashboard') }}?period=' + period + '&offset=0&category=' + category + '&subcategory=all';
+                });
+
+                document.getElementById('chart-subcategory').addEventListener('change', function() {
+                    const category = document.getElementById('chart-category').value;
+                    const subcategory = this.value;
+                    const period = '{{ $chartPeriod }}';
+                    
+                    window.location.href = '{{ route('admin.dashboard') }}?period=' + period + '&offset=0&category=' + category + '&subcategory=' + subcategory;
+                });
+                </script>
+                @endpush
 
                 {{-- Summary Card - Simplified for mobile --}}
                 <div class="mt-4 lg:mt-6 grid grid-cols-1 gap-3 rounded-sm border border-[#DDDDDD] bg-[#F5F5F5] p-3 sm:p-4">
@@ -68,12 +111,12 @@
                     {{-- Period Navigation - Stacked on mobile --}}
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-3 border-t border-[#DDDDDD] sm:border-0 sm:pt-0">
                         <div class="flex items-center gap-2 order-2 sm:order-1">
-                            <a href="{{ route('admin.dashboard', ['period' => $chartPeriod, 'offset' => $previousChartOffset]) }}"
+                            <a href="{{ route('admin.dashboard', ['period' => $chartPeriod, 'offset' => $previousChartOffset, 'category' => $chartCategory ?? 'all', 'subcategory' => $chartSubcategory ?? 'all']) }}"
                                @class(['flex h-9 w-9 shrink-0 items-center justify-center rounded-full border bg-white text-black transition-colors hover:border-black hover:bg-black hover:text-white', $chartOffset >= $chartMaxOffset ? 'pointer-events-none opacity-30 border-[#DDDDDD]' : 'border-black']) 
                                aria-label="Lihat periode sebelumnya">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="m14.25 18-6-6 6-6"/></svg>
                             </a>
-                            <a href="{{ route('admin.dashboard', ['period' => $chartPeriod, 'offset' => $nextChartOffset]) }}"
+                            <a href="{{ route('admin.dashboard', ['period' => $chartPeriod, 'offset' => $nextChartOffset, 'category' => $chartCategory ?? 'all', 'subcategory' => $chartSubcategory ?? 'all']) }}"
                                @class(['flex h-9 w-9 shrink-0 items-center justify-center rounded-full border bg-white text-black transition-colors hover:border-black hover:bg-black hover:text-white', $chartOffset === 0 ? 'pointer-events-none opacity-30 border-[#DDDDDD]' : 'border-black'])
                                aria-label="Lihat periode lebih baru">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="m9.75 6 6 6-6 6"/></svg>

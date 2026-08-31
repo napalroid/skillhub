@@ -128,4 +128,22 @@ class OrderController extends Controller
             'role'
         ));
     }
+
+    public function conversation(Order $order)
+    {
+        $isBuyer = $order->buyer_id === auth()->id();
+        $isSeller = $order->service->user_id === auth()->id();
+        
+        if (!$isBuyer && !$isSeller && !auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        $conversation = \App\Models\Conversation::firstOrCreate([
+            'service_id' => $order->service_id,
+            'buyer_id' => $order->buyer_id,
+            'seller_id' => $order->service->user_id,
+        ]);
+
+        return redirect()->route('conversations.show', $conversation);
+    }
 }

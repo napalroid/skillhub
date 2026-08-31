@@ -4,11 +4,11 @@ namespace App\Events;
 
 use App\Models\PriceOffer;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class PriceOfferCreated implements ShouldBroadcastNow
+class PriceOfferCreated implements ShouldBroadcast
 {
     use Dispatchable, SerializesModels;
 

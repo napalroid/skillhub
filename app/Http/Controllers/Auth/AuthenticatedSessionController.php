@@ -40,6 +40,13 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
+        // Cek jika intended URL adalah API endpoint, redirect ke dashboard
+        $intended = $request->session()->get('url.intended');
+        if ($intended && (str_contains($intended, '/unread-count') || str_contains($intended, '/api/') || str_contains($intended, 'json=1') || str_contains($intended, '/notifikasi'))) {
+            $request->session()->forget('url.intended');
+            return redirect()->route('dashboard');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

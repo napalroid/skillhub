@@ -3,18 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserNotification;
+use App\Services\NotificationDeliveryService;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
     public function index(Request $request)
     {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
         $notifications = auth()->user()->notifications()
             ->with(['service', 'conversation', 'order', 'payment'])
             ->latest()
             ->paginate(15);
 
-        if ($request->query('json') === '1') {
+        if ($request->query('json') === '1' || $request->expectsJson()) {
             return response()->json([
                 'notifications' => auth()->user()->notifications()
                     ->latest()
@@ -34,8 +39,19 @@ class NotificationController extends Controller
         return view('notifications.index', compact('notifications'));
     }
 
-    public function unreadCount()
+    public function unreadCount(Request $request)
     {
+        if (!auth()->check()) {
+            return response()->json([
+                'count' => 0,
+                'authenticated' => false
+            ], 401);
+        }
+
+        if (!$request->expectsJson() && !$request->ajax() && !$request->wantsJson()) {
+            return redirect()->route('notifications.index');
+        }
+
         return response()->json([
             'count' => auth()->user()->unreadNotifications()->count(),
         ]);
@@ -76,5 +92,42 @@ class NotificationController extends Controller
         }
 
         return redirect()->route('notifications.index');
+    }
+
+    public function ack(UserNotification $notification)
+    {
+        abort_unless($notification->user_id === auth()->id(), 403);
+
+        NotificationDeliveryService::markDelivered($notification);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification acknowledged',
+        ]);
+    }
+
+    public function pending(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json([
+                'notifications' => [],
+                'authenticated' => false,
+            ], 401);
+        }
+
+        $notifications = NotificationDeliveryService::getUndeliveredNotifications(auth()->id());
+
+        return response()->json([
+            'notifications' => $notifications->map(function ($n) {
+                return [
+                    'id' => $n->id,
+                    'type' => $n->type,
+                    'title' => $n->title,
+                    'message' => $n->message,
+                    'created_at' => $n->created_at->format('M d, Y h:i A'),
+                    'is_read' => (bool) $n->is_read,
+                ];
+            }),
+        ]);
     }
 }

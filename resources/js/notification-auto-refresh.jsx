@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 export function useNotificationAutoRefresh() {
     const [notifications, setNotifications] = useState([]);
@@ -49,6 +49,13 @@ export function useNotificationAutoRefresh() {
         const interval = setInterval(async () => {
             try {
                 const res = await fetch('/notifikasi/unread-count', { credentials: 'include' });
+                
+                if (res.status === 401) {
+                    console.log('[Notification Auto-Refresh] User not authenticated, stopping polling');
+                    clearInterval(interval);
+                    return;
+                }
+                
                 const data = await res.json();
                 
                 if (data.count > lastCount && lastCount > 0) {

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\UserNotification;
 use App\Events\NotificationCreated;
+use App\Services\NotificationDeliveryService;
 use Illuminate\Support\Facades\Log;
 
 class NotificationService
@@ -25,12 +26,14 @@ class NotificationService
         
         try {
             event(new NotificationCreated($notification));
+            NotificationDeliveryService::trackSent($notification);
         } catch (\Exception $e) {
             Log::error('Failed to broadcast notification', [
                 'notification_id' => $notification->id,
                 'user_id' => $userId,
                 'error' => $e->getMessage()
             ]);
+            NotificationDeliveryService::markForResend($notification);
         }
         
         return $notification;

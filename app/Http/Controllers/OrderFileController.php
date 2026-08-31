@@ -95,8 +95,12 @@ class OrderFileController extends Controller
             return back()->with('info', 'Pesanan ini sudah selesai.');
         }
 
-        if (! $order->canBeCompletedByBuyer() || ! $order->files()->where('file_type', 'hasil')->exists()) {
-            abort(403, 'Hasil kerja belum diunggah oleh seller.');
+        if (!$order->canBeCompletedByBuyer()) {
+            return back()->with('error', 'Pesanan belum bisa diselesaikan. Status saat ini: ' . $order->status);
+        }
+
+        if (!$order->files()->where('file_type', 'hasil')->exists()) {
+            return back()->with('error', 'Hasil kerja belum diunggah oleh seller.');
         }
 
         $order->update([
@@ -104,7 +108,6 @@ class OrderFileController extends Controller
             'completed_at' => now(),
         ]);
 
-        // Beri tahu seller agar tidak "buta" status: dananya akan cair otomatis 1 jam kemudian.
         NotificationService::createAndDispatch(
             userId: $order->service->user_id,
             type: 'order_approved',

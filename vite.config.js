@@ -5,8 +5,10 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     server: {
         host: true,
+        https: true,
         hmr: {
             host: 'elastic-landmass-shortcut.ngrok-free.dev',
+            protocol: 'wss',
         },
     },
 

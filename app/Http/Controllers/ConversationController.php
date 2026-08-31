@@ -23,19 +23,6 @@ class ConversationController extends Controller
             'seller_id' => $service->user_id,
         ]);
 
-        if ($conversation->wasRecentlyCreated) {
-            NotificationService::createAndDispatch(
-                userId: $service->user_id,
-                type: 'message',
-                title: 'Percakapan baru dari ' . auth()->user()->name,
-                message: 'Membuka diskusi untuk jasa "' . $service->title . '".',
-                extraData: [
-                    'service_id' => $service->id,
-                    'conversation_id' => $conversation->id,
-                ]
-            );
-        }
-
         return redirect()->route('conversations.show', $conversation);
     }
 
@@ -83,6 +70,7 @@ class ConversationController extends Controller
 
         return Conversation::query()
             ->where($participantColumn, $userId)
+            ->whereHas('messages')
             ->with(['service', 'buyer', 'seller', 'latestMessage'])
             ->withCount(['messages as unread_count' => fn ($query) => $query->where('sender_id', '!=', $userId)->whereNull('read_at')])
             ->when($filter === 'unread', fn ($query) => $query->whereHas('messages', fn ($message) => $message->where('sender_id', '!=', $userId)->whereNull('read_at')))
@@ -103,10 +91,11 @@ class ConversationController extends Controller
         $conversation->touch();
         try {
             broadcast(new MessageSent($message))->toOthers();
-        } catch (BroadcastException $exception) {
-            // Pesan sudah aman tersimpan. Kegagalan server WebSocket tidak boleh
-            // membuat pengguna mengirim ulang pesan yang sama.
-            report($exception);
+        } catch (\Exception $exception) {
+            \Log::warning('Broadcast failed but message saved', [
+                'message_id' => $message->id,
+                'error' => $exception->getMessage()
+            ]);
         }
 
         // Kirim notifikasi ke penerima (bukan pengirim) agar ia tahu ada pesan baru.

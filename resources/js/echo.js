@@ -1,30 +1,56 @@
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+console.log('[Echo] echo.js loaded!');
 
-if (csrfToken) {
-    const reverbKey = import.meta.env.VITE_REVERB_APP_KEY;
-    const publicReverbHost = import.meta.env.VITE_REVERB_PUBLIC_HOST;
-    const isNgrokPage = window.location.hostname.endsWith('ngrok-free.dev');
-    const usePublicTunnel = isNgrokPage;
-    const reverbScheme = usePublicTunnel ? 'https' : (import.meta.env.VITE_REVERB_SCHEME || 'http');
-    const reverbHost = usePublicTunnel ? (publicReverbHost || window.location.hostname) : (import.meta.env.VITE_REVERB_HOST || window.location.hostname);
-    const reverbPort = Number(usePublicTunnel ? 443 : (import.meta.env.VITE_REVERB_PORT || 8080));
+function initializeEcho() {
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-    if (!reverbKey) {
-        console.error('SkillHub realtime tidak aktif: VITE_REVERB_APP_KEY belum dikonfigurasi.');
+        if (!csrfToken) {
+            console.error('[Echo] CSRF token not found in meta tag!');
+            return;
+        }
+
+        const reverbKey = '32d226a6168ea850466a7dca5de615ed';
+        const reverbHost = '127.0.0.1';
+        const reverbPort = 8080;
+        const reverbScheme = 'http';
+
+        window.Pusher = Pusher;
+        
+        window.Echo = new Echo({
+            broadcaster: 'reverb',
+            key: reverbKey,
+            wsHost: reverbHost,
+            wsPort: reverbPort,
+            wssPort: reverbPort,
+            forceTLS: reverbScheme === 'https',
+            enabledTransports: ['ws', 'wss'],
+            auth: { headers: { 'X-CSRF-TOKEN': csrfToken } },
+        });
+        
+        console.log('[Echo] Echo initialized');
+
+        if (window.Echo.connector && window.Echo.connector.pusher) {
+            Pusher.logToConsole = false;
+
+            window.Echo.connector.pusher.connection.bind('error', (err) => {
+                console.error('[Echo] Connection error:', err);
+            });
+
+            window.Echo.connector.pusher.config.enableStats = false;
+            window.Echo.connector.pusher.config.activityTimeout = 120000;
+            window.Echo.connector.pusher.config.pongTimeout = 30000;
+        }
+    } catch (err) {
+        console.error('[Echo] Failed to initialize Echo:', err.message);
+        window.Echo = null;
     }
+}
 
-    window.Pusher = Pusher;
-    window.Echo = new Echo({
-        broadcaster: 'reverb',
-        key: reverbKey,
-        wsHost: reverbHost,
-        wsPort: reverbPort,
-        wssPort: reverbPort,
-        forceTLS: reverbScheme === 'https',
-        enabledTransports: ['ws', 'wss'],
-        auth: { headers: { 'X-CSRF-TOKEN': csrfToken } },
-    });
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeEcho);
+} else {
+    initializeEcho();
 }

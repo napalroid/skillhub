@@ -188,20 +188,9 @@ class PaymentController extends Controller
 
             if ($effectiveStatus === 'paid' && ! $previouslyPaid) {
                 $order->loadMissing('service');
-                $adminIds = User::where('role', 'admin')->pluck('id');
-                foreach ($adminIds as $adminId) {
-                    NotificationService::createAndDispatch(
-                        userId: $adminId,
-                        type: 'payment_paid',
-                        title: 'Jasa terbayarkan — perlu konfirmasi saldo',
-                        message: 'QRIS #'.$order->id.' "'.$order->service->title.'" lunas Rp'.number_format($order->final_price, 0, ',', '.').'. Konfirmasi bahwa dana masuk ke saldo admin.',
-                        extraData: [
-                            'order_id' => $order->id,
-                            'payment_id' => $payment->id,
-                            'service_id' => $order->service_id,
-                        ]
-                    );
-                }
+                
+                $escrowService = app(\App\Services\EscrowService::class);
+                $escrowService->credit($payment);
             }
         });
 
@@ -301,7 +290,8 @@ class PaymentController extends Controller
             'cair' => Payment::where('status', 'released')->count(),
         ];
 
-        $escrowBalance = Payment::where('status', 'verified')->sum('amount');
+        $escrowService = app(\App\Services\EscrowService::class);
+        $escrowBalance = $escrowService->getCurrentBalance();
         $awaitingConfirm = Payment::where('status', 'paid')->count();
         $pendingProof = Payment::where('status', 'pending')->count();
 
@@ -435,31 +425,22 @@ class PaymentController extends Controller
             return back()->with('error', 'Saldo untuk transaksi ini sudah dikonfirmasi sebelumnya.');
         }
 
-        DB::transaction(function () use ($payment) {
-            $fresh = Payment::whereKey($payment->id)->lockForUpdate()->firstOrFail();
-            if ($fresh->isAdminConfirmed()) {
-                return;
-            }
+        $escrowService = app(\App\Services\EscrowService::class);
+        $transaction = \App\Models\EscrowTransaction::where('payment_id', $payment->id)
+            ->where('status', 'pending')
+            ->first();
 
-            $fresh->update([
-                'status' => 'verified',
-                'verified_by' => auth()->id(),
-                'admin_confirmed_at' => now(),
-                'admin_confirmed_by' => auth()->id(),
-            ]);
+        if (!$transaction) {
+            return back()->with('error', 'Transaksi escrow tidak ditemukan.');
+        }
 
-            $fresh->order()->update([
-                'payment_status' => 'paid',
-                'status' => 'dibayar',
-                'paid_at' => $fresh->order->paid_at ?? now(),
-            ]);
-        });
+        $success = $escrowService->confirmCredit($transaction, auth()->user());
 
-        $payment->loadMissing('order.service');
-        $this->notifySellerOrderConfirmed($payment->order);
-        $this->notifyBuyerOrderConfirmed($payment->order);
+        if ($success) {
+            return back()->with('success', 'Saldo dikonfirmasi masuk. Seller telah diberi notifikasi untuk mengerjakan pesanan.');
+        }
 
-        return back()->with('success', 'Saldo dikonfirmasi masuk. Seller telah diberi notifikasi untuk mengerjakan pesanan.');
+        return back()->with('error', 'Gagal mengkonfirmasi saldo.');
     }
 
     /**

@@ -47,10 +47,12 @@ Route::middleware(['auth'])->group(function () {
 
     // --- NOTIFIKASI ---
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::get('/notifikasi/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
+    Route::get('/notifikasi/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count')->middleware('ensureApiRequest');
     Route::post('/notifikasi/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
     Route::get('/notifikasi/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
     Route::post('/notifikasi/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/notifikasi/{notification}/ack', [NotificationController::class, 'ack'])->name('notifications.ack');
+    Route::get('/notifikasi/pending', [NotificationController::class, 'pending'])->name('notifications.pending');
 
     // --- CHAT JASA ---
     Route::get('/messages', [ConversationController::class, 'index'])->name('conversations.index');
@@ -77,6 +79,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pesanan/buat/{service}', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/pesanan', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/pesanan/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('/pesanan/{order}/conversation', [OrderController::class, 'conversation'])->name('orders.conversation');
 
     // --- NEGOSIASI ---
     Route::post('/negosiasi', [NegotiationController::class, 'store'])->name('negotiations.store');
@@ -136,6 +139,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
     Route::post('/payments/{payment}/confirm-balance', [PaymentController::class, 'confirmBalance'])->name('payments.confirm-balance');
     Route::post('/payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
+
+    Route::get('/escrow', [App\Http\Controllers\AdminEscrowController::class, 'index'])->name('escrow.index');
+    Route::post('/escrow/{escrowTransaction}/confirm', [App\Http\Controllers\AdminEscrowController::class, 'confirm'])->name('escrow.confirm');
+    Route::post('/escrow/{escrowTransaction}/reject', [App\Http\Controllers\AdminEscrowController::class, 'reject'])->name('escrow.reject');
 
     Route::post('/orders/{order}/release', [AdminController::class, 'releaseFunds'])->name('orders.release');
     Route::post('/orders/{order}/refund', [AdminController::class, 'refundOrder'])->name('orders.refund');
