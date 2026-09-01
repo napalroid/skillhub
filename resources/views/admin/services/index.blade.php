@@ -155,9 +155,9 @@
                                                     </button>
                                                 </form>
                                             @elseif ($service->status === 'approved')
-                                                <form action="{{ route('admin.services.reject', $service) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menonaktifkan jasa ini? Jasa akan disembunyikan dari marketplace dan user akan menerima notifikasi.');">
+                                                <form id="deactivate-form-{{ $service->id }}" action="{{ route('admin.services.reject', $service) }}" method="POST" class="inline">
                                                     @csrf
-                                                    <button type="submit" class="text-[#E4002B] hover:text-[#C90021] transition p-1 rounded hover:bg-[#F5F5F5] cursor-pointer" title="Nonaktifkan dari marketplace">
+                                                    <button type="button" onclick="if(confirm('Nonaktifkan jasa ini dari marketplace?')) document.getElementById('deactivate-form-{{ $service->id }}').submit()" class="text-[#E4002B] hover:text-[#C90021] transition p-1 rounded hover:bg-[#F5F5F5] cursor-pointer" title="Nonaktifkan dari marketplace">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/></svg>
                                                     </button>
                                                 </form>
@@ -200,49 +200,6 @@
         </div>
     </div>
 
-    {{-- Modal Konfirmasi Nonaktifkan --}}
-    <div id="deactivateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden transform transition-all">
-            <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
-                <div class="flex items-center gap-3">
-                    <div class="flex-shrink-0 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white">Konfirmasi Nonaktifkan</h3>
-                </div>
-            </div>
-            <div class="p-6">
-                <p class="text-sm text-gray-700 mb-2">Anda akan menonaktifkan jasa:</p>
-                <p id="modalServiceTitle" class="font-bold text-black text-base mb-4 px-3 py-2 bg-gray-100 rounded-lg"></p>
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-                    <div class="flex gap-2">
-                        <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <div class="text-xs text-yellow-800 leading-relaxed">
-                            <p class="font-semibold mb-1">Perhatian:</p>
-                            <ul class="list-disc list-inside space-y-1">
-                                <li>Jasa akan disembunyikan dari marketplace</li>
-                                <li>Data pesanan & review tetap tersimpan</li>
-                                <li>Seller akan menerima notifikasi</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex gap-3">
-                    <button type="button" id="cancelDeactivate" class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition">
-                        Batal
-                    </button>
-                    <button type="button" id="confirmDeactivate" class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition">
-                        Ya, Nonaktifkan
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     @section('scripts')
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -256,51 +213,6 @@
                 subcategorySelect.value = '';
             });
         }
-
-        // Modal Deactivate Logic
-        const modal = document.getElementById('deactivateModal');
-        const modalTitle = document.getElementById('modalServiceTitle');
-        const confirmBtn = document.getElementById('confirmDeactivate');
-        const cancelBtn = document.getElementById('cancelDeactivate');
-        let currentServiceId = null;
-
-        // Global function to open modal
-        window.openDeactivateModal = function(serviceId, serviceTitle) {
-            currentServiceId = serviceId;
-            modalTitle.textContent = serviceTitle;
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        };
-
-        // Close modal
-        function closeModal() {
-            modal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            currentServiceId = null;
-        }
-
-        cancelBtn.addEventListener('click', closeModal);
-
-        // Close modal when clicking outside
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-
-        // Confirm deactivate
-        confirmBtn.addEventListener('click', function() {
-            if (currentServiceId) {
-                document.getElementById('deactivate-form-' + currentServiceId).submit();
-            }
-        });
-
-        // Close modal with ESC key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-                closeModal();
-            }
-        });
 
         // Stagger table rows
         if (!prefersReduced && window.gsap) {

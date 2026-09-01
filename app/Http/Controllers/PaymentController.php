@@ -318,7 +318,7 @@ class PaymentController extends Controller
 
         $payments = $query->paginate(15)->withQueryString();
 
-        return view('admin.payments.index', compact(
+        return view('admin.escrow.index', compact(
             'payments', 'filter', 'sort', 'counts', 'escrowBalance', 'awaitingConfirm', 'pendingProof'
         ));
     }
@@ -339,7 +339,7 @@ class PaymentController extends Controller
         $this->notifySellerOrderConfirmed($payment->order);
         $this->notifyBuyerOrderConfirmed($payment->order);
 
-        return redirect()->route('admin.payments.index', ['filter' => 'escrow'])
+        return redirect()->route('admin.escrow.index', ['filter' => 'masuk'])
             ->with('success', 'Pembayaran diverifikasi. Dana sudah ditahan di Proses Tahan Dana.');
     }
 

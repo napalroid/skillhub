@@ -19,7 +19,7 @@
             @php
                 $showBadge = !in_array($notification->type, ['service_removed_from_subcategory', 'service_deleted', 'new_review']);
                 $badge = match ($notification->type) {
-                    'approved' => ['text' => 'Disetujui', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500'],
+                    'approved' => ['text' => 'Jasa Diaktifkan', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500'],
                     'rejected' => ['text' => 'Ditolak', 'class' => 'bg-red-50 text-red-700 border-red-200', 'dot' => 'bg-red-500'],
                     'service_disabled' => ['text' => 'Dinonaktifkan', 'class' => 'bg-gray-100 text-gray-700 border-gray-200', 'dot' => 'bg-gray-500'],
                     'message'  => ['text' => 'Pesan Masuk', 'class' => 'bg-blue-50 text-blue-700 border-blue-200', 'dot' => 'bg-blue-500'],

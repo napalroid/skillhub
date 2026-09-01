@@ -58,10 +58,17 @@
             </div>
 
             <div class="flex flex-wrap gap-3">
-                @foreach (['all' => 'Semua', 'masuk' => 'Uang Masuk', 'keluar' => 'Uang Keluar', 'pending' => 'Pending', 'expired' => 'Expired'] as $key => $label)
+                @foreach (['all' => 'Semua', 'masuk' => 'Uang Masuk', 'keluar' => 'Uang Keluar', 'pending' => 'Pending', 'expired' => 'Expired', 'proses_tahan' => 'Proses Tahan Dana', 'cair' => 'Cair'] as $key => $label)
                     <a href="{{ route('admin.escrow.index', ['filter' => $key, 'sort' => $sort]) }}"
                        class="px-4 py-2 rounded-full text-[10px] font-heading font-bold uppercase tracking-wider border transition-colors {{ $filter === $key ? 'bg-black border-black text-white' : 'bg-white border-[#DDDDDD] text-[#555555] hover:border-black hover:text-black' }}">
-                        {{ $label }} <span class="opacity-60">({{ $counts[$key] }})</span>
+                        {{ $label }} 
+                        @if($key === 'proses_tahan')
+                            <span class="opacity-60">({{ $counts['pending'] ?? 0 }})</span>
+                        @elseif($key === 'cair')
+                            <span class="opacity-60">({{ $counts['keluar'] ?? 0 }})</span>
+                        @else
+                            <span class="opacity-60">({{ $counts[$key] ?? 0 }})</span>
+                        @endif
                     </a>
                 @endforeach
             </div>

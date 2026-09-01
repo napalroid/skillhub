@@ -162,7 +162,7 @@ class AdminController extends Controller
         NotificationService::createAndDispatch(
             userId: $service->user_id,
             type: 'approved',
-            title: "Jasa disetujui ({$service->title})",
+            title: "Jasa diaktifkan ({$service->title})",
             message: $notificationMessage,
             extraData: [
                 'service_id' => $service->id,
@@ -172,6 +172,10 @@ class AdminController extends Controller
         $successMessage = in_array($previousStatus, ['rejected', 'disabled'])
             ? 'Jasa berhasil diaktifkan kembali dan notifikasi telah dikirim ke pemilik jasa.'
             : 'Jasa berhasil disetujui dan dipublikasikan.';
+
+        if ($previousStatus === 'pending') {
+            return redirect()->route('admin.services.pending')->with('success', $successMessage);
+        }
 
         return back()->with('success', $successMessage);
     }

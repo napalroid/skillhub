@@ -36,6 +36,8 @@ class NotificationController extends Controller
             ]);
         }
 
+        auth()->user()->unreadNotifications()->update(['is_read' => true]);
+
         return view('notifications.index', compact('notifications'));
     }
 

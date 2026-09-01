@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
+use App\Models\WalletTransaction;
 use App\Services\NotificationService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,7 @@ class ReleaseDueOrders extends Command
 {
     protected $signature = 'orders:release-due';
 
-    protected $description = 'Proses auto-complete (buyer diam 3 hari) & pencairan escrow otomatis (1 jam setelah selesai).';
+    protected $description = 'Proses auto-complete (buyer diam 24 jam) & pencairan escrow otomatis (1 jam setelah selesai).';
 
     public function handle(): int
     {
@@ -24,7 +25,7 @@ class ReleaseDueOrders extends Command
     }
 
     /**
-     * C4: Bila seller sudah mengirim hasil namun buyer diam 3 hari,
+     * C4: Bila seller sudah mengirim hasil namun buyer diam 24 jam,
      * pesanan otomatis diselesaikan agar seller tidak tertahan dananya.
      */
     protected function autoComplete(): void
@@ -37,7 +38,7 @@ class ReleaseDueOrders extends Command
         $count = 0;
         foreach ($orders as $order) {
             $delivered = $order->files->where('file_type', 'hasil')->max('created_at');
-            if ($delivered && $delivered->lte(now()->subDays(3))) {
+            if ($delivered && $delivered->lte(now()->subHours(24))) {
                 $order->update([
                     'status' => Order::STATUS_SELESAI,
                     'completed_at' => now(),
@@ -47,7 +48,7 @@ class ReleaseDueOrders extends Command
                     userId: $order->buyer_id,
                     type: 'order_auto_completed',
                     title: 'Pesanan otomatis selesai',
-                    message: 'Pesanan #'.$order->id.' otomatis diselesaikan karena tidak ada tanggapan dalam 3 hari. Dana akan cair ke seller.',
+                    message: 'Pesanan #'.$order->id.' otomatis diselesaikan karena tidak ada tanggapan dalam 24 jam. Dana akan cair ke seller.',
                     extraData: [
                         'order_id' => $order->id,
                         'service_id' => $order->service_id,

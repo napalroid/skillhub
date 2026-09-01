@@ -11,7 +11,7 @@ class AdminEscrowController extends Controller
     public function index(Request $request)
     {
         $filter = $request->query('filter', 'all');
-        $allowedFilters = ['all', 'masuk', 'keluar', 'pending', 'expired'];
+        $allowedFilters = ['all', 'masuk', 'keluar', 'pending', 'expired', 'proses_tahan', 'cair'];
         if (!in_array($filter, $allowedFilters, true)) {
             $filter = 'all';
         }
@@ -50,10 +50,12 @@ class AdminEscrowController extends Controller
             $query->where('type', 'in');
         } elseif ($filter === 'keluar') {
             $query->where('type', 'out');
-        } elseif ($filter === 'pending') {
+        } elseif ($filter === 'pending' || $filter === 'proses_tahan') {
             $query->where('status', 'pending');
         } elseif ($filter === 'expired') {
             $query->where('status', 'expired');
+        } elseif ($filter === 'cair') {
+            $query->where('type', 'out');
         }
 
         match ($sort) {

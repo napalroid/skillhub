@@ -51,12 +51,11 @@ class AdminSubcategoryController extends Controller
             'category_id' => 'required|exists:categories,id'
         ]);
         $subcategory->update($request->only(['name', 'category_id']));
-        return redirect()->route('admin.subcategories.index')->with('success', 'Subkategori berhasil diperbarui.');
+        return redirect()->route('admin.categories.index')->with('success', 'Subkategori berhasil diperbarui.');
     }
 
     public function destroy(Subcategory $subcategory)
     {
-        // Force delete: hapus jasa yang menggunakan subkategori ini
         $services = Service::where('subcategory_id', $subcategory->id)->get();
         foreach ($services as $service) {
             if ($service->image) Storage::disk('public')->delete($service->image);
@@ -69,7 +68,7 @@ class AdminSubcategoryController extends Controller
         Service::where('subcategory_id', $subcategory->id)->delete();
         $subcategory->delete();
 
-        return redirect()->route('admin.subcategories.index')->with('success', 'Subkategori dan jasa terkait berhasil dihapus.');
+        return redirect()->route('admin.categories.index')->with('success', 'Subkategori dan jasa terkait berhasil dihapus.');
     }
 
     public function data()

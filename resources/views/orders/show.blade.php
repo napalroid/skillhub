@@ -93,7 +93,11 @@
                         };
                     @endphp
                     
-                    @if ($order->payment_status === 'paid' && $order->payment?->isAdminConfirmed())
+                    @if ($order->status === 'selesai')
+                        <div class="bg-[#2C9F45] text-white px-4 py-3 text-sm font-bold">
+                            Pemesanan jasa sudah selesai, sampai bertemu di jasa selanjutnya
+                        </div>
+                    @elseif ($order->payment_status === 'paid' && $order->payment?->isAdminConfirmed())
                         <div class="bg-black text-white px-4 py-3 text-sm font-bold">
                             Saldo dikonfirmasi admin. Seller telah diberi instruksi untuk segera mengerjakan pesanan jasa.
                         </div>

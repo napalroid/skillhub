@@ -135,11 +135,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/services/{service}/approve', [AdminController::class, 'approveService'])->name('services.approve');
     Route::post('/services/{service}/reject', [AdminController::class, 'rejectService'])->name('services.reject');
 
-    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
-    Route::post('/payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
-    Route::post('/payments/{payment}/confirm-balance', [PaymentController::class, 'confirmBalance'])->name('payments.confirm-balance');
-    Route::post('/payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
-
     Route::get('/escrow', [App\Http\Controllers\AdminEscrowController::class, 'index'])->name('escrow.index');
     Route::post('/escrow/{escrowTransaction}/confirm', [App\Http\Controllers\AdminEscrowController::class, 'confirm'])->name('escrow.confirm');
     Route::post('/escrow/{escrowTransaction}/reject', [App\Http\Controllers\AdminEscrowController::class, 'reject'])->name('escrow.reject');

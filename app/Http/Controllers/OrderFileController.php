@@ -54,6 +54,17 @@ class OrderFileController extends Controller
                 Order::STATUS_MENUNGGU_PERSETUJUAN,
             ], true)) {
             $order->update(['status' => Order::STATUS_MENUNGGU_PERSETUJUAN]);
+            
+            NotificationService::createAndDispatch(
+                userId: $order->buyer_id,
+                type: 'order_delivered',
+                title: 'Seller mengupload hasil jasa',
+                message: "Seller telah mengupload hasil untuk pesanan #{$order->id} ({$order->service->title}). Silakan cek dan selesaikan pesanan atau minta revisi.",
+                extraData: [
+                    'order_id' => $order->id,
+                    'service_id' => $order->service_id,
+                ]
+            );
         }
 
         return back()->with('success', 'File berhasil diunggah.');
