@@ -45,15 +45,15 @@
                 <div class="flex items-start justify-between gap-6 mb-6 pb-6 border-b border-gray-200">
                     <div class="flex-1 min-w-0">
                         <h1 class="font-heading text-2xl font-black tracking-tight mb-3">
-                            {{ $order->service->title }}
+                            {{ $order->service?->title ?? 'Pesanan #'.$order->id }}
                         </h1>
                         
                         <div class="flex flex-wrap gap-x-4 gap-y-2 text-xs">
                             <span class="text-gray-500">
-                                Penjual: <strong class="text-black font-bold">{{ $order->service->seller->name }}</strong>
+                                Penjual: <strong class="text-black font-bold">{{ $order->service?->seller?->name ?? 'N/A' }}</strong>
                             </span>
                             <span class="text-gray-500">
-                                Pembeli: <strong class="text-black font-bold">{{ $order->buyer->name }}</strong>
+                                Pembeli: <strong class="text-black font-bold">                        {{ $order->buyer?->name ?? 'N/A' }}</strong>
                             </span>
                         </div>
                     </div>
@@ -230,7 +230,7 @@
                         
                         <form id="revisiForm" method="POST" action="{{ route('order-files.revise', $order) }}" class="hidden space-y-2">
                             @csrf
-                            <input type="text" name="revision_note" placeholder="Jelaskan revisi yang diinginkan..." class="input-field text-xs">
+                            <input type="text" name="revision_note" placeholder="Jelaskan revisi yang diinginkan..." class="input-field text-xs" required>
                             <button type="submit" class="w-full bg-[#EDE734] text-black px-4 py-3 font-bold uppercase tracking-wider text-xs border-2 border-[#d4ce2a] hover:bg-[#d4ce2a]">
                                 Kirim
                             </button>
@@ -254,7 +254,7 @@
             </div>
             
             {{-- REVIEW SECTION --}} 
-            @if ($isBuyer && $order->status === 'selesai')
+            @if ($isBuyer && $order->status === 'selesai' && $order->service)
                 <div class="order-card">
                     <h2 class="font-heading text-sm font-black uppercase tracking-wider mb-4">Beri Review</h2>
                     
@@ -347,16 +347,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="order-card border-2 border-black">
-                    <h3 class="font-heading text-xs font-black uppercase tracking-wider mb-2">Butuh Bantuan?</h3>
-                    <p class="text-xs text-gray-700 mb-3">
-                        Ada masalah dengan pesanan? Hubungi counterparty atau ajukan laporan.
-                    </p>
-                    <button onclick="document.getElementById('reportForm').classList.toggle('hidden')" class="btn-danger w-full">
-                        Laporkan Masalah
-                    </button>
-                </div>
             @endif
             
             <div class="order-card border-2 border-black">
@@ -376,7 +366,7 @@
     <form id="reportForm" method="POST" action="{{ route('reports.store') }}" class="hidden mt-6 order-card" x-data="{ selectedRole: '', selectedCategory: '' }">
         @csrf
         <input type="hidden" name="order_id" value="{{ $order->id }}">
-        <input type="hidden" name="reported_user_id" value="{{ $isBuyer ? $order->service->user_id : $order->buyer_id }}">
+        <input type="hidden" name="reported_user_id" value="{{ $isBuyer ? $order->service?->user_id : $order->buyer_id }}">
         
         <h3 class="font-heading text-sm font-black uppercase tracking-wider mb-4">Laporan Masalah</h3>
         
