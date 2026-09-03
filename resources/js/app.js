@@ -3,17 +3,12 @@ import Alpine from 'alpinejs';
 import './echo';
 import './notification-listener';
 import './chat-realtime';
-import './skillhub-feature-motion.jsx';
-import './skillhub-staggered-menu.jsx';
-import './skillhub-orbit-stats.jsx';
-import './skillhub-cta-motion.jsx';
-import './skillhub-featured-services.jsx';
-import './skillhub-review-motion.jsx';
-import './skillhub-how-we-work.jsx';
-import './admin-mount.jsx';
-import './skillhub-decrypted-balance.jsx';
-import './skillhub-decrypted-greeting.jsx';
+
+// HANYA komponen global yang dibutuhkan di SEMUA halaman
+// StaggeredMenu adalah navigasi yang muncul di semua halaman
+import './components/StaggeredMenu.jsx';
 
 window.Alpine = Alpine;
 Alpine.start();
 
+console.log('✅ Core bundle loaded (global components only)');

@@ -59,10 +59,10 @@
             @endforeach
         </div>
 
-        <form action="{{ route('conversations.store', $conversation) }}" method="POST" class="border-t border-[#e5e5e5] p-3 sm:grid-cols-[1fr_auto] sm:p-4 grid gap-2 bg-white">
+        <form data-chat-form action="{{ route('conversations.store', $conversation) }}" method="POST" class="border-t border-[#e5e5e5] p-3 sm:grid-cols-[1fr_auto] sm:p-4 grid gap-2 bg-white">
             @csrf
-            <textarea name="message" maxlength="1500" required placeholder="Tulis pesan..." class="min-h-12 resize-none border border-[#e5e5e5] bg-white p-3 text-sm text-black outline-none focus:border-black"></textarea>
-            <button type="submit" class="bg-black px-6 py-3 text-[11px] font-bold uppercase tracking-[.08em] text-white transition hover:bg-black/80 disabled:opacity-60 sm:px-8">Kirim</button>
+            <textarea data-chat-input name="message" maxlength="1500" required placeholder="Tulis pesan..." class="min-h-12 resize-none border border-[#e5e5e5] bg-white p-3 text-sm text-black outline-none focus:border-black"></textarea>
+            <button data-chat-submit type="submit" class="bg-black px-6 py-3 text-[11px] font-bold uppercase tracking-[.08em] text-white transition hover:bg-black/80 disabled:opacity-60 sm:px-8">Kirim</button>
         </form>
         <p data-chat-error class="px-4 pb-3 text-xs font-bold text-red-600"></p>
     </section>

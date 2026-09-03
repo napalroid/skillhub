@@ -72,9 +72,11 @@
                                                 @csrf
                                                 <button type="submit" class="btn-success text-[10px] px-3 py-1.5">Setujui</button>
                                             </form>
-                                            <form action="{{ route('admin.services.reject', $service) }}" method="POST" class="inline" onsubmit="return confirm('Tolak jasa ini?')">
+                                            <form action="{{ route('admin.services.reject', $service) }}" method="POST" class="inline" x-data>
                                                 @csrf
-                                                <button type="submit" class="btn-danger text-[10px] px-3 py-1.5">Tolak</button>
+                                                <button type="button" 
+                                                        @click="if (confirm('Tolak jasa ini?')) $el.closest('form').submit()"
+                                                        class="btn-danger text-[10px] px-3 py-1.5">Tolak</button>
                                             </form>
                                         </div>
                                     </td>

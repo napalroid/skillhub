@@ -43,6 +43,9 @@ class MidtransService
             'transaction_details' => ['order_id' => $midtransOrderId, 'gross_amount' => (int) round((float) $order->final_price)],
             'item_details' => [['id' => (string) $order->service_id, 'price' => (int) round((float) $order->final_price), 'quantity' => 1, 'name' => str($order->service->title)->limit(50)->toString()]],
             'qris' => ['acquirer' => config('midtrans.qris_acquirer')],
+            'callbacks' => [
+                'finish' => config('midtrans.notification_url'),
+            ],
         ]);
 
         return json_decode(json_encode($response), true);

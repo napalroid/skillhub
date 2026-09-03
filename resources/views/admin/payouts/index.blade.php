@@ -122,7 +122,7 @@
                                                     <button type="submit" class="w-full btn-danger text-[10px] px-2 py-1.5 justify-center">Tolak</button>
                                                 </form>
                                             @elseif ($payout->status === 'failed')
-                                                <form action="{{ route('admin.payout.retry', $payout) }}" method="POST" onsubmit="return confirm('Ulangi pencairan ini? Saldo akan dikurangi lagi dan ditransfer ke user.')">
+                                                <form action="{{ route('admin.payouts.retry', $payout) }}" method="POST" onsubmit="return confirm('Ulangi pencairan ini? Saldo akan dikurangi lagi dan ditransfer ke user.')">
                                                     @csrf
                                                     <button type="submit" class="w-full btn-outline text-[10px] px-4 py-2 justify-center border-[#999999] text-[#999999] hover:bg-[#999999] hover:text-white">Coba Lagi</button>
                                                 </form>

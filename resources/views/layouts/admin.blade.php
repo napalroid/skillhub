@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'SkillHub Admin' }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/routes/admin.js'])
     <script>
         window.route = "{{ route('admin.dashboard') }}".replace('dashboard', '');
         window.csrfToken = "{{ csrf_token() }}";

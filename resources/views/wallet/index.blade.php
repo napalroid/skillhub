@@ -135,5 +135,9 @@
         </div>
     </div>
 
+    @push('scripts')
+    @vite('resources/js/routes/wallet.js')
+    @endpush
+    
     <script src="{{ asset('js/wallet-ui.js') }}"></script>
 </x-layouts.app>

@@ -191,6 +191,9 @@ class PaymentController extends Controller
                 
                 $escrowService = app(\App\Services\EscrowService::class);
                 $escrowService->credit($payment);
+                
+                $this->notifySellerOrderConfirmed($order);
+                $this->notifyBuyerOrderConfirmed($order);
             }
         });
 

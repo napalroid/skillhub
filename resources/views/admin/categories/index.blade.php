@@ -1,4 +1,5 @@
 <x-layouts.admin>
+    <div x-data="{ showCreateModal: false, showSubCreateModal: false, imageName: '', iconName: '' }">
     @php
         $initialCategories = $categories->map(function ($cat) {
             return [
@@ -274,4 +275,5 @@
     });
     </script>
     @endsection
+    </div>
 </x-layouts.admin>

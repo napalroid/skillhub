@@ -105,6 +105,21 @@
                                 @error('subcategory_id')<p class="mt-2 text-xs font-medium text-[#0051BA]">{{ $message }}</p>@enderror
                             </div>
                         </div>
+
+                        {{-- Request Kategori Toggle --}}
+                        <div class="mt-4 p-4 bg-[#FFF9E6] rounded">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold text-black mb-1">Tidak menemukan kategori yang sesuai?</p>
+                                    <p class="text-xs text-[#555555]">Request kategori atau subkategori baru ke admin</p>
+                                </div>
+                                <button type="button" 
+                                        @click="$dispatch('open-category-request-modal')"
+                                        class="shrink-0 px-3 py-1.5 text-xs font-bold uppercase tracking-wide bg-[#0051BA] text-white hover:bg-[#003d8f] transition">
+                                    Request
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -217,6 +232,117 @@
                 </div>
             </form>
         </section>
+
+        {{-- Modal Request Kategori (Di luar form utama) --}}
+        <div x-data="{ showModal: false }" 
+             @open-category-request-modal.window="showModal = true"
+             @keydown.escape.window="showModal = false"
+             x-show="showModal"
+             x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto"
+             style="display: none;">
+            
+            {{-- Overlay --}}
+            <div class="fixed inset-0 bg-black/50 transition-opacity" @click="showModal = false"></div>
+            
+            {{-- Modal Content --}}
+            <div class="flex min-h-screen items-center justify-center p-4">
+                <div @click.away="showModal = false" 
+                     class="relative w-full max-w-lg bg-white shadow-xl transform transition-all">
+                    
+                    {{-- Header --}}
+                    <div class="border-b border-[#DDDDDD] px-6 py-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-heading text-lg font-bold text-black">Request Kategori/Subkategori</h3>
+                            <button type="button" @click="showModal = false" class="text-2xl leading-none text-[#999999] hover:text-black transition">&times;</button>
+                        </div>
+                    </div>
+
+                    {{-- Form --}}
+                    <form method="POST" action="{{ route('category-request.store') }}" class="p-6 space-y-4">
+                        @csrf
+
+                        {{-- Request Type --}}
+                        <div x-data="{ requestType: '' }">
+                            <label class="block text-xs font-bold uppercase tracking-wide text-black mb-2">Tipe Request <span class="text-[#E4002B]">*</span></label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <label class="relative flex items-center px-3 py-2.5 border cursor-pointer transition text-xs"
+                                       :class="requestType === 'category_request' ? 'border-[#0051BA] bg-[#0051BA] text-white' : 'border-[#DDDDDD] hover:border-[#0051BA]'">
+                                    <input type="radio" name="request_type" value="category_request" x-model="requestType" required class="sr-only">
+                                    <span class="font-bold uppercase">Kategori Baru</span>
+                                </label>
+                                <label class="relative flex items-center px-3 py-2.5 border cursor-pointer transition text-xs"
+                                       :class="requestType === 'subcategory_request' ? 'border-[#0051BA] bg-[#0051BA] text-white' : 'border-[#DDDDDD] hover:border-[#0051BA]'">
+                                    <input type="radio" name="request_type" value="subcategory_request" x-model="requestType" required class="sr-only">
+                                    <span class="font-bold uppercase">Subkategori Baru</span>
+                                </label>
+                            </div>
+
+                            {{-- Category Request Fields --}}
+                            <div x-show="requestType === 'category_request'" x-collapse class="mt-4 space-y-3">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wide text-black mb-2">Nama Kategori <span class="text-[#E4002B]">*</span></label>
+                                    <input type="text" 
+                                           name="requested_category_name" 
+                                           :required="requestType === 'category_request'"
+                                           class="w-full px-3 py-2 border border-[#DDDDDD] focus:border-[#0051BA] focus:outline-none transition text-sm"
+                                           placeholder="Contoh: Fotografi & Videografi">
+                                </div>
+                            </div>
+
+                            {{-- Subcategory Request Fields --}}
+                            <div x-show="requestType === 'subcategory_request'" x-collapse class="mt-4 space-y-3">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wide text-black mb-2">Pilih Kategori <span class="text-[#E4002B]">*</span></label>
+                                    <select name="existing_category_id" 
+                                            :required="requestType === 'subcategory_request'"
+                                            class="w-full px-3 py-2 border border-[#DDDDDD] focus:border-[#0051BA] focus:outline-none transition text-sm">
+                                        <option value="">-- Pilih Kategori --</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wide text-black mb-2">Nama Subkategori <span class="text-[#E4002B]">*</span></label>
+                                    <input type="text" 
+                                           name="requested_subcategory_name" 
+                                           :required="requestType === 'subcategory_request'"
+                                           class="w-full px-3 py-2 border border-[#DDDDDD] focus:border-[#0051BA] focus:outline-none transition text-sm"
+                                           placeholder="Contoh: Wedding Photography">
+                                </div>
+                            </div>
+
+                            {{-- Reason --}}
+                            <div class="mt-4">
+                                <label class="block text-xs font-bold uppercase tracking-wide text-black mb-2">Alasan Request <span class="text-[#E4002B]">*</span></label>
+                                <textarea name="reason_for_request" 
+                                          rows="3" 
+                                          required
+                                          minlength="10"
+                                          maxlength="1000"
+                                          class="w-full px-3 py-2 border border-[#DDDDDD] focus:border-[#0051BA] focus:outline-none transition text-sm resize-y"
+                                          placeholder="Jelaskan mengapa kategori/subkategori ini perlu ditambahkan..."></textarea>
+                                <p class="text-xs text-[#999999] mt-1">Min 10 karakter, max 1000 karakter</p>
+                            </div>
+
+                            {{-- Submit --}}
+                            <div class="flex justify-end gap-2 pt-2">
+                                <button type="button" 
+                                        @click="showModal = false"
+                                        class="px-4 py-2 text-xs font-bold uppercase border border-[#DDDDDD] hover:border-[#555555] transition">
+                                    Batal
+                                </button>
+                                <button type="submit" 
+                                        class="px-4 py-2 text-xs font-bold uppercase bg-[#0051BA] text-white hover:bg-black transition">
+                                    Kirim Request
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 

@@ -501,6 +501,9 @@ class AdminController extends Controller
     {
         $query = Service::with(['seller', 'subcategory.category'])->latest();
 
+        // Exclude pending services - they should only appear in /admin/services/pending
+        $query->where('status', '!=', 'pending');
+
         // Status filter
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);

@@ -221,7 +221,7 @@
     </section>
 
     {{-- KATEGORI MANAGEMENT + APPROVAL QUEUE --}}
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6" data-stagger-container>
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6" data-stagger-container x-data="{ showCategoryModal: false }">
 
         {{-- Category Management - Compact list on mobile --}}
         <div class="admin-card" data-stagger-item>
@@ -322,9 +322,11 @@
                                             @csrf
                                             <button type="submit" class="btn-success text-[10px] px-2.5 sm:px-3 py-1.5 w-full sm:w-auto">Setujui</button>
                                         </form>
-                                        <form action="{{ route('admin.services.reject', $service) }}" method="POST" class="flex-1 sm:flex-none">
+                                        <form action="{{ route('admin.services.reject', $service) }}" method="POST" class="flex-1 sm:flex-none" x-data>
                                             @csrf
-                                            <button type="submit" onclick="return confirm('Tolak jasa ini?')" class="btn-danger text-[10px] px-2.5 sm:px-3 py-1.5 w-full sm:w-auto">Tolak</button>
+                                            <button type="button" 
+                                                    @click="if (confirm('Tolak jasa ini?')) $el.closest('form').submit()"
+                                                    class="btn-danger text-[10px] px-2.5 sm:px-3 py-1.5 w-full sm:w-auto">Tolak</button>
                                         </form>
                                     </div>
                                 </div>

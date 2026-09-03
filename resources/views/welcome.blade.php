@@ -88,7 +88,7 @@
             transform: scale(1.02);
         }
     </style>
-    @vite('resources/js/app.js')
+    @vite(['resources/js/app.js', 'resources/js/routes/welcome.js'])
 </head>
 
 <body id="top" class="overflow-x-hidden bg-white text-[#171717]">

@@ -1,19 +1,35 @@
 document.addEventListener('DOMContentLoaded', () => {
     const chatRoot = document.getElementById('skillhub-chat');
     
-    if (!chatRoot) return;
+    if (!chatRoot) {
+        console.log('[Chat] Chat root element not found');
+        return;
+    }
     
     const list = chatRoot.querySelector('[data-message-list]');
-    const messageForm = chatRoot.querySelector('form[action*="/messages/"]');
+    const messageForm = chatRoot.querySelector('[data-chat-form]');
     const offerFormAccept = chatRoot.querySelector('form[action*="/offers/accept"]');
     const offerFormReject = chatRoot.querySelector('form[action*="/offers/reject"]');
-    const input = chatRoot.querySelector('textarea');
-    const submit = chatRoot.querySelector('button[type="submit"]');
+    const input = chatRoot.querySelector('[data-chat-input]');
+    const submit = chatRoot.querySelector('[data-chat-submit]');
     const currentUserId = Number(chatRoot.dataset.userId);
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
     
+    console.log('[Chat] Elements found:', { 
+        chatRoot: !!chatRoot, 
+        messageForm: !!messageForm, 
+        input: !!input, 
+        submit: !!submit,
+        csrf: !!csrf 
+    });
+    
     if (!csrf) {
         console.error('[Chat] CSRF token not found!');
+        return;
+    }
+    
+    if (!messageForm) {
+        console.error('[Chat] Message form not found!');
         return;
     }
     
@@ -82,9 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Handle form kirim pesan saja
-    if (messageForm) {
-        messageForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
+    if (messageForm && submit) {
+        console.log('[Chat] Attaching click listener to submit button');
+        
+        const sendMessage = async () => {
+            console.log('[Chat] Send message triggered');
             const message = input.value.trim();
             if (!message) return;
             submit.disabled = true;
@@ -114,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 const payload = await response.json();
+                console.log('[Chat] Server response:', payload);
                 append(payload.message);
                 input.value = '';
                 input.focus();
@@ -124,7 +143,18 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 submit.disabled = false;
             }
+        };
+        
+        submit.addEventListener('click', sendMessage);
+        
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
         });
+        
+        console.log('[Chat] Event listeners attached successfully');
     }
 
     // Handle tombol "Terima"

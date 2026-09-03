@@ -2,7 +2,6 @@
     @php
         $statusLabels = [
             'approved' => ['label' => 'Aktif', 'class' => 'badge-success'],
-            'pending' => ['label' => 'Menunggu', 'class' => 'badge-pending'],
             'rejected' => ['label' => 'Ditolak', 'class' => 'badge-error'],
             'disabled' => ['label' => 'Dinonaktifkan', 'class' => 'badge-error'],
         ];
@@ -20,7 +19,7 @@
         <div class="flex flex-wrap items-center gap-3">
             {{-- Status Filter --}}
             <div class="flex items-center gap-1 border border-[#DDDDDD] rounded-sm p-1 bg-white">
-                @foreach(['all' => 'Semua', 'approved' => 'Aktif', 'pending' => 'Menunggu', 'rejected' => 'Ditolak', 'disabled' => 'Dinonaktifkan'] as $value => $label)
+                @foreach(['all' => 'Semua', 'approved' => 'Aktif', 'rejected' => 'Ditolak', 'disabled' => 'Dinonaktifkan'] as $value => $label)
                     <a href="{{ route('admin.services.index', array_merge(request()->query(), ['status' => $value])) }}"
                        class="px-3 py-1.5 text-xs font-bold text-uppercase-tracked rounded-sm transition
                              {{ $statusFilter === $value ? 'bg-black text-white' : 'text-[#555555] hover:text-black hover:bg-[#F5F5F5]' }}">
@@ -141,23 +140,12 @@
                                                class="btn-ghost p-1.5 text-[10px]" aria-label="Lihat di marketplace">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             </a>
-                                            @if ($service->status === 'pending')
-                                                <form action="{{ route('admin.services.approve', $service) }}" method="POST" class="inline">
+                                            @if ($service->status === 'approved')
+                                                <form id="deactivate-form-{{ $service->id }}" action="{{ route('admin.services.reject', $service) }}" method="POST" class="inline" x-data>
                                                     @csrf
-                                                    <button type="submit" class="btn-success text-[10px] px-2 py-1" title="Setujui">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m5 13 4 4L19 7"/></svg>
-                                                    </button>
-                                                </form>
-                                                <form action="{{ route('admin.services.reject', $service) }}" method="POST" class="inline" onsubmit="return confirm('Tolak jasa ini?')">
-                                                    @csrf
-                                                    <button type="submit" class="btn-danger text-[10px] px-2 py-1" title="Tolak">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18 18 6M6 6l12 12"/></svg>
-                                                    </button>
-                                                </form>
-                                            @elseif ($service->status === 'approved')
-                                                <form id="deactivate-form-{{ $service->id }}" action="{{ route('admin.services.reject', $service) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    <button type="button" onclick="if(confirm('Nonaktifkan jasa ini dari marketplace?')) document.getElementById('deactivate-form-{{ $service->id }}').submit()" class="text-[#E4002B] hover:text-[#C90021] transition p-1 rounded hover:bg-[#F5F5F5] cursor-pointer" title="Nonaktifkan dari marketplace">
+                                                    <button type="button" 
+                                                            @click="if (confirm('Nonaktifkan jasa ini dari marketplace?')) $el.closest('form').submit()"
+                                                            class="text-[#E4002B] hover:text-[#C90021] transition p-1 rounded hover:bg-[#F5F5F5] cursor-pointer" title="Nonaktifkan dari marketplace">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/></svg>
                                                     </button>
                                                 </form>

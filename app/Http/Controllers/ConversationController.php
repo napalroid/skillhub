@@ -89,6 +89,7 @@ class ConversationController extends Controller
         ])->load('sender');
 
         $conversation->touch();
+        
         try {
             broadcast(new MessageSent($message))->toOthers();
         } catch (\Exception $exception) {
@@ -98,28 +99,37 @@ class ConversationController extends Controller
             ]);
         }
 
-        // Kirim notifikasi ke penerima (bukan pengirim) agar ia tahu ada pesan baru.
         $recipientId = $conversation->buyer_id === auth()->id() ? $conversation->seller_id : $conversation->buyer_id;
         if ($recipientId) {
-            NotificationService::createAndDispatch(
-                userId: $recipientId,
-                type: 'message',
-                title: 'Pesan baru dari ' . auth()->user()->name,
-                message: Str::limit($message->message, 100),
-                extraData: [
-                    'service_id' => $conversation->service_id,
-                    'conversation_id' => $conversation->id,
-                ]
-            );
+            try {
+                NotificationService::createAndDispatch(
+                    userId: $recipientId,
+                    type: 'message',
+                    title: 'Pesan baru dari ' . auth()->user()->name,
+                    message: Str::limit($message->message, 100),
+                    extraData: [
+                        'service_id' => $conversation->service_id,
+                        'conversation_id' => $conversation->id,
+                    ]
+                );
+            } catch (\Exception $e) {
+                \Log::warning('Notification failed but message saved', [
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
 
-        return response()->json(['message' => [
-            'id' => $message->id,
-            'sender_id' => $message->sender_id,
-            'sender_name' => $message->sender->name,
-            'message' => $message->message,
-            'created_at' => $message->created_at->format('H:i'),
-        ]], 201);
+        if ($request->expectsJson()) {
+            return response()->json(['message' => [
+                'id' => $message->id,
+                'sender_id' => $message->sender_id,
+                'sender_name' => $message->sender->name,
+                'message' => $message->message,
+                'created_at' => $message->created_at->format('H:i'),
+            ]], 201);
+        }
+
+        return back()->with('success', 'Pesan terkirim');
     }
 
     private function authorizeParticipant(Conversation $conversation): void

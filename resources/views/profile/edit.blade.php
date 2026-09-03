@@ -120,10 +120,12 @@
                             </div>
 
                             <div class="flex flex-col-reverse gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                                <form method="post" action="{{ route('profile.destroy') }}" class="m-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun? Semua data akan hilang permanen.')">
+                                <form method="post" action="{{ route('profile.destroy') }}" class="m-0" x-data="{ confirmDelete: false }">
                                     @csrf
                                     @method('delete')
-                                    <button type="submit" class="rounded-2xl px-5 py-3 text-center text-sm font-bold text-red-600 transition hover:bg-red-50">
+                                    <button type="button" 
+                                            @click="if (confirm('Apakah Anda yakin ingin menghapus akun? Semua data akan hilang permanen.')) $el.closest('form').submit()"
+                                            class="rounded-2xl px-5 py-3 text-center text-sm font-bold text-red-600 transition hover:bg-red-50">
                                         Hapus akun
                                     </button>
                                 </form>

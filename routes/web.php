@@ -105,6 +105,12 @@ Route::middleware(['auth'])->group(function () {
 
     // --- LAPORAN ---
     Route::post('/laporan', [ReportController::class, 'store'])->name('reports.store');
+    
+    // --- REQUEST KATEGORI ---
+    Route::get('/request-kategori', function() {
+        return view('category-request.create');
+    })->name('category-request.create');
+    Route::post('/request-kategori', [App\Http\Controllers\CategoryRequestController::class, 'store'])->name('category-request.store');
 
     // --- DOMPET / PENCARIAN DANA ---
     Route::get('/dompet', [WalletController::class, 'index'])->name('wallet.index');
