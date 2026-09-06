@@ -1,8 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'Pesanan #{{ $order->id }}')
+@section('title')
+    Pesanan #{{ $order->id }}
+@endsection
 
 @section('content')
+@php
+    $statusMap = [
+        'menunggu_pembayaran' => ['bg' => '#f5f5f5', 'text' => '#555555'],
+        'menunggu_verifikasi' => ['bg' => '#f5f5f5', 'text' => '#555555'],
+        'dibayar' => ['bg' => '#EDE734', 'text' => '#555555'],
+        'dikerjakan' => ['bg' => '#000', 'text' => '#fff'],
+        'menunggu_persetujuan' => ['bg' => '#2C9F45', 'text' => '#fff'],
+        'selesai' => ['bg' => '#2C9F45', 'text' => '#fff'],
+        'dibatalkan' => ['bg' => '#E4002B', 'text' => '#fff'],
+    ];
+    $statusStyle = $statusMap[$order->status] ?? ['bg' => '#f5f5f5', 'text' => '#555555'];
+@endphp
+
 <style>
     .order-card {
         background: #fff;
@@ -20,19 +35,6 @@
         letter-spacing: 0.12em;
         border-radius: 1px;
     }
-    
-    @php
-        $statusMap = [
-            'menunggu_pembayaran' => ['bg' => '#f5f5f5', 'text' => '#555555'],
-            'menunggu_verifikasi' => ['bg' => '#f5f5f5', 'text' => '#555555'],
-            'dibayar' => ['bg' => '#EDE734', 'text' => '#555555'],
-            'dikerjakan' => ['bg' => '#000', 'text' => '#fff'],
-            'menunggu_persetujuan' => ['bg' => '#2C9F45', 'text' => '#fff'],
-            'selesai' => ['bg' => '#2C9F45', 'text' => '#fff'],
-            'dibatalkan' => ['bg' => '#E4002B', 'text' => '#fff'],
-        ];
-        $statusStyle = $statusMap[$order->status] ?? ['bg' => '#f5f5f5', 'text' => '#555555'];
-    @endphp
 </style>
 
 <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">
@@ -78,6 +80,76 @@
                 </div>
             </div>
             
+            {{-- BOOKING INFO SECTION --}} 
+            @if($order->booking_data || $order->time_slot_id)
+                <div class="order-card">
+                    <h2 class="font-heading text-sm font-black uppercase tracking-wider mb-4">Informasi Booking</h2>
+                    
+                    @if($order->time_slot_id)
+                        @php
+                            $timeSlot = $order->timeSlot;
+                        @endphp
+                        @if($timeSlot)
+                        <div class="mb-4">
+                            <p class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Waktu Booking</p>
+                            <div class="flex items-center gap-2 bg-[#F0F9FF] px-4 py-3 rounded-lg border border-[#BAE6FD]">
+                                <svg class="w-5 h-5 text-[#0284C7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <div>
+                                    <p class="font-bold text-[#0284C7]">{{ \Carbon\Carbon::parse($timeSlot->date)->format('l, d F Y') }}</p>
+                                    <p class="text-sm text-gray-700">{{ $timeSlot->time_start }} - {{ $timeSlot->time_end }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        @if($isSeller && $order->status !== 'dibatalkan')
+                            @php
+                                $availableSlots = $order->service->timeSlots
+                                    ->filter(fn($s) => $s->date >= now()->startOfDay())
+                                    ->sortBy('date')
+                                    ->sortBy('time_start');
+                            @endphp
+                            @if($availableSlots->count() > 0)
+                                <form method="POST" action="{{ route('orders.reschedule', $order) }}" class="inline">
+                                    @csrf
+                                    <div class="space-y-3">
+                                        <select name="time_slot_id" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                                            <option value="">-- Pilih Slot Baru --</option>
+                                            @foreach($availableSlots as $slot)
+                                                <option value="{{ $slot->id }}" {{ $slot->id == $order->time_slot_id ? 'disabled' : '' }}>
+                                                    {{ \Carbon\Carbon::parse($slot->date)->format('d M Y') }} - {{ $slot->time_start }} - {{ $slot->time_end }}
+                                                    ({{ $slot->getAvailableCountAttribute() }} tersisa)
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <input type="text" name="notes" placeholder="Catatan perubahan (opsional)" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                                        <button type="submit" class="w-full rounded-lg bg-[#F59E0B] px-4 py-2 text-sm font-bold text-white hover:bg-[#D97706]">
+                                            Update Jadwal
+                                        </button>
+                                    </div>
+                                </form>
+                            @endif
+                        @endif
+                        @endif
+                    @endif
+                    
+                    @if($order->booking_data)
+                        <div class="mt-4 border-t border-gray-100 pt-4">
+                            <p class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Data Booking</p>
+                            <div class="space-y-2">
+                                @foreach($order->booking_data as $key => $value)
+                                    @if($value)
+                                        <div class="flex gap-2 text-sm">
+                                            <span class="text-gray-500 font-medium uppercase">{{ $key }}</span>
+                                            <span class="text-gray-900">{{ $value }}</span>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @endif
+            
             {{-- PAYMENT STATUS CARD (Buyer) --}}
             @if($isBuyer)
                 <div class="order-card">
@@ -90,6 +162,17 @@
                             'expired' => 'Kedaluwarsa',
                             'failed' => 'Gagal',
                             default => ucfirst((string) $order->payment_status),
+                        };
+
+                        $orderStatusLabel = match ($order->status) {
+                            'menunggu_pembayaran' => 'Menunggu Pembayaran',
+                            'menunggu_konfirmasi' => 'Menunggu Konfirmasi Admin',
+                            'dikonfirmasi' => 'Dikonfirmasi - Siap Dikerjakan',
+                            'dikerjakan' => 'Proses Pengerjaan',
+                            'menunggu_persetujuan' => 'Menunggu Persetujuan Buyer',
+                            'selesai' => 'Selesai',
+                            'dibatalkan' => 'Dibatalkan',
+                            default => ucfirst((string) $order->status),
                         };
                     @endphp
                     
@@ -169,10 +252,22 @@
                 {{-- SELLER ACTIONS --}} 
                 @if ($isSeller)
                     <div class="space-y-3 pt-4 border-t border-gray-200">
-                        @if ($order->status === 'menunggu_persetujuan')
+                        @if ($order->status === 'menunggu_konfirmasi')
+                            <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-3 rounded">
+                                <p class="text-xs font-bold">
+                                    ⏳ Pembayaran sedang menunggu konfirmasi admin. Tombol "Mulai Kerjakan" akan muncul setelah admin mengkonfirmasi saldo masuk.
+                                </p>
+                            </div>
+                        @elseif ($order->status === 'menunggu_persetujuan')
                             <div class="bg-[#EDE734] border border-[#d4ce2a] px-4 py-3">
                                 <p class="text-xs font-bold text-black">
                                     Hasil sudah dikirim. Menunggu buyer menyetujui — setelah disetujui, dana cair otomatis ke dompet 1 jam kemudian.
+                                </p>
+                            </div>
+                        @elseif ($order->status === 'dikonfirmasi')
+                            <div class="bg-green-50 border border-green-200 text-green-800 p-3 rounded">
+                                <p class="text-xs font-bold">
+                                    ✓ Pembayaran sudah dikonfirmasi admin. Klik "Mulai Kerjakan" untuk memulai pengerjaan.
                                 </p>
                             </div>
                         @elseif ($order->status === 'dikerjakan')
@@ -183,16 +278,16 @@
                             </div>
                         @endif
                         
-                        @if ($order->status === 'dibayar')
-                            <form method="POST" action="{{ route('orders.start-work', $order) }}">
+                        @if ($order->status === 'dikonfirmasi')
+                            <form method="POST" action="{{ route('orders.start-work', $order) }}" onsubmit="return handleStartWork(event, this)">
                                 @csrf
-                                <button type="submit" class="btn-primary w-full">
+                                <button type="submit" class="btn-primary w-full" id="startWorkBtn">
                                     Mulai Kerjakan
                                 </button>
                             </form>
                         @endif
                         
-                        @if (in_array($order->status, ['dibayar', 'dikerjakan']))
+                        @if (in_array($order->status, ['dikonfirmasi', 'dikerjakan']))
                             <form method="POST" action="{{ route('order-files.store', $order) }}" enctype="multipart/form-data" class="space-y-2">
                                 @csrf
                                 <input type="hidden" name="file_type" value="hasil">
@@ -409,4 +504,17 @@
         </div>
     </form>
 </div>
+
+<script>
+function handleStartWork(event, form) {
+    const btn = document.getElementById('startWorkBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Anda akan memproses pekerjaan, buyer akan segera diberitahu.';
+        btn.classList.add('opacity-75', 'cursor-not-allowed');
+    }
+    return true;
+}
+</script>
+
 @endsection

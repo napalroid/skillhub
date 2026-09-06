@@ -63,7 +63,7 @@ class EscrowService
 
             $fresh->order()->update([
                 'payment_status' => 'paid',
-                'status' => 'dibayar',
+                'status' => 'dikonfirmasi',
                 'paid_at' => $fresh->order->paid_at ?? now(),
             ]);
         });

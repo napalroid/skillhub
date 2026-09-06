@@ -205,4 +205,29 @@ class ServiceController extends Controller
         $service->update($data);
         return redirect()->route('services.my')->with('success', 'Jasa diperbarui.');
     }
+
+    public function updateBookingConfig(Request $request, $id)
+    {
+        $service = Service::where('user_id', auth()->id())->findOrFail($id);
+
+        $request->validate([
+            'booking_enabled' => 'nullable|boolean',
+            'booking_config' => 'nullable|array',
+        ]);
+
+        $updateData = [];
+
+        if ($request->has('booking_enabled')) {
+            $updateData['booking_enabled'] = $request->booking_enabled;
+        }
+
+        if ($request->has('booking_config')) {
+            $updateData['booking_config'] = $request->booking_config;
+            $updateData['last_booking_config_edit'] = now();
+        }
+
+        $service->update($updateData);
+
+        return redirect()->route('services.edit', $service->id)->with('success', 'Konfigurasi booking berhasil diperbarui');
+    }
 }

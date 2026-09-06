@@ -4,12 +4,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
     server: {
-        host: true,
-        https: true,
-        hmr: {
-            host: 'elastic-landmass-shortcut.ngrok-free.dev',
-            protocol: 'wss',
-        },
+        host: 'localhost',
     },
 
     plugins: [
@@ -22,6 +17,7 @@ export default defineConfig({
                 'resources/js/routes/welcome.js',
                 'resources/js/routes/wallet.js',
                 'resources/js/routes/admin.js',
+                'resources/js/booking-calendar.jsx',
             ],
             refresh: true,
         }),

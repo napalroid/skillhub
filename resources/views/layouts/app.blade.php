@@ -39,7 +39,8 @@
                  data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
                  data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
                  data-dompet="{{ route('wallet.index') }}"
-                 data-pesanan="{{ route('orders.index') }}"
+                  data-pesanan="{{ route('orders.index') }}"
+                  data-services-my="{{ url('/jasa/saya') }}"
                  data-csrf-token="{{ csrf_token() }}"
                  data-is-admin="{{ auth()->user()?->isAdmin() ? 'true' : 'false' }}"
                  data-admin-dashboard="{{ auth()->user()?->isAdmin() ? route('admin.dashboard') : '' }}"></div>
@@ -60,7 +61,11 @@
         <!-- Page Content -->
         <main class="flex-grow">
             @isset($slot)
-                {{ $slot }}
+                @if(!empty(trim($slot)))
+                    {{ $slot }}
+                @else
+                    @yield('content')
+                @endif
             @else
                 @yield('content')
             @endisset

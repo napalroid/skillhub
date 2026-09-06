@@ -46,6 +46,23 @@
                         <p class="mt-2 text-sm leading-6 text-slate-500">Edit detail jasa yang sudah kamu ajukan sebelumnya.</p>
                     </div>
 
+                     <div class="mb-6 border-b border-slate-200">
+                          <nav class="-mb-px flex gap-6" aria-label="Tabs">
+                              <a href="#informasi" 
+                                 class="tab-link whitespace-nowrap border-b-2 border-blue-600 px-1 py-4 text-sm font-bold text-blue-600"
+                                 data-tab="informasi">
+                                  Informasi Dasar
+                              </a>
+                              <a href="#booking-config" 
+                                 class="tab-link whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                                 data-tab="booking-config">
+                                  Booking Config
+                              </a>
+                          </nav>
+                     </div>
+
+                    <div id="tab-informasi" class="tab-content">
+
                     <form method="POST" action="{{ route('services.update', $service->id) }}" enctype="multipart/form-data" class="space-y-5">
                         @csrf
                         @method('PUT')
@@ -116,9 +133,21 @@
                         </div>
                     </form>
                 </div>
-            </div>
-        </div>
-    </section>
+
+                <div id="tab-booking-config" class="tab-content hidden">
+                    <div class="mb-6">
+                        <p class="text-sm font-bold uppercase tracking-widest text-emerald-600">Konfigurasi Booking</p>
+                        <h2 class="mt-2 text-xl font-extrabold tracking-tight text-slate-900">Atur Field Booking</h2>
+                        <p class="mt-2 text-sm leading-6 text-slate-500">Tambahkan field yang perlu diisi buyer saat memesan jasa ini.</p>
+                    </div>
+                    
+                     @livewire('booking.config-builder', ['service' => $service])
+                 </div>
+
+
+             </div>
+         </div>
+     </section>
 @endsection
 
 @push('scripts')
@@ -149,6 +178,31 @@
             });
 
             refreshSubcategories();
+
+            // Tab switching
+            const tabLinks = document.querySelectorAll('.tab-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetTab = link.dataset.tab;
+
+                    tabLinks.forEach(l => {
+                        l.classList.remove('border-blue-600', 'text-blue-600', 'font-bold');
+                        l.classList.add('border-transparent', 'text-slate-500', 'font-medium');
+                    });
+
+                    link.classList.remove('border-transparent', 'text-slate-500', 'font-medium');
+                    link.classList.add('border-blue-600', 'text-blue-600', 'font-bold');
+
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+
+                    document.getElementById('tab-' + targetTab).classList.remove('hidden');
+                });
+            });
         });
     </script>
 @endpush

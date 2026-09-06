@@ -1,14 +1,28 @@
 
 import Alpine from 'alpinejs';
-import './echo';
-import './notification-listener';
-import './chat-realtime';
-
-// HANYA komponen global yang dibutuhkan di SEMUA halaman
-// StaggeredMenu adalah navigasi yang muncul di semua halaman
-import './components/StaggeredMenu.jsx';
 
 window.Alpine = Alpine;
 Alpine.start();
 
-console.log('✅ Core bundle loaded (global components only)');
+console.log('✅ Alpine.js loaded');
+
+// Check if navigation menu exists
+const menuRoot = document.getElementById('skillhub-staggered-menu');
+
+if (menuRoot) {
+    console.log('🔄 Loading navigation modules...');
+    
+    // Load modules sequentially to ensure proper initialization
+    import('./echo')
+        .then(() => import('./notification-listener'))
+        .then(() => import('./chat-realtime'))
+        .then(() => import('./components/StaggeredMenu.jsx'))
+        .then(() => {
+            console.log('✅ Navigation & realtime modules loaded successfully');
+        })
+        .catch(err => {
+            console.error('❌ Failed to load navigation modules:', err);
+        });
+} else {
+    console.log('✅ Core bundle loaded (minimal - no navigation)');
+}

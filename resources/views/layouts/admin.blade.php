@@ -176,9 +176,13 @@
                 },
 
                 runEntryAnimations() {
+                    console.log('🎬 Running entry animations...');
+                    console.log('  - GSAP available:', !!window.gsap);
+                    
                     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
                     if (!window.gsap || prefersReduced) {
+                        console.log('⚠️ Skipping animations:', !window.gsap ? 'GSAP not loaded' : 'Reduced motion preferred');
                         document.querySelectorAll('.row-enter').forEach(el => {
                             el.style.opacity = '1';
                             el.style.transform = 'none';
@@ -186,6 +190,7 @@
                         return;
                     }
 
+                    console.log('✨ Animating with GSAP...');
                     if (window.gsap) {
                         gsap.from('.stat-card', {
                             opacity: 0, y: 16, duration: 0.5, ease: 'power2.out',
@@ -195,6 +200,7 @@
                         document.querySelectorAll('[data-stagger-container]').forEach(container => {
                             const items = container.querySelectorAll('[data-stagger-item]');
                             if (items.length) {
+                                console.log('  - Animating', items.length, 'stagger items');
                                 gsap.from(items, {
                                     opacity: 0, y: 12, duration: 0.4, ease: 'power2.out',
                                     stagger: 0.05, delay: 0.15

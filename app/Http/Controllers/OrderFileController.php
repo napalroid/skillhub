@@ -32,8 +32,8 @@ class OrderFileController extends Controller
             if (! $order->canBeDelivered()) {
                 abort(403, 'Pesanan belum bisa dikirimi hasil (status tidak sesuai).');
             }
-            if (! $order->payment || $order->payment->status !== 'verified') {
-                abort(403, 'Dana escrow belum ditahan. Tunggu admin konfirmasi saldo sebelum mengirim hasil.');
+            if (! $order->payment || ! $order->payment->isAdminConfirmed()) {
+                abort(403, 'Dana escrow belum dikonfirmasi admin. Tunggu konfirmasi saldo sebelum mengirim hasil.');
             }
         }
 
@@ -49,7 +49,7 @@ class OrderFileController extends Controller
         // (hanya kalau belum selesai/dibatalkan)
         if (in_array($validated['file_type'], ['hasil', 'revisi'])
             && in_array($order->status, [
-                Order::STATUS_DIBAYAR,
+                Order::STATUS_DIKONFIRMASI,
                 Order::STATUS_DIKERJAKAN,
                 Order::STATUS_MENUNGGU_PERSETUJUAN,
             ], true)) {
@@ -75,19 +75,37 @@ class OrderFileController extends Controller
      */
     public function startWork(Order $order)
     {
+        \Log::info('startWork method called', ['order_id' => $order->id, 'user_id' => auth()->id()]);
+
         if ($order->service->user_id !== auth()->id()) {
+            \Log::warning('startWork: User not authorized');
             abort(403, 'Hanya seller yang bisa memulai pengerjaan.');
         }
 
         if (! $order->canBeStartedBySeller()) {
+            \Log::warning('startWork: Order cannot be started', ['status' => $order->status]);
             return back()->with('error', 'Pesanan belum bisa dikerjakan (status tidak sesuai).');
         }
 
-        if (! $order->payment || $order->payment->status !== 'verified') {
+        if (! $order->payment || ! $order->payment->isAdminConfirmed()) {
+            \Log::warning('startWork: Payment not confirmed by admin', ['payment_status' => $order->payment?->status ?? 'null', 'admin_confirmed_at' => $order->payment?->admin_confirmed_at ?? 'null']);
             return back()->with('error', 'Dana escrow belum ditahan. Tunggu admin konfirmasi saldo.');
         }
 
         $order->update(['status' => Order::STATUS_DIKERJAKAN]);
+        \Log::info('Order status updated to dikerjakan', ['order_id' => $order->id]);
+
+        // Kirim notifikasi ke buyer
+        $notification = \App\Models\UserNotification::create([
+            'user_id' => $order->buyer_id,
+            'order_id' => $order->id,
+            'service_id' => $order->service_id,
+            'type' => 'order_in_progress',
+            'title' => 'Pesanan Sedang Dikerjakan',
+            'message' => 'Seller telah memproses pesanan jasa anda',
+            'is_read' => false,
+        ]);
+        \Log::info('Notification created', ['notification_id' => $notification->id, 'buyer_id' => $order->buyer_id]);
 
         return back()->with('success', 'Pengerjaan pesanan telah dimulai.');
     }

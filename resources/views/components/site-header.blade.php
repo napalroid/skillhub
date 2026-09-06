@@ -25,6 +25,10 @@
                         </x-slot>
 
                         <x-slot name="content">
+                            <x-dropdown-link :href="url('/jasa/saya')">
+                                {{ __('Jasa Saya') }}
+                            </x-dropdown-link>
+                            
                             <x-dropdown-link :href="route('profile.edit')">
                                 {{ __('Profil') }}
                             </x-dropdown-link>
@@ -71,6 +75,7 @@
                 @auth
                     <a href="{{ route('dashboard') }}" class="block px-2 py-2 text-sm text-slate-600 hover:text-blue-600">Dashboard</a>
                     <a href="{{ route('wallet.index') }}" class="block px-2 py-2 text-sm text-slate-600 hover:text-blue-600">Dompet</a>
+                    <a href="{{ url('/jasa/saya') }}" class="block px-2 py-2 text-sm text-slate-600 hover:text-blue-600">Jasa Saya</a>
                     <a href="{{ route('profile.edit') }}" class="block px-2 py-2 text-sm text-slate-600 hover:text-blue-600">Profil</a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

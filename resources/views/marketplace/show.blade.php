@@ -64,13 +64,14 @@
          data-user-id="{{ auth()->id() ?? '' }}"
          data-user-name="{{ auth()->user()?->name ?? '' }}"
          data-avatar-url="{{ auth()->user()?->avatar_url ?? '' }}"
-         data-profile-url="{{ route('profile.edit') }}"
-         data-logout-url="{{ route('logout') }}"
-         data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
-         data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
-         data-dompet="{{ route('wallet.index') }}"
-         data-pesanan="{{ route('orders.index') }}"
-         data-csrf-token="{{ csrf_token() }}"></div>
+          data-profile-url="{{ route('profile.edit') }}"
+          data-services-my="{{ auth()->check() ? route('services.my') : '#' }}"
+          data-logout-url="{{ route('logout') }}"
+          data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
+          data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
+           data-dompet="{{ route('wallet.index') }}"
+           data-pesanan="{{ route('orders.index') }}"
+           data-csrf-token="{{ csrf_token() }}"></div>
     <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)</script>
     <div x-data="productPage(@js($photos->values()), @js($reviewData), @js(session('success') ?? session('error')))" @keydown.escape.window="closeAll()" class="min-h-screen">
         <header class="border-b border-black/10 bg-[#f2f2f1]">
@@ -139,7 +140,7 @@
                         @if (auth()->id() !== $service->user_id)
                             <div class="mt-6 grid grid-cols-[1fr_1fr] gap-3">
                                 <form method="POST" action="{{ route('conversations.start', $service) }}">@csrf<button type="submit" class="w-full rounded-full border border-black bg-transparent px-4 py-3 text-xs font-bold transition hover:bg-white" title="Buka ruang chat untuk mendiskusikan harga">Diskusikan harga?</button></form>
-                                <form method="POST" action="{{ route('orders.store') }}" x-data="{ sending: false }" @submit="sending = true">@csrf<input type="hidden" name="service_id" value="{{ $service->id }}"><button :disabled="sending" class="flex w-full items-center justify-center gap-2 rounded-full bg-[#171717] px-4 py-3 text-xs font-bold text-white transition hover:bg-black disabled:opacity-70"><i x-show="sending" x-cloak data-lucide="loader-circle" class="h-3.5 w-3.5 animate-spin"></i><span x-text="sending ? 'Memproses...' : 'Pesan sekarang'"></span></button></form>
+                                <a href="{{ route('orders.create', $service) }}" class="flex w-full items-center justify-center gap-2 rounded-full bg-[#171717] px-4 py-3 text-xs font-bold text-white transition hover:bg-black">Pesan sekarang</a>
                             </div>
                         @else
                             <div class="mt-6 grid grid-cols-[1fr_1fr] gap-3">

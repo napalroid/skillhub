@@ -177,7 +177,7 @@ class PaymentController extends Controller
             $previouslyPaid = $updatedOrder->payment_status === 'paid';
             $updates = ['payment_status' => $effectiveStatus];
             if ($effectiveStatus === 'paid') {
-                $updates += ['status' => 'dibayar', 'paid_at' => $updatedOrder->paid_at ?? now()];
+                $updates += ['status' => 'menunggu_konfirmasi', 'paid_at' => $updatedOrder->paid_at ?? now()];
             }
             if ($effectiveStatus === 'expired' || $effectiveStatus === 'failed') {
                 $updates['status'] = 'menunggu_pembayaran';
@@ -334,9 +334,11 @@ class PaymentController extends Controller
         $payment->update([
             'status' => 'verified',
             'verified_by' => auth()->id(),
+            'admin_confirmed_at' => now(),
+            'admin_confirmed_by' => auth()->id(),
         ]);
 
-        $payment->order->update(['status' => 'dibayar']);
+        $payment->order->update(['status' => 'dikonfirmasi']);
 
         $payment->loadMissing('order.service');
         $this->notifySellerOrderConfirmed($payment->order);

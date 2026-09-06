@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    protected $fillable = ['service_id', 'buyer_id', 'price_offer_id', 'status', 'payment_status', 'midtrans_order_id', 'paid_at', 'final_price', 'completed_at'];
+    protected $fillable = ['service_id', 'buyer_id', 'price_offer_id', 'status', 'payment_status', 'midtrans_order_id', 'paid_at', 'final_price', 'completed_at', 'booking_data', 'time_slot_id'];
 
     protected function casts(): array
     {
-        return ['final_price' => 'decimal:2', 'paid_at' => 'datetime', 'completed_at' => 'datetime'];
+        return ['final_price' => 'decimal:2', 'paid_at' => 'datetime', 'completed_at' => 'datetime', 'booking_data' => 'array'];
     }
 
     // Status kanonik alur escrow
@@ -18,7 +18,9 @@ class Order extends Model
 
     public const STATUS_MENUNGGU_VERIFIKASI = 'menunggu_verifikasi';
 
-    public const STATUS_DIBAYAR = 'dibayar';
+    public const STATUS_MENUNGGU_KONFIRMASI = 'menunggu_konfirmasi';
+
+    public const STATUS_DIKONFIRMASI = 'dikonfirmasi';
 
     public const STATUS_DIKERJAKAN = 'dikerjakan';
 
@@ -40,12 +42,12 @@ class Order extends Model
 
     public function canBeStartedBySeller(): bool
     {
-        return $this->status === self::STATUS_DIBAYAR;
+        return $this->status === self::STATUS_DIKONFIRMASI;
     }
 
     public function canBeDelivered(): bool
     {
-        return in_array($this->status, [self::STATUS_DIBAYAR, self::STATUS_DIKERJAKAN], true);
+        return in_array($this->status, [self::STATUS_DIKONFIRMASI, self::STATUS_DIKERJAKAN], true);
     }
 
     public function canBeCompletedByBuyer(): bool
@@ -56,7 +58,7 @@ class Order extends Model
     public function isEscrowHeld(): bool
     {
         return in_array($this->status, [
-            self::STATUS_DIBAYAR,
+            self::STATUS_DIKONFIRMASI,
             self::STATUS_DIKERJAKAN,
             self::STATUS_MENUNGGU_PERSETUJUAN,
             self::STATUS_SELESAI,
@@ -102,6 +104,11 @@ class Order extends Model
     public function payment()
     {
         return $this->hasOne(Payment::class);
+    }
+
+    public function timeSlot()
+    {
+        return $this->belongsTo(ServiceTimeSlot::class, 'time_slot_id');
     }
 
     public function reports()

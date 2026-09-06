@@ -102,6 +102,12 @@ class DatabaseSeeder extends Seeder
                 'password' => 'rudi',
                 'phone' => '081234567899',
             ],
+            [
+                'name' => 'Raffie',
+                'email' => 'raffie@gmail.com',
+                'password' => 'raffie',
+                'phone' => '081234567900',
+            ],
         ];
 
         $users = [];
@@ -125,6 +131,7 @@ class DatabaseSeeder extends Seeder
             'Desain & Grafis' => ['Desain Logo', 'Desain Poster', 'Desain Sosial Media', 'Ilustrasi'],
             'Foto & Video' => ['Edit Reels/TikTok', 'Videografi Acara', 'Dokumentasi Event', 'Foto Acara Sekolah'],
             'Konten & Media' => ['Bantu Presentasi', 'Desain Slides', 'Content Creator'],
+            'Lifestyle' => ['Barber'],
         ];
 
         foreach ($categoriesData as $catName => $subcats) {
@@ -137,148 +144,15 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // 6. Services (20 dummy services)
+        // 6. Services (1 service: Barber Potong Raffie)
         $subcats = Subcategory::all();
         $servicesData = [
             [
-                'title' => 'Desain Logo Profesional Modern',
-                'subcategory' => 'Desain Logo',
-                'price' => 150000,
-                'description' => 'Desain logo minimalis, modern, cocok untuk brand UMKM/startup. Include 3 konsep, revisi unlimited, file source AI/EPS/PNG.',
-                'user' => $users[0],
-            ],
-            [
-                'title' => 'Desain Logo Sekolah/UKM',
-                'subcategory' => 'Desain Logo',
-                'price' => 100000,
-                'description' => 'Desain logo minimalis modern untuk UKM/sekolah. 3 konsep, revisi unlimited, file AI/EPS/PNG.',
-                'user' => $users[1],
-            ],
-            [
-                'title' => 'Desain Logo Startup Tech',
-                'subcategory' => 'Desain Logo',
-                'price' => 200000,
-                'description' => 'Logo untuk startup teknologi. Modern, futuristik, cocok untuk IT/software. Include mockup & brand guideline.',
-                'user' => $users[2],
-            ],
-            [
-                'title' => 'Desain Poster Kegiatan Sekolah/OSIS',
-                'subcategory' => 'Desain Poster',
-                'price' => 50000,
-                'description' => 'Poster acara sekolah/OSIS/UKM: ukuran A3/A4, desain menarik, revisi 2x, file PDF + JPG siap cetak.',
-                'user' => $users[3],
-            ],
-            [
-                'title' => 'Buat Poster Acara Sekolah/OSIS',
-                'subcategory' => 'Desain Poster',
-                'price' => 30000,
-                'description' => 'Poster acara sekolah/OSIS/UKM: ukuran A3/A4, desain menarik, revisi 2x, file PDF + JPG siap cetak.',
-                'user' => $users[4],
-            ],
-            [
-                'title' => 'Poster Event Kampus & Organisasi',
-                'subcategory' => 'Desain Poster',
-                'price' => 75000,
-                'description' => 'Poster profesional untuk event kampus, seminar, webinar. Ukuran custom, revisi 3x, format digital & cetak.',
-                'user' => $users[5],
-            ],
-            [
-                'title' => 'Jasa Desain Sosial Media',
-                'subcategory' => 'Desain Sosial Media',
-                'price' => 75000,
-                'description' => 'Desain IG Story/Feed/TikTok template untuk OSIS/UKM. 5 template + 3 revisi. Estetik kece.',
-                'user' => $users[6],
-            ],
-            [
-                'title' => 'Desain Feed Instagram Aesthetic',
-                'subcategory' => 'Desain Sosial Media',
-                'price' => 100000,
-                'description' => 'Paket 9 feed IG kohesif & aesthetic. Cocok untuk personal branding, UMKM, bisnis online. Include template Canva.',
-                'user' => $users[0],
-            ],
-            [
-                'title' => 'Content Planning Social Media',
-                'subcategory' => 'Desain Sosial Media',
-                'price' => 120000,
-                'description' => 'Perencanaan konten sosmed 1 bulan: 30 desain post, caption, hashtag. Siap auto-pilot!',
-                'user' => $users[1],
-            ],
-            [
-                'title' => 'Ilustrasi Digital Character Design',
-                'subcategory' => 'Ilustrasi',
-                'price' => 200000,
-                'description' => 'Ilustrasi karakter digital custom untuk mascot, avatar, NFT. Full color, revisi 2x, file PNG HD.',
-                'user' => $users[2],
-            ],
-            [
-                'title' => 'Ilustrasi Cover Buku/Novel',
-                'subcategory' => 'Ilustrasi',
-                'price' => 250000,
-                'description' => 'Cover buku profesional dengan ilustrasi custom. Cocok untuk self-publishing, Wattpad, novel indie.',
-                'user' => $users[3],
-            ],
-            [
-                'title' => 'Edit Video Reels/TikTok',
-                'subcategory' => 'Edit Reels/TikTok',
-                'price' => 50000,
-                'description' => 'Editing video pendek 30-60 detik, caption auto, transisi trend, musik bebas hak cipta. Joki 3 video/bulan.',
-                'user' => $users[4],
-            ],
-            [
-                'title' => 'Edit Reels Viral dengan Transisi Smooth',
-                'subcategory' => 'Edit Reels/TikTok',
-                'price' => 75000,
-                'description' => 'Editing reels/TikTok pro: transisi keren, color grading, sound design. Durasi 15-60 detik, dijamin FYP!',
-                'user' => $users[5],
-            ],
-            [
-                'title' => 'Video Promosi Sekolah/OSIS',
-                'subcategory' => 'Videografi Acara',
-                'price' => 150000,
-                'description' => 'Video promosi acara sekolah/OSIS: dokumentasi + editing + musik. Durasi 2-3 menit, siap share ke sosmed.',
-                'user' => $users[6],
-            ],
-            [
-                'title' => 'Videografi & Editing Event Kampus',
-                'subcategory' => 'Videografi Acara',
-                'price' => 300000,
-                'description' => 'Dokumentasi video event kampus, seminar, wisuda. Cinematic, color grading pro, durasi 5-10 menit.',
-                'user' => $users[0],
-            ],
-            [
-                'title' => 'Dokumentasi Acara Pernikahan',
-                'subcategory' => 'Dokumentasi Event',
-                'price' => 500000,
-                'description' => 'Dokumentasi foto & video pernikahan. Full day coverage, editing profesional, album digital + cetak.',
-                'user' => $users[1],
-            ],
-            [
-                'title' => 'Foto Produk UMKM/Online Shop',
-                'subcategory' => 'Foto Acara Sekolah',
-                'price' => 100000,
-                'description' => 'Fotografi produk untuk UMKM/online shop. 20 foto edited, background putih/custom, siap upload marketplace.',
-                'user' => $users[2],
-            ],
-            [
-                'title' => 'Jasa Bantu Presentasi',
-                'subcategory' => 'Bantu Presentasi',
-                'price' => 40000,
-                'description' => 'Bantu buat slides PowerPoint/Google Slides presentasi sekolah. Desain menarik, konten rapi, siap ngajar.',
-                'user' => $users[3],
-            ],
-            [
-                'title' => 'Desain Presentasi PPT Profesional',
-                'subcategory' => 'Desain Slides',
-                'price' => 80000,
-                'description' => 'Desain slide PPT/Google Slides profesional untuk pitch deck, proposal, laporan. Modern & clean design.',
-                'user' => $users[4],
-            ],
-            [
-                'title' => 'Jasa Content Creator TikTok/IG',
-                'subcategory' => 'Content Creator',
-                'price' => 150000,
-                'description' => 'Jasa buat konten TikTok/IG Reels. Konsep ide, shooting, editing. Paket 5 video/minggu, auto viral!',
-                'user' => $users[5],
+                'title' => 'Barber Potong Raffie',
+                'subcategory' => 'Barber',
+                'price' => 20000,
+                'description' => 'Potong rambut model Raffie Ahmad style yang keren dan rapi. Cocok untuk anak muda, pelajar, dan mahasiswa. Includes: cuci rambut, potong profesional, styling modern. Durasi 30-45 menit. Barber berpengalaman dengan alat modern. Harga terjangkau, hasil maksimal!',
+                'user' => $users[7],
             ],
         ];
 
@@ -312,8 +186,14 @@ class DatabaseSeeder extends Seeder
         $this->command->info('- doni@gmail.com / doni');
         $this->command->info('- mira@gmail.com / mira');
         $this->command->info('- rudi@gmail.com / rudi');
+        $this->command->info('- raffie@gmail.com / raffie');
+        $this->command->info('');
+        $this->command->info('Service: Barber Potong Raffie (Rp 20.000) - Owner: Raffie');
         
         // Run DummyReportsSeeder
         $this->call(DummyReportsSeeder::class);
+        
+        // Run BarberTimeSlotSeeder
+        $this->call(BarberTimeSlotSeeder::class);
     }
 }

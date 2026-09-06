@@ -5,13 +5,13 @@
     "dev": "vite",
     "build": "vite build",
     "analyze": "node scripts/analyze-bundles.js",
-    "reverb": "php artisan reverb:start",
-    "proxy:ngrok": "node scripts/ngrok-reverb-proxy.mjs"
+    "reverb": "php artisan reverb:start"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.2",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
     "alpinejs": "^3.4.2",
     "autoprefixer": "^10.4.2",
     "concurrently": "^9.0.1",
@@ -23,6 +23,7 @@
   "dependencies": {
     "@tabler/icons-react": "^3.46.0",
     "framer-motion": "^13.0.0",
+    "gsap": "^3.15.0",
     "laravel-echo": "^2.4.0",
     "pusher-js": "^8.6.0",
     "react": "^19.2.8",

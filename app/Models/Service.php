@@ -15,10 +15,14 @@ class Service extends Model
         'status',
         'image',
         'portfolio_images',
+        'booking_config',
+        'last_booking_config_edit',
     ];
 
     protected $casts = [
         'portfolio_images' => 'array',
+        'booking_config' => 'array',
+        'last_booking_config_edit' => 'datetime',
     ];
 
     public function seller()
@@ -34,6 +38,11 @@ class Service extends Model
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function timeSlots()
+    {
+        return $this->hasMany(ServiceTimeSlot::class);
     }
 
     public function reviews()

@@ -21,7 +21,7 @@ function fetchNotifications() {
         });
 }
 
-function AccountControl({ authenticated, userName, avatarUrl, profileUrl, loginUrl, registerUrl, logoutUrl, csrfToken, notifications: initialNotifications, notificationsUrl, readAllUrl, menuOpen, onOpenMenu }) {
+function AccountControl({ authenticated, userName, avatarUrl, profileUrl, servicesMyUrl, loginUrl, registerUrl, logoutUrl, csrfToken, notifications: initialNotifications, notificationsUrl, readAllUrl, menuOpen, onOpenMenu }) {
     const [profileOpen, setProfileOpen] = useState(false);
     const [notifications, setNotifications] = useState(initialNotifications);
     const accountRef = useRef(null);
@@ -95,7 +95,7 @@ function AccountControl({ authenticated, userName, avatarUrl, profileUrl, loginU
                     <a href={notificationsUrl} onClick={() => setProfileOpen(false)} role="menuitem">Lihat semua notifikasi</a>
                 </div>
                 {unreadCount > 0 && <form className="stagger-account-read-all" method="POST" action={readAllUrl}><input type="hidden" name="_token" value={csrfToken} /><button type="submit">Tandai semua dibaca</button></form>}
-                <div className="stagger-account-actions"><a href={profileUrl} role="menuitem" onClick={() => setProfileOpen(false)}>Edit profil</a><form method="POST" action={logoutUrl}><input type="hidden" name="_token" value={csrfToken} /><button type="submit" role="menuitem">Log out</button></form></div>
+                <div className="stagger-account-actions"><a href={servicesMyUrl} role="menuitem" onClick={() => setProfileOpen(false)}>Jasa Saya</a><a href={profileUrl} role="menuitem" onClick={() => setProfileOpen(false)}>Edit profil</a><form method="POST" action={logoutUrl}><input type="hidden" name="_token" value={csrfToken} /><button type="submit" role="menuitem">Log out</button></form></div>
             </> : <div className="stagger-account-actions"><a href={loginUrl} role="menuitem">Login</a><a href={registerUrl} role="menuitem">Registrasi</a></div>}
         </motion.div>}</AnimatePresence>
     </div>;
@@ -134,6 +134,7 @@ if (menuRoot) {
         { label: 'Marketplace', href: menuRoot.dataset.marketplace },
         { label: 'Dompet', href: menuRoot.dataset.dompet },
         { label: 'Pesanan', href: menuRoot.dataset.pesanan },
+        { label: 'Jasa Saya', href: menuRoot.dataset.servicesMy },
         { label: 'Chat', href: menuRoot.dataset.chat || '/seller/messages' }
     ];
     
@@ -145,9 +146,10 @@ if (menuRoot) {
         home: menuRoot.dataset.home, 
         dompet: menuRoot.dataset.dompet, 
         pesanan: menuRoot.dataset.pesanan, 
+        servicesMy: menuRoot.dataset.servicesMy,
         chat: menuRoot.dataset.chat || '/seller/messages', 
         items: menuItems 
     };
-    const account = { authenticated: menuRoot.dataset.authenticated === 'true', userName: menuRoot.dataset.userName, avatarUrl: menuRoot.dataset.avatarUrl || '', profileUrl: menuRoot.dataset.profileUrl, loginUrl: menuRoot.dataset.login, registerUrl: menuRoot.dataset.register, logoutUrl: menuRoot.dataset.logoutUrl, csrfToken: menuRoot.dataset.csrfToken, notifications: getNotifications(), notificationsUrl: menuRoot.dataset.notificationsUrl, readAllUrl: menuRoot.dataset.notificationsReadAllUrl };
+    const account = { authenticated: menuRoot.dataset.authenticated === 'true', userName: menuRoot.dataset.userName, avatarUrl: menuRoot.dataset.avatarUrl || '', profileUrl: menuRoot.dataset.profileUrl, servicesMyUrl: menuRoot.dataset.servicesMy, loginUrl: menuRoot.dataset.login, registerUrl: menuRoot.dataset.register, logoutUrl: menuRoot.dataset.logoutUrl, csrfToken: menuRoot.dataset.csrfToken, notifications: getNotifications(), notificationsUrl: menuRoot.dataset.notificationsUrl, readAllUrl: menuRoot.dataset.notificationsReadAllUrl };
     createRoot(menuRoot).render(<StaggeredMenu links={links} account={account} />);
 }

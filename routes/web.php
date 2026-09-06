@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ServiceTimeSlotController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\NegotiationController;
@@ -73,13 +74,20 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/jasa/saya', [ServiceController::class, 'myServices'])->name('services.my');
     Route::get('/jasa/{id}/edit', [ServiceController::class, 'edit'])->name('services.edit');
     Route::put('/jasa/{id}', [ServiceController::class, 'update'])->name('services.update');
+    
+    // --- TIME SLOT MANAGEMENT FOR SELLERS ---
+    Route::get('/jasa/{service}/jam-tersedia', [ServiceTimeSlotController::class, 'manage'])->name('services.slots.manage');
+    Route::get('/jasa/{service}/jam-tersedia/data', [ServiceTimeSlotController::class, 'getSlotsForDate'])->name('services.slots.data');
+    Route::get('/jasa/{service}/jam-tersedia/orders', [ServiceTimeSlotController::class, 'getOrders'])->name('services.slots.orders');
 
     // --- PESANAN ---
     Route::get('/pesanan', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/pesanan/buat/{service}', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/pesanan', [OrderController::class, 'store'])->name('orders.store');
+    Route::delete('/pesanan/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::get('/pesanan/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/pesanan/{order}/conversation', [OrderController::class, 'conversation'])->name('orders.conversation');
+    Route::post('/pesanan/{order}/reschedule', [OrderController::class, 'reschedule'])->name('orders.reschedule');
 
     // --- NEGOSIASI ---
     Route::post('/negosiasi', [NegotiationController::class, 'store'])->name('negotiations.store');
