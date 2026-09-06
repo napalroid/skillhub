@@ -84,6 +84,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pesanan', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/pesanan/buat/{service}', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/pesanan', [OrderController::class, 'store'])->name('orders.store');
+    Route::patch('/pesanan/{order}/set-price', [OrderController::class, 'setPrice'])->name('orders.set-price');
     Route::delete('/pesanan/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::get('/pesanan/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/pesanan/{order}/conversation', [OrderController::class, 'conversation'])->name('orders.conversation');

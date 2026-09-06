@@ -14,25 +14,29 @@ class OrderController extends Controller
     {
         abort_unless($service->status === 'approved', 404, 'Jasa tidak tersedia.');
 
-        $availableSlots = \App\Models\ServiceTimeSlot::where('service_id', $service->id)
-            ->whereDate('date', '>=', now()->format('Y-m-d'))
-            ->orderBy('date')
-            ->orderBy('time_start')
-            ->get()
-            ->map(function ($slot) {
-                $bookedCount = $slot->orders()
-                    ->whereNotIn('status', ['menunggu_pembayaran', 'dibatalkan'])
-                    ->count();
-                
-                return [
-                    'id' => $slot->id,
-                    'date' => $slot->date->format('Y-m-d'),
-                    'time_start' => $slot->time_start,
-                    'time_end' => $slot->time_end,
-                    'max_bookings' => $slot->max_bookings,
-                    'available_count' => $slot->max_bookings - $bookedCount,
-                ];
-            });
+        // Only get available slots if time slots are enabled
+        $availableSlots = [];
+        if ($service->time_slots_enabled) {
+            $availableSlots = \App\Models\ServiceTimeSlot::where('service_id', $service->id)
+                ->whereDate('date', '>=', now()->format('Y-m-d'))
+                ->orderBy('date')
+                ->orderBy('time_start')
+                ->get()
+                ->map(function ($slot) {
+                    $bookedCount = $slot->orders()
+                        ->whereNotIn('status', ['menunggu_pembayaran', 'dibatalkan'])
+                        ->count();
+                    
+                    return [
+                        'id' => $slot->id,
+                        'date' => $slot->date->format('Y-m-d'),
+                        'time_start' => $slot->time_start,
+                        'time_end' => $slot->time_end,
+                        'max_bookings' => $slot->max_bookings,
+                        'available_count' => $slot->max_bookings - $bookedCount,
+                    ];
+                })->toArray();
+        }
 
         return view('orders.create', compact('service', 'availableSlots'));
     }
@@ -48,11 +52,8 @@ class OrderController extends Controller
 
         $service = Service::approved()->findOrFail($validated['service_id']);
 
-        // Validate time slot if booking with time slots enabled
-        if ($service->booking_config && 
-            isset($service->booking_config['time_slots_enabled']) && 
-            $service->booking_config['time_slots_enabled'] &&
-            !empty($validated['time_slot_id'])) {
+        // Validate time slot only if time slots enabled on service
+        if ($service->time_slots_enabled && !empty($validated['time_slot_id'])) {
             
             $slot = \App\Models\ServiceTimeSlot::find($validated['time_slot_id']);
             
@@ -103,8 +104,9 @@ class OrderController extends Controller
         $orderData = [
             'service_id' => $service->id,
             'buyer_id' => auth()->id(),
-            'status' => 'menunggu_pembayaran',
-            'final_price' => $service->price,
+            'status' => 'menunggu_konfirmasi_harga',
+            'estimated_price' => $service->price,
+            'final_price' => null,
         ];
 
         // Add booking data if exists
@@ -118,6 +120,18 @@ class OrderController extends Controller
         }
 
         $order ??= Order::create($orderData);
+
+        // Notify seller about new order waiting for price confirmation
+        \App\Services\NotificationService::createAndDispatch(
+            userId: $service->user_id,
+            type: 'new_order',
+            title: 'Pesanan Baru Menunggu Konfirmasi',
+            message: "Pesanan baru #{$order->id} menunggu Anda menetapkan harga.",
+            extraData: [
+                'order_id' => $order->id,
+                'buyer_name' => auth()->user()->name,
+            ]
+        );
 
         // Notify buyer about selected slot
         if (!empty($validated['time_slot_id'])) {
@@ -139,7 +153,56 @@ class OrderController extends Controller
         return redirect()->route('orders.show', $order)
             ->with('success', ! empty($validated['message'])
                 ? 'Pesanmu sudah dikirim ke penyedia jasa.'
-                : 'Pesanan dibuat. Anda bisa negosiasi harga atau langsung bayar.');
+                : 'Pesanan dibuat. Seller akan menetapkan harga untuk pesanan Anda.');
+    }
+
+    public function setPrice(Request $request, Order $order)
+    {
+        abort_unless($order->service->user_id === auth()->id(), 403, 'Hanya seller yang bisa menetapkan harga.');
+        
+        $validated = $request->validate([
+            'final_price' => 'required|numeric|min:1000',
+            'seller_price_note' => 'nullable|string|max:500',
+        ]);
+
+        $oldPrice = $order->final_price;
+        $newPrice = $validated['final_price'];
+
+        DB::transaction(function () use ($order, $oldPrice, $newPrice, $validated) {
+            $order->update([
+                'final_price' => $newPrice,
+                'seller_price_note' => $validated['seller_price_note'],
+                'status' => 'menunggu_pembayaran',
+            ]);
+
+            \App\Models\OrderPriceHistory::create([
+                'order_id' => $order->id,
+                'changed_by' => auth()->id(),
+                'old_price' => $oldPrice,
+                'new_price' => $newPrice,
+                'note' => $validated['seller_price_note'],
+            ]);
+        });
+
+        $order->loadMissing('service', 'buyer');
+
+        if ($order->buyer_id) {
+            event(new \App\Events\SellerPriceSet($order));
+
+            \App\Services\NotificationService::createAndDispatch(
+                userId: $order->buyer_id,
+                type: 'price_set',
+                title: 'Harga Pesanan DitETAPkan',
+                message: "Seller telah menetapkan harga Rp" . number_format($newPrice, 0, ',', '.') . 
+                         " untuk pesanan #{$order->id}. Silakan lakukan pembayaran.",
+                extraData: [
+                    'order_id' => $order->id,
+                    'final_price' => $newPrice,
+                ]
+            );
+        }
+
+        return back()->with('success', 'Harga berhasil ditetapkan: Rp' . number_format($newPrice, 0, ',', '.'));
     }
 
     public function show(Order $order)
@@ -160,7 +223,8 @@ class OrderController extends Controller
                 'messages.sender',
                 'files',
                 'payment',
-                'timeSlot'
+                'timeSlot',
+                'priceHistories'
             ]);
             
             return view('orders.show', compact('order', 'isBuyer', 'isSeller'));

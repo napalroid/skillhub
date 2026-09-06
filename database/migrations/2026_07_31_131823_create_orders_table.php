@@ -23,7 +23,7 @@ return new class extends Migration
             'menunggu_persetujuan',
             'selesai',
         ])->default('menunggu_pembayaran');
-        $table->decimal('final_price', 10, 2);
+        $table->decimal('final_price', 10, 2)->nullable();
         $table->timestamps();
     });
 }

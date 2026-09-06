@@ -9,7 +9,10 @@
     $statusMap = [
         'menunggu_pembayaran' => ['bg' => '#f5f5f5', 'text' => '#555555'],
         'menunggu_verifikasi' => ['bg' => '#f5f5f5', 'text' => '#555555'],
+        'menunggu_konfirmasi_harga' => ['bg' => '#F59E0B', 'text' => '#fff'],
+        'menunggu_konfirmasi' => ['bg' => '#3B82F6', 'text' => '#fff'],
         'dibayar' => ['bg' => '#EDE734', 'text' => '#555555'],
+        'dikonfirmasi' => ['bg' => '#3B82F6', 'text' => '#fff'],
         'dikerjakan' => ['bg' => '#000', 'text' => '#fff'],
         'menunggu_persetujuan' => ['bg' => '#2C9F45', 'text' => '#fff'],
         'selesai' => ['bg' => '#2C9F45', 'text' => '#fff'],
@@ -166,6 +169,7 @@
 
                         $orderStatusLabel = match ($order->status) {
                             'menunggu_pembayaran' => 'Menunggu Pembayaran',
+                            'menunggu_konfirmasi_harga' => 'Menunggu Konfirmasi Harga',
                             'menunggu_konfirmasi' => 'Menunggu Konfirmasi Admin',
                             'dikonfirmasi' => 'Dikonfirmasi - Siap Dikerjakan',
                             'dikerjakan' => 'Proses Pengerjaan',
@@ -191,6 +195,26 @@
                         <p class="text-xs text-gray-500">
                             Admin akan mencocokkan dana masuk di rekening, lalu menekan <strong>Konfirmasi Saldo Masuk</strong> di Transaksi.
                         </p>
+                    @elseif ($order->status === 'menunggu_konfirmasi_harga')
+                        <div class="bg-[#FEF3C7] border border-[#F59E0B] text-[#92400E] p-3">
+                            <p class="text-xs font-bold">
+                                ⏳ Menunggu seller menetapkan harga untuk pesanan ini. Anda akan menerima notifikasi saat harga sudah ditetapkan.
+                            </p>
+                        </div>
+                    @elseif ($order->status === 'menunggu_pembayaran' && $order->final_price)
+                        <div class="mb-4 p-4 bg-[#D1FAE5] border border-[#10B981]">
+                            <p class="text-xs font-bold text-[#065F46] mb-2">Harga Telah DitETAPkan</p>
+                            <p class="text-2xl font-black text-black">
+                                Rp{{ number_format($order->final_price, 0, ',', '.') }}
+                            </p>
+                            @if($order->seller_price_note)
+                            <p class="text-sm text-gray-700 mt-2 italic">{{ $order->seller_price_note }}</p>
+                            @endif
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4">Bayar aman melalui QRIS Midtrans Sandbox. Setelah sukses, status menjadi Jasa Terbayarkan di admin.</p>
+                        <a href="{{ route('orders.payment.show', $order) }}" class="btn-primary">
+                            Bayar dengan QRIS
+                        </a>
                     @elseif ($order->status === 'menunggu_pembayaran')
                         <p class="text-sm text-gray-600 mb-4">Bayar aman melalui QRIS Midtrans Sandbox. Setelah sukses, status menjadi Jasa Terbayarkan di admin.</p>
                         <a href="{{ route('orders.payment.show', $order) }}" class="btn-primary">
@@ -202,6 +226,30 @@
                         </p>
                     @else
                         <p class="text-sm text-gray-500">Menunggu buyer melakukan pembayaran.</p>
+                    @endif
+                    
+                    @if($isBuyer && $order->priceHistories->count() > 0 && $order->status !== 'menunggu_konfirmasi_harga')
+                    <div class="mt-4 p-4 bg-gray-50 border border-gray-200">
+                        <p class="text-xs font-black uppercase tracking-wider mb-2" style="color: #666;">History Perubahan Harga:</p>
+                        <div class="space-y-2">
+                            @foreach($order->priceHistories as $history)
+                            <div class="text-xs text-gray-600">
+                                <span style="color: #999;">{{ $history->created_at->format('d M H:i') }}</span>
+                                @if($history->old_price)
+                                <span style="color: #999;">Rp{{ number_format($history->old_price, 0, ',', '.') }}</span>
+                                <span style="color: #999;">→</span>
+                                @endif
+                                <span class="font-bold" style="color: #000;">Rp{{ number_format($history->new_price, 0, ',', '.') }}</span>
+                                @if($history->note)
+                                <span style="color: #666; font-style: italic;">({{ $history->note }})</span>
+                                @endif
+                            </div>
+                            @endforeach
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2 italic">
+                            Harga akhir yang digunakan untuk pembayaran: <strong class="text-black">Rp{{ number_format($order->final_price, 0, ',', '.') }}</strong>
+                        </p>
+                    </div>
                     @endif
                 </div>
             @endif
@@ -251,6 +299,142 @@
                 
                 {{-- SELLER ACTIONS --}} 
                 @if ($isSeller)
+                    {{-- SELLER: SET PRICE FORM --}}
+                    @if($order->status === 'menunggu_konfirmasi_harga')
+                    <div class="order-card" style="background: #FEF3C7; border-color: #F59E0B;">
+                        <h3 class="font-heading text-sm font-black uppercase tracking-wider mb-4" style="color: #B45309;">
+                            <svg class="inline w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="vertical-align: middle;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Set Harga untuk Pesanan Ini
+                        </h3>
+                        
+                        @if($order->booking_data)
+                        <div class="mb-4 p-4 bg-white border border-gray-200" style="border-radius: 2px;">
+                            <p class="text-xs font-black uppercase tracking-wider mb-3" style="color: #666;">Detail Booking dari Buyer:</p>
+                            <div class="space-y-2">
+                                @foreach($order->booking_data as $key => $value)
+                                <div class="flex items-start gap-3">
+                                    <span class="text-xs text-gray-500" style="min-width: 140px;">{{ ucfirst(str_replace('_', ' ', $key)) }}</span>
+                                    <span class="text-sm font-bold text-black">{{ is_array($value) ? implode(', ', $value) : $value }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                        
+                        <form action="{{ route('orders.set-price', $order) }}" method="POST" id="setPriceForm">
+                            @csrf
+                            @method('PATCH')
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-bold mb-2" style="color: #000;">
+                                    Harga Final (Rp) <span style="color: #E4002B;">*</span>
+                                </label>
+                                <input type="number" 
+                                       name="final_price" 
+                                       id="final_price_input"
+                                       required
+                                       min="1000" 
+                                       step="1000"
+                                       value="{{ $order->estimated_price ?? old('final_price') }}"
+                                       style="width: 100%; border: 1px solid #ccc; padding: 0.75rem; font-size: 1.125rem; font-weight: bold; color: #000;">
+                                <p class="mt-2 text-xs text-gray-600">
+                                    Estimasi dari harga jasa: <span class="font-bold text-black">Rp{{ number_format($order->estimated_price ?? 0, 0, ',', '.') }}</span>
+                                </p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-bold mb-2" style="color: #000;">
+                                    Catatan untuk Buyer (opsional)
+                                </label>
+                                <textarea name="seller_price_note" 
+                                          rows="2"
+                                          placeholder="Misal: Harga termasuk unlock hero tambahan, winrate rendah butuh effort lebih..."
+                                          style="width: 100%; border: 1px solid #ccc; padding: 0.75rem; font-size: 0.875rem; color: #000; resize: vertical;">{{ old('seller_price_note') }}</textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn-primary w-full">
+                                Set Harga & Lanjutkan
+                            </button>
+                        </form>
+                    </div>
+                    @endif
+
+                    {{-- SELLER: PRICE ALREADY SET --}}
+                    @if($order->status === 'menunggu_pembayaran' && $order->final_price)
+                    <div class="order-card" style="background: #D1FAE5; border-color: #10B981;">
+                        <h3 class="font-heading text-sm font-black uppercase tracking-wider mb-3" style="color: #065F46;">Harga Sudah DitETAPkan</h3>
+                        <div class="flex items-center gap-4 mb-4">
+                            <div>
+                                <p class="text-3xl font-black" style="color: #000;">
+                                    Rp{{ number_format($order->final_price, 0, ',', '.') }}
+                                </p>
+                                @if($order->seller_price_note)
+                                <p class="text-sm text-gray-700 mt-1">{{ $order->seller_price_note }}</p>
+                                @endif
+                            </div>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-gray-300">
+                            <button type="button" 
+                                    onclick="document.getElementById('editPriceForm').classList.toggle('hidden')"
+                                    class="text-sm font-bold underline" style="color: #F59E0B;">
+                                Ubah Harga
+                            </button>
+                            
+                            <form action="{{ route('orders.set-price', $order) }}" method="POST" id="editPriceForm" class="hidden mt-4">
+                                @csrf
+                                @method('PATCH')
+                                
+                                <div class="flex gap-3 items-end">
+                                    <div class="flex-1">
+                                        <label class="block text-xs font-bold mb-1" style="color: #666;">Harga Baru (Rp)</label>
+                                        <input type="number" 
+                                               name="final_price" 
+                                               required
+                                               min="1000" 
+                                               step="1000"
+                                               value="{{ $order->final_price }}"
+                                               style="width: 100%; border: 1px solid #ccc; padding: 0.5rem; color: #000;">
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="block text-xs font-bold mb-1" style="color: #666;">Catatan</label>
+                                        <input type="text" 
+                                               name="seller_price_note" 
+                                               value="{{ $order->seller_price_note }}"
+                                               style="width: 100%; border: 1px solid #ccc; padding: 0.5rem; color: #000;">
+                                    </div>
+                                    <button type="submit" class="btn-primary" style="padding: 0.5rem 1rem; white-space: nowrap;">
+                                        Update
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        @if($order->priceHistories->count() > 0)
+                        <div class="mt-4 pt-4 border-t border-gray-300">
+                            <p class="text-xs font-black uppercase tracking-wider mb-2" style="color: #666;">History Perubahan Harga:</p>
+                            <div class="space-y-2">
+                                @foreach($order->priceHistories as $history)
+                                <div class="text-xs text-gray-600">
+                                    <span style="color: #999;">{{ $history->created_at->format('d M H:i') }}</span>
+                                    @if($history->old_price)
+                                    <span style="color: #999; text-decoration: line-through;">Rp{{ number_format($history->old_price, 0, ',', '.') }}</span>
+                                    <span style="color: #999;">→</span>
+                                    @endif
+                                    <span class="font-bold" style="color: #000;">Rp{{ number_format($history->new_price, 0, ',', '.') }}</span>
+                                    @if($history->note)
+                                    <span style="color: #666; font-style: italic;">({{ $history->note }})</span>
+                                    @endif
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                    @endif
+
                     <div class="space-y-3 pt-4 border-t border-gray-200">
                         @if ($order->status === 'menunggu_konfirmasi')
                             <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-3 rounded">

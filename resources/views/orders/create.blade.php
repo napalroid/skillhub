@@ -10,13 +10,20 @@
             </a>
             <div class="mt-6 flex items-center justify-between">
                 <div>
-                    <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Pilih tanggal dan waktu</h1>
-                    <p class="mt-2 text-sm text-gray-400">Langkah 1 dari 3</p>
+                    @if($service->time_slots_enabled)
+                        <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Pilih tanggal dan waktu</h1>
+                        <p class="mt-2 text-sm text-gray-400">Langkah 1 dari 3</p>
+                    @else
+                        <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Buat Pesanan</h1>
+                        <p class="mt-2 text-sm text-gray-400">Isi informasi booking untuk pesanan Anda</p>
+                    @endif
                 </div>
             </div>
+            @if($service->time_slots_enabled)
             <div class="mt-4 h-1 w-full overflow-hidden rounded-full bg-gray-800">
                 <div class="h-full w-1/3 bg-white"></div>
             </div>
+            @endif
         </div>
 
         <form method="POST" action="{{ route('orders.store') }}" id="orderForm">
@@ -24,10 +31,12 @@
             <input type="hidden" name="service_id" value="{{ $service->id }}">
             <input type="hidden" name="time_slot_id" id="selected_slot_id">
 
+            @if($service->time_slots_enabled)
             <div id="booking-calendar-root" 
                  data-service-id="{{ $service->id }}"
                  data-available-slots="{{ json_encode($availableSlots) }}">
             </div>
+            @endif
 
             @if($service->booking_config && isset($service->booking_config['enabled']) && $service->booking_config['enabled'] && !empty($service->booking_config['fields']))
             <div class="mt-8 rounded-xl border border-gray-800 bg-black p-6">
@@ -136,11 +145,19 @@
                            class="rounded-lg border border-gray-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-gray-900">
                             Kembali
                         </a>
+                        @if($service->time_slots_enabled)
                         <button type="submit" id="submitBtn"
                                 class="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-700 px-6 py-3 text-sm font-bold text-gray-400 transition hover:bg-gray-600 cursor-not-allowed">
                             <span>Pilih Waktu Dulu</span>
                             <span aria-hidden="true">←</span>
                         </button>
+                        @else
+                        <button type="submit" id="submitBtn"
+                                class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-bold text-black transition hover:bg-gray-100">
+                            <span>Lanjut Pembayaran</span>
+                            <span aria-hidden="true">→</span>
+                        </button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -157,6 +174,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const timeSlotEnabled = {{ $service->time_slots_enabled ? 'true' : 'false' }};
+            
+            @if($service->time_slots_enabled)
             const submitBtn = document.getElementById('submitBtn');
             const slotInput = document.getElementById('selected_slot_id');
             
@@ -175,6 +195,7 @@
             slotInput.addEventListener('change', function() {
                 window.updateSubmitButton(this.value);
             });
+            @endif
         });
     </script>
 </x-layouts.app>

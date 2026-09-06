@@ -27,6 +27,10 @@ class PaymentController extends Controller
         abort_unless($order->buyer_id === auth()->id(), 403);
         $order->load('service');
 
+        if (empty($order->final_price)) {
+            return back()->with('error', 'Seller belum menetapkan harga untuk pesanan ini.');
+        }
+
         // A refresh or a second click must never turn a valid payment state
         // into a 422 page. Paid orders and an active QR are simply shown
         // again; expired/failed QRIS payments may create a new QR.
@@ -192,8 +196,14 @@ class PaymentController extends Controller
                 $escrowService = app(\App\Services\EscrowService::class);
                 $escrowService->credit($payment);
                 
-                $this->notifySellerOrderConfirmed($order);
-                $this->notifyBuyerOrderConfirmed($order);
+                // Notify admin about new payment waiting for confirmation
+                $this->notifyAdminPaymentWaiting($order);
+                
+                // Notify buyer that payment is successful and waiting admin confirmation
+                $this->notifyBuyerPaymentWaiting($order);
+                
+                // Notify seller that payment is waiting admin confirmation
+                $this->notifySellerPaymentWaiting($order);
             }
         });
 
@@ -346,6 +356,94 @@ class PaymentController extends Controller
 
         return redirect()->route('admin.escrow.index', ['filter' => 'masuk'])
             ->with('success', 'Pembayaran diverifikasi. Dana sudah ditahan di Proses Tahan Dana.');
+    }
+
+    /**
+     * Notifikasi ke admin ada pembayaran baru yang perlu dikonfirmasi
+     */
+    protected function notifyAdminPaymentWaiting(Order $order): void
+    {
+        // Find admin users
+        $adminUsers = \App\Models\User::where('is_admin', true)->get();
+        
+        foreach ($adminUsers as $admin) {
+            NotificationService::createAndDispatch(
+                userId: $admin->id,
+                type: 'payment_waiting',
+                title: 'Pembayaran Baru Menunggu Konfirmasi',
+                message: 'Pesanan #'.$order->id.' telah dibayar dan menunggu konfirmasi admin.',
+                extraData: [
+                    'order_id' => $order->id,
+                    'payment_id' => $order->payment?->id,
+                    'buyer_name' => $order->buyer->name ?? 'Buyer',
+                ]
+            );
+        }
+    }
+
+    /**
+     * Notifikasi ke buyer bahwa pembayaran berhasil dan menunggu konfirmasi admin
+     */
+    protected function notifyBuyerPaymentWaiting(Order $order): void
+    {
+        if (! $order->buyer_id) {
+            return;
+        }
+
+        $already = \DB::table('user_notifications')
+            ->where('user_id', $order->buyer_id)
+            ->where('type', 'payment_waiting_admin')
+            ->where('order_id', $order->id)
+            ->exists();
+        if ($already) {
+            return;
+        }
+
+        NotificationService::createAndDispatch(
+            userId: $order->buyer_id,
+            type: 'payment_waiting_admin',
+            title: 'Pembayaran Berhasil',
+            message: 'Pembayaran untuk pesanan #'.$order->id.' telah berhasil. Menunggu konfirmasi dari admin.',
+            extraData: [
+                'order_id' => $order->id,
+                'payment_id' => $order->payment?->id,
+                'service_id' => $order->service_id,
+            ]
+        );
+    }
+
+    /**
+     * Notifikasi ke seller bahwa pembayaran sudah diterima dan menunggu konfirmasi admin
+     */
+    protected function notifySellerPaymentWaiting(Order $order): void
+    {
+        $order->loadMissing('service');
+        $sellerId = $order->service?->user_id;
+
+        if (! $sellerId) {
+            return;
+        }
+
+        $already = \DB::table('user_notifications')
+            ->where('user_id', $sellerId)
+            ->where('type', 'payment_waiting_seller')
+            ->where('order_id', $order->id)
+            ->exists();
+        if ($already) {
+            return;
+        }
+
+        NotificationService::createAndDispatch(
+            userId: $sellerId,
+            type: 'payment_waiting_seller',
+            title: 'Pembayaran Diterima',
+            message: 'Pembayaran untuk pesanan #'.$order->id.' telah diterima. Menunggu konfirmasi admin sebelum mulai mengerjakan.',
+            extraData: [
+                'order_id' => $order->id,
+                'payment_id' => $order->payment?->id,
+                'service_id' => $order->service_id,
+            ]
+        );
     }
 
     /**

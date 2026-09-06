@@ -23,7 +23,7 @@
             <div class="admin-card p-6">
                 <h2 class="font-heading font-bold text-sm uppercase tracking-wider text-black mb-4">Informasi Subkategori</h2>
 
-                <form method="POST" action="{{ route('admin.subcategories.update', $subcategory) }}" class="space-y-4">
+                <form method="POST" action="{{ route('subcategories.update', $subcategory) }}" class="space-y-4">
                     @csrf @method('PUT')
 
                     <div>

@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    protected $fillable = ['service_id', 'buyer_id', 'price_offer_id', 'status', 'payment_status', 'midtrans_order_id', 'paid_at', 'final_price', 'completed_at', 'booking_data', 'time_slot_id'];
+    protected $fillable = ['service_id', 'buyer_id', 'price_offer_id', 'status', 'payment_status', 'midtrans_order_id', 'paid_at', 'final_price', 'estimated_price', 'seller_price_note', 'completed_at', 'booking_data', 'time_slot_id'];
 
     protected function casts(): array
     {
-        return ['final_price' => 'decimal:2', 'paid_at' => 'datetime', 'completed_at' => 'datetime', 'booking_data' => 'array'];
+        return ['final_price' => 'decimal:2', 'estimated_price' => 'decimal:2', 'paid_at' => 'datetime', 'completed_at' => 'datetime', 'booking_data' => 'array'];
     }
 
     // Status kanonik alur escrow
@@ -25,6 +25,8 @@ class Order extends Model
     public const STATUS_DIKERJAKAN = 'dikerjakan';
 
     public const STATUS_MENUNGGU_PERSETUJUAN = 'menunggu_persetujuan';
+
+    public const STATUS_MENUNGGU_KONFIRMASI_HARGA = 'menunggu_konfirmasi_harga';
 
     public const STATUS_SELESAI = 'selesai';
 
@@ -114,5 +116,10 @@ class Order extends Model
     public function reports()
     {
         return $this->hasMany(Report::class);
+    }
+
+    public function priceHistories()
+    {
+        return $this->hasMany(OrderPriceHistory::class)->latest();
     }
 }

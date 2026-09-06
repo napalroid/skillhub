@@ -15,12 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('service_id')->constrained()->cascadeOnDelete();
             $table->date('date');
-            $table->time('time_start');
-            $table->time('time_end');
+            $table->string('time_start');
+            $table->string('time_end');
             $table->integer('max_bookings')->default(1);
             $table->timestamps();
-            
-            $table->index(['service_id', 'date']);
         });
     }
 

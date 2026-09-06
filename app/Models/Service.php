@@ -17,12 +17,16 @@ class Service extends Model
         'portfolio_images',
         'booking_config',
         'last_booking_config_edit',
+        'booking_enabled',
+        'time_slots_enabled',
     ];
 
     protected $casts = [
         'portfolio_images' => 'array',
         'booking_config' => 'array',
         'last_booking_config_edit' => 'datetime',
+        'booking_enabled' => 'boolean',
+        'time_slots_enabled' => 'boolean',
     ];
 
     public function seller()

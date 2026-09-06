@@ -44,6 +44,17 @@ class ConfigBuilder extends Component
         return view('livewire.booking.config-builder');
     }
 
+    public function toggleTimeSlots()
+    {
+        $this->service->time_slots_enabled = !$this->service->time_slots_enabled;
+        $this->service->save();
+        
+        $this->dispatch('alert', [
+            'type' => 'success',
+            'message' => 'Time slots ' . ($this->service->time_slots_enabled ? 'diaktifkan' : 'dinonaktifkan')
+        ]);
+    }
+
     public function addField()
     {
         if (count($this->fields) >= config('booking.max_fields_per_service', 15)) {
@@ -93,8 +104,13 @@ class ConfigBuilder extends Component
 
     public function removeField($index)
     {
+        logger('removeField called with index: ' . $index);
+        logger('Fields before: ' . json_encode($this->fields));
+        
         unset($this->fields[$index]);
         $this->fields = array_values($this->fields);
+        
+        logger('Fields after: ' . json_encode($this->fields));
     }
 
     public function moveField($index, $direction)
