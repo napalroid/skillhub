@@ -29,7 +29,7 @@ class ServiceController extends Controller
 
         $services = Service::query()
             ->with(['seller', 'subcategory.category', 'subcategory.serviceType'])
-            ->where('status', 'approved')
+            ->approved()
             ->whereDoesntHave('subcategory.serviceType', function ($q) {
                 $q->where('hidden_from_listing', true);
             })

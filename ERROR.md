@@ -822,6 +822,31 @@ Kolom `services.is_paused` telah ada dan controller memanggil `update()`, tetapi
 
 ---
 
+## BUG-020 — Jasa yang Dijeda Masih Tampil di Marketplace
+
+### Severity
+
+HIGH
+
+### Status
+
+FIXED
+
+### Root Cause
+
+Daftar marketplace memakai filter langsung `status = approved`, bukan scope `Service::approved()`. Filter langsung tersebut tidak memeriksa `is_paused`.
+
+### Fix Applied
+
+Query `/jasa` kini memakai scope `approved()`, yang memerlukan status approved dan `is_paused = false`. Halaman detail serta alur pembuatan pesanan telah memakai scope yang sama.
+
+### Verification
+
+* Semua query status approved di controller layanan ditelusuri.
+* Cache Blade berhasil dibuat ulang.
+
+---
+
 ## BUG-018 — Navigasi Staggered Menunggu Modul Realtime
 
 ### Severity
