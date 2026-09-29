@@ -790,3 +790,27 @@ Pesan kini ditampilkan segera sebagai `Mengirim...`, lalu direkonsiliasi dengan 
 ### Verification
 
 * Build frontend dijalankan setelah perubahan.
+
+---
+
+## BUG-018 — Navigasi Staggered Menunggu Modul Realtime
+
+### Severity
+
+HIGH
+
+### Status
+
+FIXED
+
+### Root Cause
+
+`app.js` memuat Echo, listener notifikasi, dan chat secara berantai sebelum mulai mengimpor StaggeredMenu. Akibatnya menu menunggu beberapa request chunk yang tidak diperlukan untuk merender navigasi.
+
+### Fix Applied
+
+StaggeredMenu kini mulai dimuat paralel dengan modul realtime. Modul chat hanya dimuat bila halaman benar-benar memiliki root chat.
+
+### Verification
+
+* Build frontend dijalankan setelah perubahan.

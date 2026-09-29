@@ -24,18 +24,28 @@ const menuRoot = document.getElementById('skillhub-staggered-menu');
 
 if (menuRoot) {
     console.log('🔄 Loading navigation modules...');
-    
-    // Load modules sequentially to ensure proper initialization
-    import('./echo')
-        .then(() => import('./notification-listener'))
-        .then(() => import('./chat-realtime'))
-        .then(() => import('./components/StaggeredMenu.jsx'))
+
+    // Navigation must not wait for WebSocket or chat modules. Loading those
+    // sequentially delayed the only visible navigation on every page.
+    const menuPromise = import('./components/StaggeredMenu.jsx')
+        .then(() => console.log('✅ Staggered menu loaded successfully'));
+
+    const echoPromise = import('./echo');
+    const realtimePromise = echoPromise
         .then(() => {
-            console.log('✅ Navigation & realtime modules loaded successfully');
+            const modules = [import('./notification-listener')];
+
+            if (document.getElementById('skillhub-chat')) {
+                modules.push(import('./chat-realtime'));
+            }
+
+            return Promise.all(modules);
         })
-        .catch(err => {
-            console.error('❌ Failed to load navigation modules:', err);
-        });
+        .then(() => console.log('✅ Realtime modules loaded successfully'));
+
+    Promise.all([menuPromise, realtimePromise])
+        .then(() => console.log('✅ Navigation & realtime modules loaded successfully'))
+        .catch(err => console.error('❌ Failed to load navigation modules:', err));
 } else {
     console.log('✅ Core bundle loaded (minimal - no navigation)');
 }
