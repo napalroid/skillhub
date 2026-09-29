@@ -12,20 +12,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS via CDN (cepat, no build) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-
     <!-- Style tambahan -->
     <style>
         body {
@@ -44,6 +30,7 @@
         }
     </style>
 
+    @include('partials.realtime-config')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>

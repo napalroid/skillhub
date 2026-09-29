@@ -15,6 +15,16 @@
         </a>
     </div>
 
+    <form method="GET" class="mb-5 flex flex-wrap items-end gap-3">
+        <label class="text-xs font-bold uppercase tracking-wide text-[#555555]">Field buyer
+            <select name="buyer_fields" class="mt-1 block border border-[#DDDDDD] bg-white px-3 py-2 text-sm text-black"><option value="">Semua</option><option value="configured" @selected(request('buyer_fields') === 'configured')>Ada konfigurasi</option><option value="none" @selected(request('buyer_fields') === 'none')>Belum ada</option></select>
+        </label>
+        <label class="text-xs font-bold uppercase tracking-wide text-[#555555]">Urutkan
+            <select name="sort" class="mt-1 block border border-[#DDDDDD] bg-white px-3 py-2 text-sm text-black"><option value="latest" @selected(request('sort', 'latest') === 'latest')>Terbaru</option><option value="oldest" @selected(request('sort') === 'oldest')>Terlama</option><option value="fields_first" @selected(request('sort') === 'fields_first')>Ada field buyer dahulu</option></select>
+        </label>
+        <button class="btn-outline px-4 py-2 text-xs" type="submit">Terapkan</button>
+    </form>
+
     {{-- SERVICES TABLE --}}
     <div class="admin-card" data-stagger-container>
         <div class="overflow-hidden">
@@ -44,6 +54,7 @@
                                     <td>
                                         <p class="font-medium text-black truncate max-w-xs">{{ $service->title }}</p>
                                         <p class="text-[10px] text-[#555555] mt-0.5 line-clamp-1">{{ $service->description }}</p>
+                                        <p class="mt-1 text-[10px] font-bold {{ !empty($service->booking_config['fields']) ? 'text-[#0051BA]' : 'text-[#999999]' }}">{{ !empty($service->booking_config['fields']) ? count($service->booking_config['fields']).' field buyer' : 'Tanpa field buyer' }}</p>
                                     </td>
                                     <td>
                                         <span class="text-xs px-2 py-1 rounded-sm border border-[#DDDDDD] bg-white">

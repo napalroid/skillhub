@@ -1,778 +1,85 @@
 @php
-    $marketplaceCategories = collect([
-        [
-            'id' => 0,
-            'name' => 'Semua Jasa',
-            'url' => route('services.index'),
-            'icon' => null,
-            'iconImage' => null,
-            'active' => ! request('category'),
-        ],
-    ])->merge($categories->map(function ($category) {
-        return [
-            'id' => $category->id,
-            'name' => $category->name,
-            'url' => route('services.index', ['category' => $category->id]),
-            'icon' => $category->icon ?: $category->displayIcon(),
-            'iconImage' => $category->iconIsFile() ? asset('storage/' . $category->icon) : ($category->image ? asset('storage/' . $category->image) : null),
-            'active' => (string) request('category') === (string) $category->id,
-        ];
-    })->values());
-
-    $marketplaceMenuItems = [
-        ['label' => 'Home', 'href' => route('home')],
-        ['label' => 'Marketplace', 'href' => route('services.index')],
-        ['label' => 'Chat', 'href' => route('conversations.seller-index')],
-        ['label' => 'About Us', 'href' => route('home') . '#keunggulan'],
-    ];
-
-    $hasActiveFilters = request()->hasAny(['category', 'subcategory', 'search', 'sort']);
-
+    $marketplaceCategories = collect([['id' => 0, 'name' => 'Semua jasa', 'url' => route('services.index'), 'image' => null, 'active' => ! request('category')]])->merge($categories->map(fn ($category) => [
+        'id' => $category->id, 'name' => $category->name, 'url' => route('services.index', ['category' => $category->id]),
+        'image' => $category->iconIsFile() ? asset('storage/' . $category->icon) : ($category->image ? asset('storage/' . $category->image) : null),
+        'active' => (string) request('category') === (string) $category->id,
+    ]));
     $heroSlides = [
-        [
-            'title' => 'Wujudkan ide besar dengan talenta terbaik.',
-            'subtitle' => 'Temukan ribuan karya dan layanan digital berkualitas langsung dari siswa berprestasi.',
-            'image' => asset('storage/marketplace-image/SKILLHUB_1920x1080.webp'),
-            'tag' => 'Eksplorasi Jasa',
-        ],
-        [
-            'title' => 'Jasa kreatif, koding & desain untuk kebutuhanmu.',
-            'subtitle' => 'Dari pembuatan website responsif, desain grafis modern, hingga video editing profesional.',
-            'image' => asset('storage/marketplace-image/skillhubsitemap.webp'),
-            'tag' => 'Talenta Digital',
-        ],
-        [
-            'title' => 'Solusi proyek & kebutuhan sekolah cepat dan terpercaya.',
-            'subtitle' => 'Portofolio teruji dengan komunikasi langsung bersama kreator siswa yang siap membantu.',
-            'image' => asset('storage/marketplace-image/ITSKILLHUB.webp'),
-            'tag' => 'Karya Nyata',
-        ],
+        ['title' => 'Karya yang tepat untuk rencana yang besar.', 'tag' => 'Karya terpilih', 'image' => asset('storage/marketplace-image/SKILLHUB_1920x1080.webp')],
+        ['title' => 'Talenta siswa, disusun untuk kebutuhan nyata.', 'tag' => 'Talenta digital', 'image' => asset('storage/marketplace-image/skillhubsitemap.webp')],
+        ['title' => 'Dari ide pertama sampai hasil yang siap dipakai.', 'tag' => 'Proyek nyata', 'image' => asset('storage/marketplace-image/ITSKILLHUB.webp')],
     ];
+    $hasActiveFilters = request()->hasAny(['category', 'subcategory', 'search', 'sort']);
+    $resultTitle = request('search') ? 'Hasil untuk “' . request('search') . '”' : ($activeCategory?->name ?? 'Jasa untuk setiap kebutuhan');
 @endphp
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eksplorasi Jasa Siswa | SkillHub</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+<html lang="id" class="scroll-smooth"><head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="description" content="Temukan jasa dan talenta siswa terpilih di SkillHub."><title>Marketplace Jasa Siswa | SkillHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
     @vite('resources/js/app.js')
-    
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-            background-color: #ffffff;
-            color: #111111;
-            -webkit-font-smoothing: antialiased;
-        }
+        :root{--ink:#111318;--paper:#f8f9fb;--line:#dfe4eb;--muted:#687180;--blue:#155eef;--blue-dark:#1047b7}*{box-sizing:border-box}html{background:var(--paper);scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:'DM Sans',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased}::selection{background:#bdd1ff;color:var(--ink)}:focus-visible{outline:3px solid var(--blue);outline-offset:3px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.skip-link{position:absolute;z-index:20;top:-5rem;left:1rem;padding:.75rem 1rem;background:#fff;color:var(--ink);font-weight:700;text-decoration:none}.skip-link:focus{top:1rem}.marketplace-shell{overflow:hidden}.marketplace-wrap{width:min(100% - 2rem,1280px);margin-inline:auto}
+        .marketplace-hero{position:relative;display:flex;min-height:100svh;padding:7.5rem 0 5rem;background:#111318;color:#fff;isolation:isolate}.marketplace-hero::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(8,11,17,.88) 0%,rgba(8,11,17,.63) 44%,rgba(8,11,17,.2) 100%)}.marketplace-hero__grid{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:0;min-height:calc(100svh - 12.5rem)}.marketplace-hero h1{max-width:11ch;margin:0;font-family:'DM Serif Display',Georgia,serif;font-size:clamp(3.15rem,6vw,6rem);font-weight:400;line-height:.94;letter-spacing:-.04em;text-wrap:balance}.marketplace-hero__copy{max-width:50ch;margin:1.6rem 0 2.2rem;color:#e0e5ed;font-size:1.05rem;line-height:1.7}.marketplace-search{display:grid;grid-template-columns:1fr auto;width:min(100%,35rem);padding:5px;background:#fff;box-shadow:0 20px 50px rgba(0,0,0,.27)}.marketplace-search label{display:flex;align-items:center;gap:.75rem;min-width:0;padding-left:.8rem;color:var(--muted)}.marketplace-search input{width:100%;min-width:0;padding:.9rem 0;border:0;color:var(--ink);font:500 .92rem inherit;outline:0}.marketplace-search input::placeholder{color:#87909e}.marketplace-search button{border:0;padding:.9rem 1.15rem;background:var(--blue);color:#fff;font:600 .88rem inherit;cursor:pointer;transition:background .2s,transform .2s}.marketplace-search button:hover{background:var(--blue-dark)}.marketplace-search button:active{transform:scale(.98)}.marketplace-hero__links{display:flex;flex-wrap:wrap;gap:.5rem 1rem;margin-top:1.35rem;color:#d6dde8;font-size:.78rem}.marketplace-hero__links a{color:#fff;text-decoration-color:rgba(255,255,255,.55);text-underline-offset:4px;transition:text-decoration-color .2s}.marketplace-hero__links a:hover{text-decoration-color:#fff}
+        .marketplace-image-stack{position:absolute!important;inset:0!important;z-index:0;min-height:0!important;margin:0!important;padding:0!important;max-width:none!important}.marketplace-image-stack__frame{position:relative;width:100%;height:100%!important}.marketplace-image-stack__card{position:absolute;inset:0;margin:0;overflow:hidden;background:#242934;transform-origin:center center;box-shadow:none}.marketplace-image-stack__card::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 52%,rgba(4,8,15,.5));pointer-events:none}.marketplace-image-stack__card img{width:100%;height:100%;object-fit:cover;display:block}.marketplace-image-stack__card figcaption{position:absolute;z-index:1;right:1.35rem;bottom:1.1rem;left:auto;display:flex;justify-content:space-between;align-items:center;color:#fff;font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase}.marketplace-image-stack__card figcaption span{color:#b8ceff;font-variant-numeric:tabular-nums}.marketplace-image-stack__controls{position:absolute;z-index:3;right:1.25rem;bottom:1.25rem;display:flex;gap:.35rem}.marketplace-image-stack__controls button{width:2.4rem;height:2.25rem;border:1px solid rgba(255,255,255,.45);background:rgba(8,11,17,.42);color:#fff;font:600 .7rem inherit;cursor:pointer;transition:background .2s,color .2s,border-color .2s}.marketplace-image-stack__controls button:hover,.marketplace-image-stack__controls button.is-active{border-color:#fff;background:#fff;color:var(--ink)}
+        .marketplace-categories{padding:4.5rem 0 2rem}.marketplace-section-heading{display:flex;justify-content:space-between;gap:1.5rem;align-items:center;padding-bottom:1.2rem;border-bottom:1px solid var(--ink)}.marketplace-section-heading h2{margin:0;font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2.1rem,4vw,3.5rem);font-weight:400;line-height:1;letter-spacing:-.035em}.marketplace-section-heading p{max-width:31ch;margin:0;color:var(--muted);font-size:.9rem;line-height:1.55}.marketplace-reset{color:var(--blue);font-size:.82rem;font-weight:700;text-decoration:none}.marketplace-reset:hover{text-decoration:underline;text-underline-offset:4px}.marketplace-category-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border-bottom:1px solid var(--line)}.marketplace-category{display:grid;grid-template-columns:2.8rem 1fr auto;align-items:center;gap:.75rem;min-height:5.5rem;padding:1rem 0;color:var(--ink);border-bottom:1px solid var(--line);text-decoration:none;transition:all .2s ease}.marketplace-category:nth-child(odd){padding-right:1.5rem;border-right:1px solid var(--line)}.marketplace-category:nth-child(even){padding-left:1.5rem}.marketplace-category:hover{padding-left:1rem;color:var(--blue)}.marketplace-category:nth-child(odd):hover{padding-left:1rem;padding-right:1.75rem}.marketplace-category__visual{width:2.4rem;height:2.4rem;display:grid;place-items:center;overflow:hidden;background:#e8edf6;color:var(--blue);font-size:.75rem;font-weight:700;border-radius:8px}.marketplace-category.is-active .marketplace-category__visual{background:var(--blue);color:#fff}.marketplace-category__visual img{width:100%;height:100%;object-fit:cover}.marketplace-category__name{font-size:.95rem;font-weight:600}.marketplace-category__arrow{font-size:1.25rem;font-weight:400;transition:transform .2s}.marketplace-category:hover .marketplace-category__arrow{transform:translateX(3px)}
+        .marketplace-listing{padding:5rem 0 6.5rem}.marketplace-listing__top{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;margin-bottom:2rem}.marketplace-listing__top h2{max-width:15ch;margin:0;font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2.35rem,4.6vw,4.2rem);font-weight:400;line-height:.98;letter-spacing:-.04em}.marketplace-listing__top p{margin:.6rem 0 0;color:var(--muted);font-size:.9rem}.marketplace-filters{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.75rem}.marketplace-filters select{appearance:none;min-width:11rem;padding:.65rem 2.3rem .65rem .75rem;border:1px solid var(--line);border-radius:6px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23111318' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat calc(100% - .7rem) center;color:var(--ink);font:600 .75rem inherit;cursor:pointer;transition:border-color .2s}.marketplace-filters select:focus{border-color:var(--blue);outline:0}        .marketplace-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2.5rem}.marketplace-service{min-width:0}.marketplace-service__image{position:relative;display:block;aspect-ratio:1.7/1;overflow:hidden;background:#e7ebf2;color:inherit}.marketplace-service__image img{width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.16,1,.3,1)}.marketplace-service:hover .marketplace-service__image img{transform:scale(1.03)}.marketplace-service__image::after{content:'Lihat jasa  ↗';position:absolute;right:.6rem;bottom:.6rem;padding:.4rem .55rem;background:#fff;color:var(--ink);font-size:.65rem;font-weight:700;opacity:0;transform:translateY(5px);transition:opacity .2s,transform .2s}.marketplace-service:hover .marketplace-service__image::after{opacity:1;transform:translateY(0)}.marketplace-service__body{padding-top:.9rem}.marketplace-service__category{margin:0 0 .45rem;color:var(--blue);font-size:.65rem;font-weight:700;letter-spacing:.075em;text-transform:uppercase}.marketplace-service h3{margin:0;font-size:1rem;font-weight:700;line-height:1.35;letter-spacing:-.015em}.marketplace-service h3 a{color:inherit;text-decoration:none}.marketplace-service h3 a:hover{text-decoration:underline;text-decoration-color:var(--blue);text-underline-offset:4px}.marketplace-service__meta{display:flex;align-items:center;justify-content:space-between;gap:.7rem;margin-top:.85rem;color:var(--muted);font-size:.78rem}.marketplace-service__price{color:var(--ink);font-size:.92rem;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}.marketplace-empty{grid-column:1/-1;padding:5rem 1rem;text-align:center;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}.marketplace-empty h3{margin:0;font-family:'DM Serif Display',Georgia,serif;font-size:2rem;font-weight:400}.marketplace-empty p{max-width:37ch;margin:1rem auto 1.5rem;color:var(--muted);line-height:1.6}.marketplace-button{display:inline-block;padding:.8rem 1rem;background:var(--ink);color:#fff;font-size:.78rem;font-weight:700;text-decoration:none;transition:background .2s,transform .2s}.marketplace-button:hover{background:var(--blue)}.marketplace-button:active{transform:scale(.98)}.marketplace-pagination{display:flex;justify-content:center;gap:.35rem;margin-top:4rem}.marketplace-pagination a,.marketplace-pagination span{display:grid;width:2.45rem;height:2.45rem;place-items:center;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:.8rem;font-weight:700;text-decoration:none}.marketplace-pagination a:hover,.marketplace-pagination .is-current{border-color:var(--ink);background:var(--ink);color:#fff}.marketplace-pagination .is-disabled{opacity:.35}
+        .marketplace-faq{padding:5rem 0 6.5rem;border-top:1px solid var(--ink)}.marketplace-faq__grid{display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr);gap:4rem}.marketplace-faq h2{margin:0;font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2.3rem,4vw,3.8rem);font-weight:400;line-height:.98;letter-spacing:-.04em}.marketplace-faq p{max-width:29ch;color:var(--muted);line-height:1.65}.marketplace-faq details{border-top:1px solid var(--line)}.marketplace-faq details:last-child{border-bottom:1px solid var(--line)}.marketplace-faq summary{display:flex;justify-content:space-between;gap:1rem;padding:1.25rem 0;color:var(--ink);font-size:.95rem;font-weight:700;cursor:pointer;list-style:none}.marketplace-faq summary::-webkit-details-marker{display:none}.marketplace-faq summary::after{content:'+';color:var(--blue);font-size:1.2rem;font-weight:400}.marketplace-faq details[open] summary::after{content:'−'}.marketplace-faq details p{margin:0;padding:0 2rem 1.35rem 0;max-width:62ch;font-size:.9rem}        @media(max-width:960px){.marketplace-hero{padding:7rem 0 4.5rem}.marketplace-hero__grid{min-height:calc(100svh - 11.5rem);gap:0}.marketplace-hero h1{max-width:13ch}.marketplace-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:2rem}.marketplace-categories{padding:3.5rem 0 1.5rem}.marketplace-section-heading{gap:.75rem;padding-bottom:1rem}.marketplace-category{min-height:5rem;padding:.75rem 0}.marketplace-category:nth-child(odd){padding-right:1.25rem}.marketplace-category:nth-child(even){padding-left:1.25rem}}@media(max-width:640px){.marketplace-wrap{width:min(100% - 1.35rem,1280px)}.marketplace-hero{min-height:100svh;padding:6.5rem 0 4.5rem}.marketplace-hero::before{background:linear-gradient(90deg,rgba(8,11,17,.88),rgba(8,11,17,.48))}.marketplace-hero__grid{min-height:calc(100svh - 11rem)}.marketplace-hero h1{font-size:clamp(3rem,15vw,4.35rem)}.marketplace-hero__copy{font-size:.95rem}.marketplace-search{grid-template-columns:1fr}.marketplace-search button{width:100%}.marketplace-image-stack__card figcaption{right:1rem;bottom:4.6rem;left:auto;font-size:.62rem}.marketplace-image-stack__controls{right:.7rem;bottom:.8rem}.marketplace-categories{padding-top:4rem}.marketplace-section-heading,.marketplace-listing__top{display:block}.marketplace-section-heading p{margin-top:1rem}.marketplace-category-list{grid-template-columns:1fr}.marketplace-category,.marketplace-category:nth-child(odd),.marketplace-category:nth-child(even){min-height:5.5rem;padding-inline:0;border-right:0}.marketplace-category:hover,.marketplace-category:nth-child(odd):hover{padding-left:.35rem;padding-right:0}.marketplace-listing{padding:4rem 0 5rem}.marketplace-listing__top{margin-bottom:1.75rem}.marketplace-filters{justify-content:start;margin-top:1.5rem}.marketplace-filters select{flex:1;min-width:0}.marketplace-grid{grid-template-columns:1fr;gap:2.5rem}.marketplace-service__image{aspect-ratio:16/10}.marketplace-faq{padding:4rem 0 5rem}.marketplace-faq__grid{grid-template-columns:1fr;gap:2rem}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+        /* Compact marketplace composition translated from the supplied reference. */
+        .marketplace-hero{display:block;min-height:0;padding:6.1rem 0 1.15rem;background:var(--paper);color:var(--ink)}.marketplace-hero::before{display:none}.marketplace-hero__grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(14rem,.78fr);min-height:12.25rem;gap:1rem;align-items:stretch}.marketplace-hero__grid>div:first-child{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;min-height:12.25rem;padding:1.65rem 2rem;background:#fff;border:1px solid #eef0f4;border-radius:18px;overflow:hidden}.marketplace-hero__grid>div:first-child::after{content:'';position:absolute;z-index:-1;right:-4.5rem;bottom:-5rem;width:16rem;height:16rem;border-radius:50%;background:#eff5ff}.marketplace-hero h1{max-width:20ch;font-family:'DM Sans',ui-sans-serif,sans-serif;font-size:clamp(1.55rem,2.75vw,2.4rem);font-weight:700;line-height:1.08;letter-spacing:-.04em}.marketplace-hero__copy{max-width:48ch;margin:.7rem 0 1.15rem;color:#586273;font-size:.85rem;line-height:1.5}.marketplace-search{width:min(100%,31rem);padding:3px;border:1px solid #dfe7f2;border-radius:9px;box-shadow:none}.marketplace-search input{padding:.68rem 0;font-size:.78rem}.marketplace-search button{padding:.68rem .9rem;border-radius:6px;font-size:.75rem}.marketplace-hero__links{gap:.35rem .75rem;margin-top:.75rem;color:#758096;font-size:.68rem}.marketplace-hero__links a{color:#3168bf;text-decoration:none}.marketplace-hero__links a:hover{text-decoration:underline}
+        .marketplace-image-stack{position:relative!important;inset:auto!important;z-index:auto;min-height:12.25rem!important;margin:0!important;padding:0!important;max-width:none!important}.marketplace-image-stack::before{display:none}.marketplace-image-stack__frame{position:relative;z-index:auto;width:calc(100% - .65rem);height:calc(100% - .65rem)!important;min-height:11.6rem;overflow:visible}.marketplace-image-stack__card{display:block!important;border-radius:18px;box-shadow:0 7px 18px rgba(33,52,84,.13);transition-property:opacity,transform;transition-timing-function:cubic-bezier(.22,1,.36,1);will-change:transform,opacity}.marketplace-image-stack__card::after{background:linear-gradient(180deg,transparent 52%,rgba(4,8,15,.35))}.marketplace-image-stack__card figcaption{right:.9rem;bottom:.75rem;left:.9rem;font-size:.58rem;letter-spacing:.06em}.marketplace-image-stack__controls{z-index:4;right:.55rem;bottom:.55rem}.marketplace-image-stack__controls button{width:auto;height:auto;padding:.38rem .55rem;border:1px solid rgba(255,255,255,.7);border-radius:6px;background:rgba(12,17,27,.48);font-size:.58rem}.marketplace-image-stack__controls button:hover{background:#fff;color:var(--ink)}
+        .marketplace-categories{padding:1rem 0 .4rem}.marketplace-section-heading{display:flex;align-items:center;padding:0 0 .55rem;border:0}.marketplace-section-heading h2{font-family:'DM Sans',ui-sans-serif,sans-serif;font-size:.84rem;font-weight:700;letter-spacing:-.02em}.marketplace-section-heading p{display:none}.marketplace-reset{margin-left:auto;font-size:.68rem}.marketplace-category-list{display:flex;gap:.7rem;overflow-x:auto;border:0;padding:.2rem 0 .75rem;scrollbar-width:none}.marketplace-category-list::-webkit-scrollbar{display:none}.marketplace-category{grid-template-columns:2.25rem auto;gap:.4rem;min-height:0;padding:0!important;border:0!important;color:#496c70;flex:0 0 auto}.marketplace-category:hover{padding:0!important;color:#2f6a72}.marketplace-category__visual{width:2.25rem;height:2.25rem;border-radius:50%;background:#e7f1ef;font-size:.58rem;box-shadow:0 3px 8px rgba(44,82,83,.12)}.marketplace-category.is-active .marketplace-category__visual{background:#447b7d}.marketplace-category__name{padding:.42rem .6rem;border-radius:7px;background:#f2f5f5;font-size:.68rem;font-weight:600}.marketplace-category.is-active .marketplace-category__name{background:#447b7d;color:#fff}.marketplace-category__arrow{display:none}
+        .marketplace-listing{padding:1rem 0 4rem}.marketplace-listing__top{align-items:center;margin-bottom:1rem}.marketplace-listing__top h2{max-width:none;font-family:'DM Sans',ui-sans-serif,sans-serif;font-size:1rem;font-weight:700;letter-spacing:-.025em}.marketplace-listing__top p{margin:.2rem 0 0;font-size:.68rem}.marketplace-filters{gap:.35rem}.marketplace-filters select{min-width:8.8rem;padding:.5rem 1.9rem .5rem .6rem;border-radius:7px;font-size:.64rem}.marketplace-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}.marketplace-service{overflow:hidden;border:1px solid #e5e9ef;border-radius:11px;background:#fff;box-shadow:0 5px 12px rgba(39,54,79,.08);transition:transform .22s,box-shadow .22s}.marketplace-service:hover{transform:translateY(-3px);box-shadow:0 10px 18px rgba(39,54,79,.13)}.marketplace-service__image{aspect-ratio:1.72/1}.marketplace-service__image::after{right:.45rem;bottom:.45rem;padding:.32rem .45rem;border-radius:5px;font-size:.55rem}.marketplace-service__body{padding:.7rem .75rem .8rem}.marketplace-service__category{margin-bottom:.35rem;font-size:.55rem;letter-spacing:.06em}.marketplace-service h3{display:-webkit-box;overflow:hidden;font-size:.73rem;line-height:1.3;-webkit-box-orient:vertical;-webkit-line-clamp:1}.marketplace-service__meta{margin-top:.55rem;font-size:.62rem}.marketplace-service__price{font-size:.72rem}.marketplace-faq{padding-top:3rem}
+        .marketplace-hero__grid{grid-template-columns:minmax(13rem,.25fr) minmax(0,1fr)}.marketplace-image-stack{min-height:14rem!important}.marketplace-hero__grid>div:first-child{min-height:14rem}.marketplace-image-stack__frame{width:calc(100% - 1.15rem);height:calc(100% - 1.15rem)!important}.marketplace-image-stack__card{box-shadow:0 10px 25px rgba(33,52,84,.15)}
+        @media(max-width:960px){.marketplace-hero{padding-top:5.5rem}.marketplace-hero__grid{grid-template-columns:minmax(14rem,.38fr) minmax(0,1fr)}.marketplace-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:640px){.marketplace-hero{padding-top:5rem}.marketplace-hero__grid{grid-template-columns:1fr;gap:.75rem}.marketplace-hero__grid>div:first-child{min-height:15rem;padding:1.35rem}.marketplace-image-stack{min-height:12rem!important}.marketplace-image-stack__frame{height:calc(100% - .5rem)!important}.marketplace-category-list{margin-inline:-.05rem}.marketplace-listing{padding-top:1rem}.marketplace-listing__top h2{font-size:1rem}.marketplace-filters{margin-top:.85rem}.marketplace-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}.marketplace-service__body{padding:.6rem}.marketplace-service h3{-webkit-line-clamp:2}.marketplace-service__meta{align-items:flex-start;flex-direction:column;gap:.25rem}.marketplace-faq{padding-top:3rem}}
+/* Hero: a single, portrait-friendly image canvas with the marketplace action layer inside it. */
+.marketplace-hero{padding:4.75rem 0 2.6rem}
+.marketplace-hero__grid{position:relative;display:block;width:min(calc(100vw - 2rem),86rem);height:clamp(36rem,50vw,46rem);min-height:0;margin-inline:auto}
+.marketplace-hero__grid>div:first-child{position:absolute;z-index:5;inset:auto auto 2.5rem 2.5rem;display:block;width:min(32rem,calc(100% - 5rem));min-height:0;padding:0;background:transparent;border:0;border-radius:0;color:#fff;overflow:visible;box-shadow:none}
+.marketplace-hero__grid>div:first-child::after{display:none}
+.marketplace-hero h1{max-width:10.5ch;margin-bottom:.8rem;color:#fff;font-size:clamp(2.45rem,4.35vw,4.6rem);line-height:.95;letter-spacing:-.04em;text-wrap:balance;text-shadow:0 .2rem 1.25rem rgba(0,0,0,.86)}
+.marketplace-hero__copy{max-width:29rem;color:rgba(255,255,255,.96);font-size:1rem;line-height:1.55;text-shadow:0 .13rem .9rem rgba(0,0,0,.9)}
+.marketplace-search{max-width:28rem;margin-top:1.4rem;background:#fff;border-color:rgba(255,255,255,.75);box-shadow:0 1rem 2.5rem rgba(0,0,0,.18)}
+.marketplace-search input{color:var(--ink)}
+.marketplace-popular{max-width:30rem;margin-top:1.65rem;color:rgba(255,255,255,.92);text-shadow:0 .12rem .75rem rgba(0,0,0,.9)}
+.marketplace-popular a{color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}
+.marketplace-popular a:hover{background:#fff;color:var(--ink)}
+.marketplace-image-stack{position:absolute!important;inset:0!important;width:auto!important;height:auto!important;min-height:0!important;overflow:visible}
+.marketplace-image-stack__frame{width:100%;height:100%!important;min-height:0!important;cursor:pointer}
+.marketplace-image-stack__card{border-radius:1.45rem;transform-origin:center top;box-shadow:0 1.8rem 3.5rem rgba(17,24,39,.16);transition:none!important}
+.marketplace-image-stack__card::after{background:linear-gradient(90deg,rgba(3,9,17,.44),transparent 55%,rgba(3,9,17,.1))}
+.marketplace-image-stack__card figcaption{right:6.1rem;bottom:1.3rem;left:auto;padding:.55rem .7rem;background:rgba(4,10,18,.7);border:1px solid rgba(255,255,255,.18);border-radius:.5rem;font-size:.66rem;letter-spacing:.12em}
+.marketplace-image-stack__controls{right:1rem;bottom:1rem}
+.marketplace-image-stack__controls button{display:grid;place-items:center;min-width:2.35rem}
+.marketplace-image-stack__controls .marketplace-image-stack__next{width:2.35rem;padding:0}
+.marketplace-image-stack__next svg{transition:transform .2s ease}
+@media (hover:hover) and (pointer:fine){.marketplace-image-stack__next:hover svg{transform:translateX(2px)}}
+@keyframes marketplace-stack-front{from{opacity:.52;transform:translate3d(0,20px,0) scale(.972)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+@keyframes marketplace-stack-middle{from{opacity:.42;transform:translate3d(0,40px,0) scale(.944)}to{opacity:.52;transform:translate3d(0,20px,0) scale(.972)}}
+@keyframes marketplace-stack-back{from{opacity:1;transform:translate3d(0,0,0) scale(1)}to{opacity:.42;transform:translate3d(0,40px,0) scale(.944)}}
+.marketplace-image-stack__card--depth-0{animation:marketplace-stack-front 700ms cubic-bezier(.23,1,.32,1) both}
+.marketplace-image-stack__card--depth-1{animation:marketplace-stack-middle 700ms cubic-bezier(.23,1,.32,1) both}
+.marketplace-image-stack__card--depth-2,.marketplace-image-stack__card--depth-3{animation:marketplace-stack-back 700ms cubic-bezier(.23,1,.32,1) both}
+@media (prefers-reduced-motion:reduce){.marketplace-image-stack__card--depth-0,.marketplace-image-stack__card--depth-1,.marketplace-image-stack__card--depth-2,.marketplace-image-stack__card--depth-3{animation:none!important}.marketplace-image-stack__card{transform:none!important;transition:opacity 200ms ease!important}}
 
-        /* Hero Background Container */
-        .hero-bg-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .hero-bg-item {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
-                        transform 1s cubic-bezier(0.16, 1, 0.3, 1);
-            overflow: hidden;
-        }
-
-        .hero-bg-item img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-            transition: transform 8s linear;
-        }
-
-        .hero-bg-item:hover img {
-            transform: scale(1.1);
-        }
-
-        /* Service Card - No Background, Hover State Only */
-        .service-card {
-            display: block;
-            border: 1px solid transparent;
-            padding: 0.5rem;
-            transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-                        transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .service-card:hover {
-            border-color: #000000;
-            transform: translateY(-2px);
-        }
-
-        .service-card-image {
-            position: relative;
-            overflow: hidden;
-            background-color: #f1f5f9;
-        }
-
-        .service-card-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .service-card:hover .service-card-image img {
-            transform: scale(1.03);
-        }
-
-        .service-card-title {
-            transition: color 0.2s ease;
-        }
-
-        .service-card:hover .service-card-title {
-            color: #000000;
-        }
-
-        /* Category Filter - Clean Editorial */
-        .category-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 1.25rem;
-            border: 1px solid #e2e8f0;
-            background-color: #ffffff;
-            text-decoration: none;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            user-select: none;
-            flex-shrink: 0;
-        }
-
-        .category-item:hover {
-            border-color: #000000;
-            background-color: #fafafa;
-        }
-
-        .category-item.active {
-            border-color: #000000;
-            background-color: #000000;
-            color: #ffffff;
-        }
-
-        .category-item.active .category-icon {
-            filter: invert(1);
-        }
-
-        .category-icon {
-            width: 1.5rem;
-            height: 1.5rem;
-            flex-shrink: 0;
-        }
-
-        /* Pagination */
-        .pagination-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 2.5rem;
-            height: 2.5rem;
-            padding: 0 0.75rem;
-            border: 1px solid #e2e8f0;
-            background-color: #ffffff;
-            color: #0f172a;
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.18s ease;
-        }
-
-        .pagination-link:hover {
-            border-color: #000000;
-            background-color: #fafafa;
-            color: #000000;
-        }
-
-        .pagination-link.is-active {
-            border-color: #000000;
-            background-color: #000000;
-            color: #ffffff;
-        }
-
-        .pagination-ellipsis {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 2.5rem;
-            height: 2.5rem;
-            color: #94a3b8;
-            font-size: 0.875rem;
-            font-weight: 600;
-            user-select: none;
-        }
-
-        /* FAQ Accordion */
-        .faq-item {
-            border-bottom: 1px solid #e2e8f0;
-            transition: border-color 0.2s ease;
-        }
-
-        .faq-item:hover {
-            border-color: #000000;
-        }
-
-        .faq-toggle {
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
-
-        .faq-toggle .faq-icon {
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .faq-item.active .faq-icon {
-            transform: rotate(180deg);
-        }
-
-        .faq-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .faq-text {
-            margin: 0;
-            line-height: 1.7;
-        }
-
-        @media (max-width: 639px) {
-            .faq-text {
-                font-size: 0.875rem;
-            }
-        }
-    </style>
-</head>
-<body class="min-h-screen bg-white text-[#111111] antialiased">
-    
-    {{-- Header Navigation Mount --}}
-     <div id="skillhub-staggered-menu"
-          data-home="{{ route('home') }}"
-          data-marketplace="{{ route('services.index') }}"
-          data-how="{{ route('home') }}#how-we-work"
-          data-why-us="{{ route('home') }}#keunggulan"
-          data-login="{{ route('login') }}"
-          data-register="{{ route('register') }}"
-          data-get-started="{{ route('home') }}#cara-kerja"
-          data-authenticated="{{ auth()->check() ? 'true' : 'false' }}"
-          data-user-id="{{ auth()->id() ?? '' }}"
-          data-user-name="{{ auth()->user()?->name ?? '' }}"
-          data-avatar-url="{{ auth()->user()?->avatar_url ?? '' }}"
-          data-profile-url="{{ route('profile.edit') }}"
-          data-services-my="{{ auth()->check() ? route('services.my') : '#' }}"
-          data-logout-url="{{ route('logout') }}"
-          data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}"
-          data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}"
-          data-dompet="{{ route('wallet.index') }}"
-          data-pesanan="{{ route('orders.index') }}"
-          data-csrf-token="{{ csrf_token() }}"
-          data-is-admin="{{ auth()->check() && auth()->user()->isAdmin() ? 'true' : 'false' }}"
-          data-admin-dashboard="{{ auth()->check() && auth()->user()->isAdmin() ? route('admin.dashboard') : '' }}"></div>
+@media (max-width:700px){
+  .marketplace-hero{padding:4.6rem 0 1.7rem}
+  .marketplace-hero__grid{width:100%;height:clamp(34rem,136vw,41rem)}
+  .marketplace-image-stack{inset:0!important}
+  .marketplace-hero__grid>div:first-child{inset:auto auto 1.25rem 1.25rem;width:calc(100% - 2.5rem);padding:0}
+  .marketplace-hero__grid>div:first-child::after{display:none}
+  .marketplace-hero h1{font-size:clamp(2.2rem,11vw,3.15rem)}
+  .marketplace-hero__copy{font-size:.91rem;max-width:25rem}
+  .marketplace-search{margin-top:1rem}
+  .marketplace-popular{gap:.38rem;margin-top:1.1rem;font-size:.73rem}
+  .marketplace-popular a{padding:.28rem .48rem}
+}
+</style>
+</head><body>
+    <div id="skillhub-staggered-menu" data-home="{{ route('home') }}" data-marketplace="{{ route('services.index') }}" data-how="{{ route('home') }}#how-we-work" data-why-us="{{ route('home') }}#keunggulan" data-login="{{ route('login') }}" data-register="{{ route('register') }}" data-get-started="{{ route('home') }}#cara-kerja" data-authenticated="{{ auth()->check() ? 'true' : 'false' }}" data-user-id="{{ auth()->id() ?? '' }}" data-user-name="{{ auth()->user()?->name ?? '' }}" data-avatar-url="{{ auth()->user()?->avatar_url ?? '' }}" data-profile-url="{{ route('profile.edit') }}" data-services-my="{{ auth()->check() ? route('services.my') : '#' }}" data-logout-url="{{ route('logout') }}" data-notifications-url="{{ auth()->check() ? route('notifications.index') : '' }}" data-notifications-read-all-url="{{ auth()->check() ? route('notifications.read-all') : '' }}" data-dompet="{{ route('wallet.index') }}" data-pesanan="{{ route('orders.index') }}" data-csrf-token="{{ csrf_token() }}" data-is-admin="{{ auth()->check() && auth()->user()->isAdmin() ? 'true' : 'false' }}" data-admin-dashboard="{{ auth()->check() && auth()->user()->isAdmin() ? route('admin.dashboard') : '' }}"></div>
     <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT)</script>
-    <script id="skillhub-staggered-menu-items-data" type="application/json">@json($marketplaceMenuItems, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT)</script>
-
-    <main x-data="heroState()">
-        
-        {{-- SECTION 1: HERO - IMAGE AS BACKGROUND FOR TEXT --}}
-        <section class="relative min-h-[600px] sm:min-h-[700px] lg:min-h-[800px] overflow-hidden">
-            
-            {{-- Background Image Slides --}}
-            <div class="absolute inset-0 z-0">
-                <template x-for="(slide, index) in slides" :key="index">
-                    <div class="absolute inset-0 transition-all duration-1000 ease-out"
-                         :class="currentSlide === index ? 'opacity-100 scale-100' : 'opacity-0 scale-105'">
-                        <img :src="slide.image" 
-                             :alt="slide.title" 
-                             class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
-                    </div>
-                </template>
-            </div>
-
-            {{-- Content OVER the background image --}}
-            <div class="relative z-10 mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 h-full min-h-[600px] sm:min-h-[700px] lg:min-h-[800px] flex items-center">
-                <div class="w-full lg:w-1/2 space-y-6 sm:space-y-8 py-20 sm:py-24 lg:py-32">
-                    
-                    {{-- Dynamic Title --}}
-                    <div>
-                        <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-white leading-[1.1] drop-shadow-lg transition-opacity duration-700"
-                            x-text="slides[currentSlide].title">
-                            Wujudkan ide besar dengan talenta terbaik.
-                        </h1>
-                    </div>
-
-                    {{-- Dynamic Subtitle --}}
-                    <div>
-                        <p class="text-base sm:text-lg lg:text-xl leading-relaxed text-white/90 max-w-xl drop-shadow transition-opacity duration-700"
-                           x-text="slides[currentSlide].subtitle">
-                            Temukan ribuan karya dan layanan digital berkualitas langsung dari siswa berprestasi.
-                        </p>
-                    </div>
-
-                    {{-- Search Bar --}}
-                    <form action="{{ route('services.index') }}" method="GET" class="max-w-xl">
-                        @foreach (request()->only(['category', 'subcategory', 'sort']) as $name => $value)
-                            @if ($value)<input type="hidden" name="{{ $name }}" value="{{ $value }}">@endif
-                        @endforeach
-                        
-                        <div class="flex items-center bg-white/95 backdrop-blur-sm border-2 border-white/50 focus-within:border-white transition shadow-2xl">
-                            <div class="flex flex-1 items-center pl-4">
-                                <svg class="h-5 w-5 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                </svg>
-                                <input type="search" 
-                                       name="search" 
-                                       value="{{ request('search') }}" 
-                                       placeholder="Cari jasa yang Anda butuhkan..." 
-                                       class="w-full border-0 bg-transparent px-3 py-3.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0">
-                            </div>
-                            
-                            <button type="submit" 
-                                    class="inline-flex items-center px-6 py-3.5 text-sm font-bold text-white bg-black transition hover:bg-slate-800 active:scale-[0.98]">
-                                Cari
-                            </button>
-                        </div>
-                    </form>
-
-                    {{-- Popular Tags --}}
-                    <div class="flex flex-wrap items-center gap-2 text-xs">
-                        <span class="font-bold text-white uppercase tracking-wide drop-shadow">Populer:</span>
-                        @foreach (['Desain Logo', 'Landing Page', 'Edit Video', 'Python'] as $keyword)
-                            <a href="{{ route('services.index', ['search' => $keyword]) }}" 
-                               class="px-3 py-1.5 font-semibold text-white border border-white/50 bg-white/10 backdrop-blur-sm transition hover:bg-white hover:text-black">
-                                {{ $keyword }}
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
-            {{-- Navigation Controls --}}
-            <div class="absolute bottom-8 left-4 sm:left-8 right-4 sm:right-8 flex items-center justify-between z-20">
-                <button type="button" 
-                        @click="prev()" 
-                        class="flex h-12 w-12 items-center justify-center bg-white/90 backdrop-blur-sm text-black border border-white transition hover:bg-black hover:text-white hover:border-black active:scale-95 shadow-xl"
-                        aria-label="Gambar sebelumnya">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                </button>
-
-                <div class="flex items-center gap-2">
-                    <template x-for="(slide, index) in slides" :key="index">
-                        <button type="button" 
-                                @click="goTo(index)" 
-                                class="h-2 transition-all duration-300"
-                                :class="currentSlide === index ? 'w-8 bg-white' : 'w-2 bg-white/50 hover:bg-white/70'"
-                                :aria-label="'Pergi ke slide ' + (index + 1)"></button>
-                    </template>
-                </div>
-                
-                <button type="button" 
-                        @click="next()" 
-                        class="flex h-12 w-12 items-center justify-center bg-white/90 backdrop-blur-sm text-black border border-white transition hover:bg-black hover:text-white hover:border-black active:scale-95 shadow-xl"
-                        aria-label="Gambar berikutnya">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
-            </div>
-        </section>
-
-        {{-- SECTION 2: CATEGORY NAVIGATION --}}
-        <section class="mx-auto max-w-[1440px] px-4 pt-12 pb-6 sm:px-6 lg:px-8">
-            <div class="mb-6 flex items-center justify-between">
-                <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-black uppercase">
-                    Kategori
-                </h2>
-                @if ($hasActiveFilters)
-                    <a href="{{ route('services.index') }}" class="text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black underline underline-offset-4 transition">
-                        Reset Filter
-                    </a>
-                @endif
-            </div>
-
-            <div class="overflow-x-auto pb-3 -mx-4 px-4">
-                <div class="inline-flex items-center gap-3 min-w-full">
-                    @foreach ($marketplaceCategories as $category)
-                        <a href="{{ $category['url'] }}" 
-                           class="category-item {{ $category['active'] ? 'active' : '' }}">
-                            
-                            @if ($category['iconImage'])
-                                <img src="{{ $category['iconImage'] }}" 
-                                     alt="{{ $category['name'] }}" 
-                                     class="category-icon object-cover">
-                            @elseif ($category['id'] === 0)
-                                <svg class="category-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                                </svg>
-                            @else
-                                <svg class="category-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    @switch($category['icon'])
-                                        @case('design')
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.39m3.421 3.415a15.995 15.995 0 004.764-4.764l3.426-5.14a.75.75 0 00-.944-.944l-5.14 3.426a16 16 0 00-4.764 4.765m4.658 4.657l-4.658-4.657m0 0a3 3 0 10-4.243-4.243"/>
-                                        @break
-
-                                        @case('code')
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/>
-                                        @break
-
-                                        @case('camera')
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/>
-                                        @break
-
-                                        @case('music')
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V4.5l-9 3v10.5"/>
-                                        @break
-
-                                        @case('write')
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/>
-                                        @break
-
-                                        @case('learn')
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
-                                        @break
-
-                                        @case('business')
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/>
-                                        @break
-
-                                        @default
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/>
-                                    @endswitch
-                                </svg>
-                            @endif
-
-                            <span class="text-sm font-bold whitespace-nowrap">
-                                {{ $category['name'] }}
-                            </span>
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-
-        {{-- SEPARATOR --}}
-        <div class="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 my-8">
-            <div class="h-px w-full bg-black"></div>
-        </div>
-
-        {{-- SECTION 3: SERVICE LISTING --}}
-        <section id="daftar-jasa" class="bg-white py-6 sm:py-8">
-            <div class="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-                
-                {{-- Header & Controls --}}
-                <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-slate-200 pb-6">
-                    <div>
-                        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-black uppercase">
-                            @if (request('search'))
-                                Hasil: "{{ request('search') }}"
-                            @elseif ($activeCategory)
-                                {{ $activeCategory->name }}
-                            @else
-                                Semua Jasa
-                            @endif
-                        </h2>
-                        <p class="text-sm text-slate-500 mt-1 font-medium">
-                            {{ $services->total() }} jasa tersedia
-                        </p>
-                    </div>
-
-                    {{-- Filter Toolbar --}}
-                    <form action="{{ route('services.index') }}#daftar-jasa" method="GET" class="flex flex-wrap items-center gap-2">
-                        @foreach (request()->only(['search', 'category']) as $name => $value)
-                            @if ($value)<input type="hidden" name="{{ $name }}" value="{{ $value }}">@endif
-                        @endforeach
-
-                        {{-- Subcategory --}}
-                        <div class="relative">
-                            <label for="subcategory" class="sr-only">Subkategori</label>
-                            <select id="subcategory" 
-                                    name="subcategory" 
-                                    onchange="this.form.submit()" 
-                                    class="appearance-none border border-slate-300 bg-white py-2.5 pl-3 pr-9 text-xs font-bold uppercase tracking-wide text-black outline-none hover:border-black focus:border-black transition">
-                                <option value="">Semua Subkategori</option>
-                                @foreach ($subcategories as $subcategory)
-                                    <option value="{{ $subcategory->id }}" @selected((string) request('subcategory') === (string) $subcategory->id)>
-                                        {{ $subcategory->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-
-                        {{-- Sort --}}
-                        <div class="relative">
-                            <label for="sort" class="sr-only">Urutkan</label>
-                            <select id="sort" 
-                                    name="sort" 
-                                    onchange="this.form.submit()" 
-                                    class="appearance-none border border-slate-300 bg-white py-2.5 pl-3 pr-9 text-xs font-bold uppercase tracking-wide text-black outline-none hover:border-black focus:border-black transition">
-                                <option value="latest" @selected(request('sort', 'latest') === 'latest')>Terbaru</option>
-                                <option value="price_low" @selected(request('sort') === 'price_low')>Harga: Rendah</option>
-                                <option value="price_high" @selected(request('sort') === 'price_high')>Harga: Tinggi</option>
-                            </select>
-                            <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                    </form>
-                </div>
-
-                {{-- SERVICE GRID --}}
-                <div class="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    @forelse ($services as $service)
-                        @php
-                            $mainImage = $service->image ? asset('storage/' . $service->image) : asset('images/skillhub-hero.png');
-                            $portfolioImage = filled($service->portfolio_images[0] ?? null) ? asset('storage/' . $service->portfolio_images[0]) : null;
-                        @endphp
-                        
-                        <article class="service-card group">
-                            {{-- Image --}}
-                            <a href="{{ route('services.show', $service) }}" class="service-card-image block aspect-[16/9] mb-3">
-                                <img src="{{ $mainImage }}" 
-                                     alt="{{ $service->title }}" 
-                                     loading="lazy" 
-                                     decoding="async">
-                                
-                                @if ($portfolioImage)
-                                    <img src="{{ $portfolioImage }}" 
-                                         alt="Portofolio {{ $service->title }}" 
-                                         class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                         loading="lazy" 
-                                         decoding="async">
-                                @endif
-                            </a>
-
-                            {{-- Content --}}
-                            <div class="space-y-1">
-                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                                    {{ $service->subcategory?->name ?? 'Jasa' }}
-                                </p>
-
-                                <h3 class="service-card-title text-sm font-bold text-slate-800 line-clamp-2 leading-snug">
-                                    <a href="{{ route('services.show', $service) }}">
-                                        {{ $service->title }}
-                                    </a>
-                                </h3>
-
-                                <p class="text-xs text-slate-500">
-                                    {{ $service->seller?->name ?? 'SkillHub' }}
-                                </p>
-
-                                <div class="text-base font-extrabold text-black pt-1">
-                                    Rp{{ number_format($service->price, 0, ',', '.') }}
-                                </div>
-                            </div>
-                        </article>
-                    @empty
-                        {{-- Empty State --}}
-                        <div class="col-span-full border-2 border-dashed border-slate-300 p-16 text-center">
-                            <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                            <h3 class="mt-4 text-lg font-bold text-black">Tidak ada jasa ditemukan</h3>
-                            <p class="mt-2 text-sm text-slate-600 max-w-sm mx-auto">
-                                Coba ubah kata kunci pencarian atau filter kategori.
-                            </p>
-                            <a href="{{ route('services.index') }}" 
-                               class="mt-6 inline-flex items-center border-2 border-black bg-black px-6 py-3 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-white hover:text-black">
-                                Lihat Semua Jasa
-                            </a>
-                        </div>
-                    @endforelse
-                </div>
-
-                {{-- PAGINATION --}}
-                @if ($services->hasPages())
-                    <nav role="navigation" aria-label="Navigasi Halaman" class="mt-16 flex items-center justify-center">
-                        <ul class="flex flex-wrap items-center gap-1">
-                            
-                            {{-- Previous --}}
-                            @if ($services->onFirstPage())
-                                <li aria-disabled="true">
-                                    <span class="pagination-link opacity-40 cursor-not-allowed">
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-                                        </svg>
-                                    </span>
-                                </li>
-                            @else
-                                <li>
-                                    <a href="{{ $services->previousPageUrl() }}#daftar-jasa" 
-                                       rel="prev" 
-                                       class="pagination-link">
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-                                        </svg>
-                                    </a>
-                                </li>
-                            @endif
-
-                            {{-- Page Numbers --}}
-                            @foreach ($services->links()->elements as $element)
-                                @if (is_string($element))
-                                    <li aria-disabled="true">
-                                        <span class="pagination-ellipsis">{{ $element }}</span>
-                                    </li>
-                                @endif
-
-                                @if (is_array($element))
-                                    @foreach ($element as $page => $url)
-                                        @if ($page == $services->currentPage())
-                                            <li aria-current="page">
-                                                <span class="pagination-link is-active">{{ $page }}</span>
-                                            </li>
-                                        @else
-                                            <li>
-                                                <a href="{{ $url }}#daftar-jasa" class="pagination-link">
-                                                    {{ $page }}
-                                                </a>
-                                            </li>
-                                        @endif
-                                    @endforeach
-                                @endif
-                            @endforeach
-
-                            {{-- Next --}}
-                            @if ($services->hasMorePages())
-                                <li>
-                                    <a href="{{ $services->nextPageUrl() }}#daftar-jasa" 
-                                       rel="next" 
-                                       class="pagination-link">
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                                        </svg>
-                                    </a>
-                                </li>
-                            @else
-                                <li aria-disabled="true">
-                                    <span class="pagination-link opacity-40 cursor-not-allowed">
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                                        </svg>
-                                    </span>
-                                </li>
-                            @endif
-                            
-                        </ul>
-                    </nav>
-                @endif
-
-            </div>
-        </section>
-
-        {{-- FAQ SECTION - EDITORIAL DESIGN --}}
-        <section class="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 lg:px-8 border-t border-slate-200 mt-16">
-            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-black uppercase mb-12">Pertanyaan Umum</h2>
-            
-            <div class="space-y-0">
-                @foreach ([
-                    ['question' => 'Bagaimana cara kerja SkillHub?', 'answer' => 'SkillHub adalah marketplace jasa untuk lingkungan sekolah. Anda dapat memilih jasa yang dibutuhkan, memesan langsung, dan pembayaran akan diholds oleh sistem escrow hingga pekerjaan selesai.'],
-                    ['question' => 'Bagaimana cara memilih jasa yang tepat?', 'answer' => 'Perhatikan rating, jumlah pesanan, portfolio penyedia jasa, dan deskripsi layanan yang diberikan. Anda juga bisa memfilter berdasarkan kategori dan subkategori yang relevan.'],
-                    ['question' => 'Bagaimana cara memesan jasa?', 'answer' => 'Klik pada jasa yang Anda pilih, lalu ikuti proses pemesanan. Pembayaran akan di-held oleh sistem escrow SkillHub hingga pekerjaan selesai.'],
-                    ['question' => 'Bagaimana cara melakukan pembayaran?', 'answer' => 'Pembayaran dilakukan melalui Midtrans dengan berbagai metode (QRIS, Transfer Bank, E-Wallet). Dana akan diholds oleh sistem escrow hingga pekerjaan selesai dan diverifikasi.'],
-                    ['question' => 'Bagaimana jika saya membutuhkan jasa yang tidak tersedia?', 'answer' => 'Kami menerima pengajuan jasa baru. Anda bisa mengajukan jasa yang dibutuhkan melalui halaman "Ajukan Jasa" setelah login.'],
-                    ['question' => 'Bagaimana cara melihat reputasi penyedia jasa?', 'answer' => 'Di halaman detail jasa, Anda dapat melihat rating rata-rata, jumlah pesanan yang selesai, dan portofolio penyedia jasa.']
-                ] as $faq)
-                    <div class="faq-item">
-                        <button type="button" class="faq-toggle flex w-full items-center justify-between py-6 text-left text-base font-bold text-black hover:text-black focus:outline-none transition-colors">
-                            <span>{{ $faq['question'] }}</span>
-                            <svg class="faq-icon h-5 w-5 text-slate-400 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </button>
-                        <div class="faq-content">
-                            <p class="faq-text text-sm text-slate-600 leading-relaxed pb-6">{{ $faq['answer'] }}</p>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </section>
-
-        {{-- SEPARATOR --}}
-        <div class="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 my-12">
-            <div class="h-px w-full bg-black"></div>
-        </div>
-
-    </main>
-    <x-site-footer />
-
-    {{-- Hero State & FAQ Logic --}}
-    <script>
-        function heroState() {
-            return {
-                slides: @js($heroSlides),
-                currentSlide: 0,
-                intervalTimer: null,
-                init() {
-                    this.startAutoplay();
-                },
-                startAutoplay() {
-                    this.intervalTimer = setInterval(() => {
-                        this.next();
-                    }, 7000);
-                },
-                pause() {
-                    if (this.intervalTimer) clearInterval(this.intervalTimer);
-                },
-                resume() {
-                    this.pause();
-                    this.startAutoplay();
-                },
-                next() {
-                    this.currentSlide = (this.currentSlide + 1) % this.slides.length;
-                },
-                prev() {
-                    this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
-                },
-                goTo(index) {
-                    this.currentSlide = index;
-                }
-            };
-        }
-
-        // FAQ Accordion
-        document.addEventListener('DOMContentLoaded', function () {
-            const faqItems = document.querySelectorAll('.faq-toggle');
-            faqItems.forEach(function (faqToggle) {
-                faqToggle.addEventListener('click', function () {
-                    const faqItem = this.closest('.faq-item');
-                    const faqContent = faqItem.querySelector('.faq-content');
-                    const faqText = faqItem.querySelector('.faq-text');
-                    
-                    faqItem.classList.toggle('active');
-                    
-                    if (faqItem.classList.contains('active')) {
-                        faqContent.style.maxHeight = faqText.scrollHeight + 'px';
-                    } else {
-                        faqContent.style.maxHeight = '0';
-                    }
-                });
-            });
-        });
-    </script>
-</body>
-</html>
+    <a class="skip-link" href="#marketplace-content">Langsung ke konten marketplace</a>
+    <main id="marketplace-content" class="marketplace-shell"><section class="marketplace-hero"><div class="marketplace-wrap marketplace-hero__grid"><div><h1>Karya siswa, dipilih untuk bergerak lebih jauh.</h1><p class="marketplace-hero__copy">Temukan jasa kreatif, teknis, dan praktis dari talenta yang tumbuh di komunitas sekolahmu, dengan proses yang jelas dan pembayaran yang terlindungi.</p><form class="marketplace-search" action="{{ route('services.index') }}" method="GET">@foreach(request()->only(['category','subcategory','sort']) as $name=>$value)@if($value)<input type="hidden" name="{{ $name }}" value="{{ $value }}">@endif@endforeach<label><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/></svg><span class="sr-only">Cari jasa</span><input data-typewriter-search type="search" name="search" value="{{ request('search') }}" placeholder="Cari jasa yang kamu butuhkan"></label><button type="submit">Cari jasa</button></form><div class="marketplace-hero__links"><span>Mulai dari:</span>@foreach(['Desain logo','Landing page','Edit video','Python'] as $keyword)<a href="{{ route('services.index',['search'=>$keyword]) }}">{{ $keyword }}</a>@endforeach</div></div><div id="marketplace-image-stack" data-slides='@json($heroSlides, JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT)'></div></div></section>
+        <section class="marketplace-categories marketplace-wrap" aria-labelledby="kategori-title"><div class="marketplace-section-heading"><div><h2 id="kategori-title">Temukan jalurmu.</h2></div><p>Pilih kategori untuk menyaring karya dan layanan yang paling relevan untukmu.</p>@if($hasActiveFilters)<a class="marketplace-reset" href="{{ route('services.index') }}">Bersihkan filter</a>@endif</div><nav class="marketplace-category-list" aria-label="Kategori jasa">@foreach($marketplaceCategories as $category)<a href="{{ $category['url'] }}" class="marketplace-category {{ $category['active'] ? 'is-active' : '' }}" @if($category['active']) aria-current="page" @endif><span class="marketplace-category__visual">@if($category['image'])<img src="{{ $category['image'] }}" alt="">@else{{ $category['id']===0 ? 'ALL' : \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($category['name'],0,2)) }}@endif</span><span class="marketplace-category__name">{{ $category['name'] }}</span><span class="marketplace-category__arrow" aria-hidden="true">→</span></a>@endforeach</nav></section>
+        <section id="daftar-jasa" class="marketplace-listing marketplace-wrap" aria-labelledby="jasa-title"><div class="marketplace-listing__top"><div><h2 id="jasa-title">{{ $resultTitle }}</h2><p>{{ $services->total() }} jasa tersedia untuk dijelajahi</p></div><form class="marketplace-filters" action="{{ route('services.index') }}#daftar-jasa" method="GET">@foreach(request()->only(['search','category']) as $name=>$value)@if($value)<input type="hidden" name="{{ $name }}" value="{{ $value }}">@endif@endforeach<label class="sr-only" for="subcategory">Subkategori</label><select id="subcategory" name="subcategory" onchange="this.form.submit()"><option value="">Semua subkategori</option>@foreach($subcategories as $subcategory)<option value="{{ $subcategory->id }}" @selected((string)request('subcategory')===(string)$subcategory->id)>{{ $subcategory->name }}</option>@endforeach</select><label class="sr-only" for="sort">Urutkan jasa</label><select id="sort" name="sort" onchange="this.form.submit()"><option value="latest" @selected(request('sort','latest')==='latest')>Paling baru</option><option value="price_low" @selected(request('sort')==='price_low')>Harga terendah</option><option value="price_high" @selected(request('sort')==='price_high')>Harga tertinggi</option></select></form></div><div class="marketplace-grid">@forelse($services as $service)@php($mainImage=$service->image?asset('storage/'.$service->image):asset('images/skillhub-hero.png'))<article class="marketplace-service"><a class="marketplace-service__image" href="{{ route('services.show',$service) }}"><img src="{{ $mainImage }}" alt="{{ $service->title }}" loading="lazy" decoding="async"></a><div class="marketplace-service__body"><p class="marketplace-service__category">{{ $service->subcategory?->name ?? 'Jasa' }}</p><h3><a href="{{ route('services.show',$service) }}">{{ $service->title }}</a></h3><div class="marketplace-service__meta"><span>{{ $service->seller?->name ?? 'SkillHub' }}</span><span class="marketplace-service__price">Rp{{ number_format($service->price,0,',','.') }}</span></div></div></article>@empty<div class="marketplace-empty"><h3>Belum ada jasa yang cocok.</h3><p>Coba gunakan kata kunci lain atau hapus filter untuk melihat semua layanan yang tersedia.</p><a class="marketplace-button" href="{{ route('services.index') }}">Lihat semua jasa</a></div>@endforelse</div>@if($services->hasPages())<nav class="marketplace-pagination" aria-label="Navigasi halaman"><span class="{{ $services->onFirstPage()?'is-disabled':'' }}">←</span>@foreach($services->links()->elements as $element)@if(is_string($element))<span>{{ $element }}</span>@else @foreach($element as $page=>$url)@if($page==$services->currentPage())<span class="is-current">{{ $page }}</span>@else<a href="{{ $url }}#daftar-jasa">{{ $page }}</a>@endif @endforeach @endif @endforeach @if($services->hasMorePages())<a href="{{ $services->nextPageUrl() }}#daftar-jasa" aria-label="Halaman berikutnya">→</a>@else<span class="is-disabled">→</span>@endif</nav>@endif</section>
+        <section class="marketplace-faq marketplace-wrap" aria-labelledby="faq-title"><div class="marketplace-faq__grid"><div><h2 id="faq-title">Semua hal penting, dijelaskan.</h2><p>SkillHub menjaga proses pemesanan tetap jelas dari pencarian jasa hingga pekerjaan selesai.</p></div><div>@foreach([['Bagaimana cara kerja SkillHub?','Pilih jasa, komunikasikan kebutuhanmu, lalu lakukan pemesanan. Dana pembayaran ditahan oleh sistem escrow sampai pekerjaan selesai.'],['Bagaimana memilih jasa yang tepat?','Baca deskripsi, portofolio, dan ulasan penyedia jasa sebelum memesan. Kamu juga dapat menyaring jasa berdasarkan kategori dan subkategori.'],['Bagaimana cara melakukan pembayaran?','Pembayaran tersedia melalui Midtrans. Dana diamankan oleh escrow sampai hasil pekerjaan disetujui.'],['Bagaimana jika jasa yang saya butuhkan belum ada?','Setelah masuk, kamu dapat mengajukan kebutuhan atau jasa baru melalui fitur yang tersedia di SkillHub.']] as [$question,$answer])<details><summary>{{ $question }}</summary><p>{{ $answer }}</p></details>@endforeach</div></div></section></main><x-site-footer />
+</body></html>

@@ -18,6 +18,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\PriceOfferController;
+use App\Http\Controllers\ServiceAddonController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +51,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifikasi/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count')->middleware('ensureApiRequest');
     Route::post('/notifikasi/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+    Route::post('/notifikasi/read-multiple', [NotificationController::class, 'readMultiple'])->name('notifications.read-multiple');
     Route::get('/notifikasi/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
     Route::post('/notifikasi/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
     Route::post('/notifikasi/{notification}/ack', [NotificationController::class, 'ack'])->name('notifications.ack');
@@ -74,6 +76,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/jasa/saya', [ServiceController::class, 'myServices'])->name('services.my');
     Route::get('/jasa/{id}/edit', [ServiceController::class, 'edit'])->name('services.edit');
     Route::put('/jasa/{id}', [ServiceController::class, 'update'])->name('services.update');
+    Route::get('/jasa/{service}/layanan-tambahan', [ServiceAddonController::class, 'edit'])->name('services.addons.edit');
+    Route::put('/jasa/{service}/layanan-tambahan', [ServiceAddonController::class, 'update'])->name('services.addons.update');
+    
+    // --- ORDERS ---
+    Route::post('/orders/joki-ml', [OrderController::class, 'storeJokiMl'])->name('orders.store-joki-ml');
     
     // --- TIME SLOT MANAGEMENT FOR SELLERS ---
     Route::get('/jasa/{service}/jam-tersedia', [ServiceTimeSlotController::class, 'manage'])->name('services.slots.manage');
@@ -85,6 +92,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pesanan/buat/{service}', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/pesanan', [OrderController::class, 'store'])->name('orders.store');
     Route::patch('/pesanan/{order}/set-price', [OrderController::class, 'setPrice'])->name('orders.set-price');
+    Route::post('/pesanan/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::delete('/pesanan/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::get('/pesanan/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/pesanan/{order}/conversation', [OrderController::class, 'conversation'])->name('orders.conversation');
@@ -185,7 +193,55 @@ Route::put('/subcategories/{subcategory}', [App\Http\Controllers\AdminSubcategor
 Route::delete('/subcategories/{subcategory}', [App\Http\Controllers\AdminSubcategoryController::class, 'destroy'])->name('subcategories.destroy');
 });
 
+// API endpoint for dynamic form (service type based on subcategory)
+Route::get('/api/subcategories/{subcategory}/service-type', function($subcategory) {
+    $subcategory = \App\Models\Subcategory::with('serviceType')->find($subcategory);
+    
+    if (!$subcategory) {
+        return response()->json(['service_type' => null], 404);
+    }
+    
+    return response()->json([
+        'service_type' => $subcategory->serviceType ? [
+            'code' => $subcategory->serviceType->code,
+            'name' => $subcategory->serviceType->name,
+            'icon' => $subcategory->serviceType->icon,
+            'has_custom_pricing' => $subcategory->serviceType->has_custom_pricing,
+            'requires_manual_approval' => $subcategory->serviceType->requires_manual_approval,
+            'hidden_from_listing' => $subcategory->serviceType->hidden_from_listing,
+            'enable_time_slots' => $subcategory->serviceType->enable_time_slots,
+        ] : null,
+    ]);
+});
+
+// Partial views for service type fields
+Route::get('/partials/service-types/joki-ml-fields', function() {
+    return view('partials.service-types.joki-ml-fields');
+});
+
+Route::get('/partials/service-types/barber-fields', function() {
+    return view('partials.service-types.barber-fields');
+});
+
 // ==============================================
+// DEBUG: Preview the my-services view
+Route::get('/jasa/debug-preview', function () {
+    $services = collect();
+    $categories = collect();
+    $subcategories = collect();
+    
+    $html = view('services.my-services', compact('services', 'categories', 'subcategories'))->render();
+    
+    // Check which design is rendered
+    if (strpos($html, 'seller-workspace') !== false) {
+        return response('✓ NEW DESIGN DETECTED in view rendering')->header('Content-Type', 'text/plain');
+    } elseif (strpos($html, 'service-workspace') !== false) {
+        return response('✗ OLD DESIGN STILL RENDERING in view')->header('Content-Type', 'text/plain');
+    } else {
+        return response('? NO DESIGN PATTERN FOUND')->header('Content-Type', 'text/plain');
+    }
+})->name('services.debug');
+
 // [PERBAIKAN UTAMA] ROUTE DETAIL JASA (WILDCARD)
 // DITARUH DI PALING BAWAH AGAR TIDAK MEMAKAN ROUTE LAIN
 // ==============================================

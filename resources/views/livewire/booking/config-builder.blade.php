@@ -1,119 +1,166 @@
-<div class="space-y-6">
-    {{-- Time Slots Toggle - MOVED TO TOP --}}
-    <div class="rounded-lg border-2 border-blue-200 bg-blue-50 p-5">
-        <div class="flex items-start justify-between gap-4">
+<div class="space-y-10 px-6 lg:px-8 py-8 lg:py-10">
+    
+    <div class="border-b border-black/10 pb-10 mb-2">
+        <div class="flex items-start justify-between gap-8">
             <div class="flex-1">
-                <div class="flex items-center gap-2 mb-2">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <p class="text-base font-bold text-slate-900">Time Slots / Jadwal Booking</p>
-                </div>
-                <p class="text-sm text-slate-600 leading-relaxed">
-                    Aktifkan jika jasa ini membutuhkan pemilihan hari & jam spesifik.<br>
-                    <span class="text-slate-500">Nonaktifkan untuk: joki ML, desain grafis, jasa online tanpa jadwal tetap.</span>
+                <div class="text-[11px] font-medium tracking-[0.08em] uppercase text-black/40 mb-4">Time Slots</div>
+                <p class="text-sm text-black/60 leading-relaxed max-w-lg">
+                    Aktifkan jika jasa ini membutuhkan pemilihan hari dan jam spesifik. 
+                    <span class="text-black/40">Nonaktifkan untuk joki ML, desain grafis, jasa online tanpa jadwal tetap.</span>
                 </p>
             </div>
-            <div class="flex flex-col items-end gap-2">
-                <button type="button" 
-                        wire:click="toggleTimeSlots" 
-                        class="relative inline-flex h-8 w-14 items-center rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm {{ $service->time_slots_enabled ? 'bg-green-500' : 'bg-gray-400' }}">
-                    <span class="inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform {{ $service->time_slots_enabled ? 'translate-x-7' : 'translate-x-1' }}"></span>
-                </button>
-                <span class="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded {{ $service->time_slots_enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
-                    {{ $service->time_slots_enabled ? 'AKTIF' : 'NONAKTIF' }}
-                </span>
+            <div class="flex items-center gap-4 shrink-0">
+                <select wire:model.live="timeSlotsEnabled" 
+                        class="px-3 py-2 border-2 border-black rounded text-sm font-medium text-black bg-white hover:bg-black/5 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2">
+                    <option value="0" {{ $timeSlotsEnabled == 0 ? 'selected' : '' }}>Nonaktif</option>
+                    <option value="1" {{ $timeSlotsEnabled == 1 ? 'selected' : '' }}>Aktif</option>
+                </select>
             </div>
         </div>
     </div>
 
-    {{-- Header --}}
-    <div class="border-b border-gray-200 pb-4">
-        <h3 class="text-xl font-bold text-gray-900">Konfigurasi Field Booking</h3>
-        <p class="mt-2 text-sm text-gray-500">Atur field yang harus diisi buyer saat memesan jasa ini. Maksimal 15 field.</p>
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_16rem] border-b border-black/10 pb-10">
+        <div>
+            <div class="text-[11px] font-medium tracking-[0.08em] uppercase text-black/40 mb-3">Informasi buyer</div>
+            <p class="text-sm leading-relaxed text-black/60">Tambahkan field untuk informasi yang perlu dikumpulkan sebelum buyer melanjutkan booking. Field wajib akan divalidasi oleh alur booking yang sudah ada.</p>
+        </div>
+        <aside class="border border-black/10 bg-[#fafafa] p-4">
+            <div class="text-[10px] font-medium tracking-[0.1em] uppercase text-black/40 mb-3">Preview buyer</div>
+            @forelse($fields as $field)
+                <div class="mb-3 last:mb-0">
+                    <div class="text-[11px] font-medium text-black">{{ $field['label'] }}@if($field['required']) <span class="text-[#155eef]">*</span>@endif</div>
+                    @if(in_array($field['type'], ['select', 'radio']))
+                        <div class="mt-1 border-b border-black/15 py-1.5 text-[11px] text-black/35">Pilih {{ $field['label'] }}</div>
+                    @elseif($field['type'] === 'textarea')
+                        <div class="mt-1 h-9 border border-black/10 bg-white"></div>
+                    @else
+                        <div class="mt-1 border-b border-black/15 py-1.5 text-[11px] text-black/35">{{ $field['placeholder'] ?? 'Jawaban buyer' }}</div>
+                    @endif
+                </div>
+            @empty
+                <p class="text-xs leading-relaxed text-black/35">Preview akan tampil setelah field pertama ditambahkan.</p>
+            @endforelse
+        </aside>
     </div>
 
-    {{-- Template Suggestions --}}
     @if(count($templates) > 0)
-    <div class="rounded border border-gray-200 bg-gray-50 p-4">
-        <div class="flex items-start justify-between gap-4">
-            <div>
-                <p class="text-sm font-bold text-gray-900">Gunakan Template</p>
-                <p class="mt-1 text-xs text-gray-500">Pilih template sesuai jenis jasa untuk mempercepat konfigurasi</p>
-            </div>
-            <button type="button" wire:click="$toggle('showTemplateModal')" class="shrink-0 rounded border border-[#0051BA] bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[#0051BA] transition hover:bg-[#0051BA] hover:text-white">
+    <div class="border-b border-black/10 pb-10">
+        <div class="text-[11px] font-medium tracking-[0.08em] uppercase text-black/40 mb-4">Template</div>
+        <div class="flex items-center justify-between gap-4">
+            <p class="text-sm text-black/60">Gunakan template untuk mempercepat konfigurasi.</p>
+            <button type="button" 
+                    wire:click="$toggle('showTemplateModal')" 
+                    class="px-4 py-2 border border-black text-black text-xs font-medium hover:bg-black hover:text-white transition-all">
                 Pilih Template
             </button>
         </div>
     </div>
     @endif
 
-    {{-- Current Fields List --}}
-    <div class="space-y-3">
-        <div class="flex items-center justify-between">
-            <p class="text-sm font-bold text-gray-900">Field Saat Ini ({{ count($fields) }}/15)</p>
+    <div>
+        <div class="flex items-center justify-between gap-4 mb-6">
+            <div class="text-[11px] font-medium tracking-[0.08em] uppercase text-black/40">
+                Field Saat Ini - {{ count($fields) }}/15
+            </div>
             @if(count($fields) > 0)
-            <button type="button" wire:click="clearConfig" wire:confirm="Yakin ingin menghapus semua field?" class="text-xs text-red-600 hover:underline">
+            <button type="button" 
+                    wire:click="clearConfig" 
+                    wire:confirm="Yakin ingin menghapus semua field?" 
+                    class="text-xs font-medium text-black hover:underline hover:text-black/70 transition-colors">
                 Hapus Semua
             </button>
             @endif
         </div>
 
         @if(count($fields) === 0)
-        <div class="rounded border border-dashed border-gray-300 bg-gray-50 p-8 text-center">
-            <p class="text-sm text-gray-500">Belum ada field. Tambahkan field atau gunakan template.</p>
+        <div class="py-20 border-t border-black/10">
+            <p class="text-sm text-black/40 text-center">Belum ada field. Tambahkan field di bawah atau gunakan template.</p>
         </div>
         @else
-        <div class="space-y-2">
+        <div class="border-t border-black/10 divide-y divide-black/5">
         @foreach($fields as $index => $field)
-        <div wire:key="field-{{ $index }}" class="flex items-start gap-3 rounded border border-gray-200 bg-white p-4">
-            <div class="flex-1">
-                <div class="flex items-start justify-between gap-2">
-                    <div class="flex-1">
-                        <p class="text-sm font-bold text-gray-900">{{ $field['label'] }}</p>
-                        <p class="mt-1 text-xs text-gray-500">
-                            <span class="font-mono text-gray-700">{{ $field['name'] }}</span> • 
-                            <span>{{ config('booking.field_types')[$field['type']] ?? $field['type'] }}</span> • 
-                            <span class="font-bold {{ $field['required'] ? 'text-red-600' : 'text-green-600' }}">
-                                {{ $field['required'] ? 'Wajib' : 'Opsional' }}
-                            </span>
-                        </p>
-                        @if(!empty($field['options']))
-                        <p class="mt-2 text-xs text-gray-500">
-                            Opsi: {{ implode(', ', array_slice($field['options'], 0, 3)) }}{{ count($field['options']) > 3 ? '...' : '' }}
-                        </p>
-                        @endif
-                    </div>
-                    <div class="flex items-center gap-1">
-                        @if($index > 0)
-                        <button type="button" wire:click="moveField({{ $index }}, 'up')" class="rounded p-1 text-gray-500 hover:bg-gray-100" title="Naik">↑</button>
-                        @endif
-                        @if($index < count($fields) - 1)
-                        <button type="button" wire:click="moveField({{ $index }}, 'down')" class="rounded p-1 text-gray-500 hover:bg-gray-100" title="Turun">↓</button>
-                        @endif
-                        <button type="button" wire:click="removeField({{ $index }})" wire:loading.attr="disabled" class="rounded p-1 text-red-600 hover:bg-red-50" title="Hapus">×</button>
-                    </div>
-                </div>
+        <div wire:key="field-{{ $index }}" 
+             class="group py-6 flex items-start gap-6">
+            
+            <div class="text-xs font-medium tracking-[0.12em] text-black/20 w-6 shrink-0 pt-1">
+                {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
             </div>
+
+            <div class="flex-1 min-w-0">
+                <div class="text-sm font-semibold text-black mb-2">{{ $field['label'] }}</div>
+                <div class="flex items-center gap-2 text-xs text-black/40">
+                    <span class="font-mono">{{ $field['name'] }}</span>
+                    <span class="w-0.5 h-0.5 rounded-full bg-black/20"></span>
+                    <span>{{ config('booking.field_types')[$field['type']] ?? $field['type'] }}</span>
+                    <span class="w-0.5 h-0.5 rounded-full bg-black/20"></span>
+                    <span class="{{ $field['required'] ? 'text-black font-medium' : 'text-black/50' }}">
+                        {{ $field['required'] ? 'Wajib' : 'Opsional' }}
+                    </span>
+                </div>
+                @if(!empty($field['options']))
+                <div class="mt-2 text-xs text-black/30">
+                    Opsi: {{ implode(', ', array_slice($field['options'], 0, 3)) }}{{ count($field['options']) > 3 ? '...' : '' }}
+                </div>
+                @endif
+            </div>
+
+                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                @if($index > 0)
+                                <button type="button" 
+                                        wire:click="moveField({{ $index }}, 'up')" 
+                                        class="p-2 text-black/30 hover:text-white hover:bg-black transition-all"
+                                        aria-label="Move up">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                    </svg>
+                                </button>
+                                @endif
+                                @if($index < count($fields) - 1)
+                                <button type="button" 
+                                        wire:click="moveField({{ $index }}, 'down')" 
+                                        class="p-2 text-black/30 hover:text-white hover:bg-black transition-all"
+                                        aria-label="Move down">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+                                @endif
+                                <button type="button" 
+                                        wire:click="removeField({{ $index }})" 
+                                        wire:loading.attr="disabled" 
+                                        class="p-2 text-black/30 hover:text-white hover:bg-black transition-all"
+                                        aria-label="Remove field">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
         </div>
             @endforeach
         </div>
         @endif
     </div>
 
-    {{-- Add New Field Form --}}
-    <div class="rounded border border-gray-200 bg-gray-50 p-4">
-        <p class="mb-3 text-sm font-bold text-gray-900">Tambah Field Baru</p>
+    <div class="border-t border-black/10 pt-10">
+        <div class="text-[11px] font-medium tracking-[0.08em] uppercase text-black/40 mb-6">Tambah Field Baru</div>
         
-        <div class="grid gap-4 sm:grid-cols-2">
+        <div class="grid gap-6 sm:grid-cols-2">
             <div>
-                <label class="block text-xs font-bold uppercase tracking-wide text-gray-900 mb-2">Label (Tampil ke User)</label>
-                <input type="text" wire:model="newField.label" placeholder="Jenis Potongan Rambut" class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:border-[#0051BA] focus:outline-none">
+                <label class="block text-[11px] font-medium tracking-[0.08em] uppercase text-black/40 mb-3">
+                    Label
+                </label>
+                <input type="text" 
+                       wire:model="newField.label" 
+                       placeholder="Rank Sekarang"
+                       class="w-full px-0 py-3 bg-transparent border-0 border-b border-black/15 text-sm text-black placeholder:text-black/30 focus:outline-none focus:border-black focus:ring-0 transition-colors">
             </div>
 
             <div>
-                <label class="block text-xs font-bold uppercase tracking-wide text-gray-900 mb-2">Tipe Field</label>
-                <select wire:model="newField.type" class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:border-[#0051BA] focus:outline-none">
+                <label class="block text-[11px] font-medium tracking-[0.08em] uppercase text-black/40 mb-3">
+                    Tipe Field
+                </label>
+                <select wire:model="newField.type" 
+                        class="w-full px-0 py-3 bg-transparent border-0 border-b border-black/15 text-sm text-black focus:outline-none focus:border-black focus:ring-0 transition-colors cursor-pointer">
                     @foreach(config('booking.field_types', []) as $type => $label)
                     <option value="{{ $type }}">{{ $label }}</option>
                     @endforeach
@@ -121,64 +168,97 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold uppercase tracking-wide text-gray-900 mb-2">Wajib Diisi?</label>
-                <select wire:model="newField.required" class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:border-[#0051BA] focus:outline-none">
+                <label class="block text-[11px] font-medium tracking-[0.08em] uppercase text-black/40 mb-3">
+                    Status
+                </label>
+                <select wire:model="newField.required" 
+                        class="w-full px-0 py-3 bg-transparent border-0 border-b border-black/15 text-sm text-black focus:outline-none focus:border-black focus:ring-0 transition-colors cursor-pointer">
                     <option value="0">Opsional</option>
                     <option value="1">Wajib</option>
                 </select>
             </div>
 
             <div>
-                <label class="block text-xs font-bold uppercase tracking-wide text-gray-900 mb-2">Placeholder (opsional)</label>
-                <input type="text" wire:model="newField.placeholder" placeholder="Teks bantuan untuk user" class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:border-[#0051BA] focus:outline-none">
+                <label class="block text-[11px] font-medium tracking-[0.08em] uppercase text-black/40 mb-3">
+                    Placeholder
+                </label>
+                <input type="text" 
+                       wire:model="newField.placeholder" 
+                       placeholder="Teks bantuan"
+                       class="w-full px-0 py-3 bg-transparent border-0 border-b border-black/15 text-sm text-black placeholder:text-black/30 focus:outline-none focus:border-black focus:ring-0 transition-colors">
             </div>
 
             @if(in_array($newField['type'], ['select', 'radio', 'checkbox']))
             <div class="sm:col-span-2">
-                <label class="block text-xs font-bold uppercase tracking-wide text-gray-900 mb-2">Opsi (pisahkan dengan koma)</label>
-                <input type="text" wire:model="newField.options" placeholder="Opsi 1, Opsi 2, Opsi 3" class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:border-[#0051BA] focus:outline-none">
-                <p class="mt-1 text-xs text-gray-500">Contoh: Crewcut, Fade, Undercut</p>
+                <label class="block text-[11px] font-medium tracking-[0.08em] uppercase text-black/40 mb-3">
+                    Opsi
+                </label>
+                <input type="text" 
+                       wire:model="newField.options" 
+                       placeholder="Opsi 1, Opsi 2, Opsi 3"
+                       class="w-full px-0 py-3 bg-transparent border-0 border-b border-black/15 text-sm text-black placeholder:text-black/30 focus:outline-none focus:border-black focus:ring-0 transition-colors">
+                <p class="mt-2 text-xs text-black/30">Pisahkan dengan koma. Contoh: Warrior, Epic, Legend</p>
             </div>
             @endif
         </div>
 
-        <div class="mt-4 flex justify-end">
-            <button type="button" wire:click="addField" class="rounded bg-[#0051BA] px-4 py-2 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-black">
-                + Tambah Field
+        <div class="flex justify-end mt-8">
+            <button type="button" 
+                    wire:click="addField" 
+                    class="px-5 py-2.5 bg-black text-white text-sm font-medium hover:bg-black/90 transition-all">
+                Tambah Field
             </button>
         </div>
     </div>
 
-    {{-- Save Button --}}
-    <div class="flex justify-end gap-3 border-t border-gray-200 pt-4">
-        <a href="{{ route('services.my') }}" class="rounded border border-gray-300 px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-gray-50">
+    <div class="flex items-center justify-end gap-4 pt-8 border-t border-black/10">
+        <a href="{{ route('services.my') }}" 
+           class="px-6 py-3 text-sm font-medium text-black/50 hover:text-black hover:bg-black/5 transition-all">
             Batal
         </a>
-        <button type="button" wire:click="saveConfig" class="rounded bg-[#0051BA] px-6 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-black">
+        <button type="button" 
+                wire:click="saveConfig" 
+                class="px-6 py-3 bg-black text-white text-sm font-medium hover:bg-black/90 transition-all">
             Simpan Konfigurasi
         </button>
     </div>
 
-    {{-- Template Modal --}}
     @if($showTemplateModal)
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-        <div class="w-full max-w-2xl rounded-lg bg-white shadow-2xl">
-            <div class="border-b border-gray-200 px-6 py-4">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-gray-900">Pilih Template</h3>
-                    <button type="button" wire:click="$toggle('showTemplateModal')" class="text-2xl leading-none text-gray-500 hover:text-gray-900">&times;</button>
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" 
+         role="dialog" 
+         aria-modal="true" 
+         aria-labelledby="template-modal-title">
+        <div class="w-full max-w-2xl bg-white max-h-[90vh] flex flex-col">
+            <div class="border-b border-black/10 px-6 py-5 flex items-center justify-between shrink-0">
+                <div>
+                    <div class="text-[10px] font-medium tracking-[0.12em] uppercase text-black/35 mb-1">Template</div>
+                    <h3 id="template-modal-title" class="text-lg font-semibold text-black">Pilih Template</h3>
                 </div>
+                 <button type="button" 
+                         wire:click="$toggle('showTemplateModal')" 
+                         class="p-2 text-black/40 hover:text-white hover:bg-black transition-all"
+                         aria-label="Close modal">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                     </svg>
+                 </button>
             </div>
-            <div class="max-h-96 overflow-y-auto p-6">
-                <div class="grid gap-3 sm:grid-cols-2">
-                    @foreach($templates as $key => $template)
-                    <button type="button" wire:click="applyTemplate('{{ $key }}')" class="rounded-lg border border-gray-200 p-4 text-left transition hover:border-[#0051BA] hover:bg-[#0051BA]/5">
-                        <p class="text-sm font-bold text-gray-900">{{ $template['name'] }}</p>
-                        <p class="mt-1 text-xs text-gray-500">{{ count($template['fields']) }} field</p>
-                    </button>
-                    @endforeach
-                </div>
-            </div>
+             <div class="overflow-y-auto p-6">
+                 <style>
+                     .template-btn:hover { background-color: #000 !important; border-color: #000 !important; }
+                     .template-btn:hover div { color: #fff !important; }
+                 </style>
+                 <div class="grid gap-3 sm:grid-cols-2">
+                     @foreach($templates as $key => $template)
+                     <button type="button" 
+                             wire:click="applyTemplate('{{ $key }}')" 
+                             class="template-btn relative text-left p-5 border border-black/10 bg-white transition-all">
+                         <div class="text-sm font-semibold text-black mb-1">{{ $template['name'] }}</div>
+                         <div class="text-xs text-black/40">{{ count($template['fields']) }} field</div>
+                     </button>
+                     @endforeach
+                 </div>
+             </div>
         </div>
     </div>
     @endif
@@ -186,9 +266,9 @@
 
 @script
 <script>
-    $wire.on('alert', (event) => {
-        const data = event[0] || event;
-        alert(data.message);
-    });
+$wire.on('alert', (event) => {
+    const data = event[0] || event;
+    alert(data.message);
+});
 </script>
 @endscript

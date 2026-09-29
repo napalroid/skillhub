@@ -17,6 +17,12 @@ class PaymentController extends Controller
     public function showQris(Order $order)
     {
         abort_unless($order->buyer_id === auth()->id() || $order->service->user_id === auth()->id() || auth()->user()->isAdmin(), 403);
+
+        if ($order->buyer_id === auth()->id() && $order->approval_status === 'pending') {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Pesanan ini masih menunggu persetujuan harga dari seller.');
+        }
+
         $order->load(['service.seller', 'payment', 'priceOffer']);
 
         return view('payments.qris', compact('order'));
@@ -29,6 +35,11 @@ class PaymentController extends Controller
 
         if (empty($order->final_price)) {
             return back()->with('error', 'Seller belum menetapkan harga untuk pesanan ini.');
+        }
+
+        if ($order->approval_status === 'pending') {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'Pesanan ini masih menunggu persetujuan harga dari seller.');
         }
 
         // A refresh or a second click must never turn a valid payment state
@@ -318,7 +329,7 @@ class PaymentController extends Controller
             $query->where('status', 'released');
         }
 
-        // Persortiran (urutan baris) — tombol filter ada di kolom 1,
+        // Persortiran (urutan baris). Tombol filter ada di kolom 1,
         // pengurutan hasil diterapkan di sini dan ditampilkan di kolom 2.
         match ($sort) {
             'oldest' => $query->oldest(),
@@ -364,7 +375,7 @@ class PaymentController extends Controller
     protected function notifyAdminPaymentWaiting(Order $order): void
     {
         // Find admin users
-        $adminUsers = \App\Models\User::where('is_admin', true)->get();
+        $adminUsers = \App\Models\User::where('role', 'admin')->get();
         
         foreach ($adminUsers as $admin) {
             NotificationService::createAndDispatch(

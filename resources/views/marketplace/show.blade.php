@@ -42,8 +42,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $service->title }} — SkillHub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{ $service->title }} | SkillHub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -51,7 +50,7 @@
         [x-cloak] { display: none !important; }
         body { font-family: 'DM Sans', sans-serif; }
     </style>
-    @vite('resources/js/app.js')
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-[#f2f2f1] text-[#171717] antialiased pt-16">
     <div id="skillhub-staggered-menu"

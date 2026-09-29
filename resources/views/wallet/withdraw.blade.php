@@ -106,19 +106,19 @@
             <dl class="wh-rows">
                 <div class="is-amount">
                     <dt>Jumlah</dt>
-                    <dd id="wh-preview-amount">—</dd>
+                    <dd id="wh-preview-amount">-</dd>
                 </div>
                 <div>
                     <dt>Metode</dt>
-                    <dd id="wh-preview-method">—</dd>
+                    <dd id="wh-preview-method">-</dd>
                 </div>
                 <div>
                     <dt>Nomor</dt>
-                    <dd id="wh-preview-account">—</dd>
+                    <dd id="wh-preview-account">-</dd>
                 </div>
                 <div>
                     <dt>Atas nama</dt>
-                    <dd id="wh-preview-name">—</dd>
+                    <dd id="wh-preview-name">-</dd>
                 </div>
             </dl>
             <div class="wh-dialog-actions">

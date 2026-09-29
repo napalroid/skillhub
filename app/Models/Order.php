@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    protected $fillable = ['service_id', 'buyer_id', 'price_offer_id', 'status', 'payment_status', 'midtrans_order_id', 'paid_at', 'final_price', 'estimated_price', 'seller_price_note', 'completed_at', 'booking_data', 'time_slot_id'];
+    protected $fillable = ['service_id', 'buyer_id', 'price_offer_id', 'status', 'payment_status', 'midtrans_order_id', 'paid_at', 'final_price', 'estimated_price', 'seller_price_note', 'completed_at', 'booking_data', 'time_slot_id', 'approval_status', 'seller_approved_at', 'seller_rejection_reason', 'orderable_type', 'orderable_id'];
 
     protected function casts(): array
     {
@@ -25,8 +25,6 @@ class Order extends Model
     public const STATUS_DIKERJAKAN = 'dikerjakan';
 
     public const STATUS_MENUNGGU_PERSETUJUAN = 'menunggu_persetujuan';
-
-    public const STATUS_MENUNGGU_KONFIRMASI_HARGA = 'menunggu_konfirmasi_harga';
 
     public const STATUS_SELESAI = 'selesai';
 
@@ -121,5 +119,20 @@ class Order extends Model
     public function priceHistories()
     {
         return $this->hasMany(OrderPriceHistory::class)->latest();
+    }
+
+    public function addons()
+    {
+        return $this->hasMany(OrderAddon::class);
+    }
+
+    public function jokiMlOrder()
+    {
+        return $this->hasOne(JokiMlOrder::class);
+    }
+
+    public function barberOrder()
+    {
+        return $this->hasOne(BarberOrder::class);
     }
 }

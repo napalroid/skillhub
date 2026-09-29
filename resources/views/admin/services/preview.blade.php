@@ -77,6 +77,29 @@
                 </div>
             </article>
 
+            <section class="border-t border-[#DDDDDD] pt-8" data-stagger-item>
+                <h2 class="text-xs font-bold uppercase tracking-[0.12em] text-[#555555]">Data yang diminta dari buyer</h2>
+                <p class="mt-2 text-sm text-[#555555]">Booking slot: <strong class="text-black">{{ $service->time_slots_enabled ? 'Aktif' : 'Tidak aktif' }}</strong></p>
+                @if(!empty($service->booking_config['fields']))
+                    <div class="mt-4 space-y-3">
+                        @foreach($service->booking_config['fields'] as $field)
+                            <div class="border border-[#DDDDDD] bg-white p-4"><div class="flex flex-wrap items-center gap-2"><strong class="text-sm text-black">{{ $field['label'] }}</strong><span class="text-[10px] uppercase tracking-wide text-[#555555]">{{ $field['type'] }}</span>@if($field['required'] ?? false)<span class="text-[10px] font-bold uppercase tracking-wide text-[#0051BA]">Wajib</span>@endif</div>@if(!empty($field['options']))<p class="mt-2 text-xs text-[#555555]">Pilihan: {{ implode(', ', $field['options']) }}</p>@endif @if(!empty($field['help_text']))<p class="mt-2 text-xs text-[#555555]">{{ $field['help_text'] }}</p>@endif</div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="mt-3 text-sm text-[#555555]">Seller tidak meminta data tambahan dari buyer.</p>
+                @endif
+            </section>
+
+            <section class="border-t border-[#DDDDDD] pt-8" data-stagger-item>
+                <h2 class="text-xs font-bold uppercase tracking-[0.12em] text-[#555555]">Layanan tambahan buyer</h2>
+                @forelse($service->addons as $addon)
+                    <div class="mt-3 flex items-start justify-between gap-4 border border-[#DDDDDD] bg-white p-4"><div><strong class="text-sm text-black">{{ $addon->name }}</strong>@if($addon->description)<p class="mt-1 text-xs text-[#555555]">{{ $addon->description }}</p>@endif</div><span class="whitespace-nowrap text-sm font-bold text-black">+Rp{{ number_format($addon->price, 0, ',', '.') }}</span></div>
+                @empty
+                    <p class="mt-3 text-sm text-[#555555]">Tidak ada layanan tambahan.</p>
+                @endforelse
+            </section>
+
             {{-- PORTFOLIO SECTION --}}
             @if ($portfolios->isNotEmpty())
                 <section class="pt-8 border-t border-[#DDDDDD]" data-stagger-item>

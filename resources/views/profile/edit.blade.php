@@ -3,7 +3,7 @@
     $initial = mb_strtoupper(mb_substr($user->name, 0, 1));
 @endphp
 
-<x-layouts.app title="Edit Profil — SkillHub">
+    <x-layouts.app title="Edit Profil - SkillHub">
 
     <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:py-14">
 
@@ -15,7 +15,7 @@
 
         <div class="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
 
-            {{-- Profile Header — Double-Bezel outer shell --}}
+            {{-- Profile Header - Double-Bezel outer shell --}}
             <aside class="lg:sticky lg:top-24 lg:self-start">
                 <div class="rounded-[1.75rem] border border-gray-200/80 bg-gray-50 p-2">
                     <div class="overflow-hidden rounded-[1.4rem] bg-white">
@@ -57,7 +57,7 @@
                 </div>
             </aside>
 
-            {{-- Form Profil — Double-Bezel outer shell --}}
+            {{-- Form Profil - Double-Bezel outer shell --}}
             <section>
                 <div class="rounded-[1.75rem] border border-gray-200/80 bg-gray-50 p-2">
                     <div class="rounded-[1.4rem] bg-white p-6 sm:p-8">
@@ -80,7 +80,7 @@
                                 @if ($user->email_verified_at)
                                     <p class="mt-2 text-xs text-emerald-600">✓ Email sudah diverifikasi</p>
                                 @else
-                                    <p class="mt-2 text-xs text-amber-600">⚠ Belum diverifikasi — <a href="{{ route('verification.send') }}" class="font-semibold hover:underline">Kirim ulang</a></p>
+                                    <p class="mt-2 text-xs text-amber-600">⚠ Belum diverifikasi. <a href="{{ route('verification.send') }}" class="font-semibold hover:underline">Kirim ulang</a></p>
                                 @endif
                             </div>
 

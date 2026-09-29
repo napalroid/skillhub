@@ -12,6 +12,7 @@
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
 
     <!-- Scripts -->
+    @include('partials.realtime-config')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <style>
@@ -86,6 +87,37 @@
             {{ session('status') }}
         </div>
     @endif
+
+    <script>
+        @auth
+        (function() {
+            function updateNotificationBadge() {
+                fetch('{{ route('notifications.unread-count') }}', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('nf-bell-badge');
+                    if (badge) {
+                        if (data.count > 0) {
+                            badge.textContent = Math.min(data.count, 9) + (data.count > 9 ? '+' : '');
+                            badge.classList.remove('nf-hidden');
+                        } else {
+                            badge.classList.add('nf-hidden');
+                        }
+                    }
+                })
+                .catch(err => console.error('Error updating notification badge:', err));
+            }
+
+            setInterval(updateNotificationBadge, 5000);
+        })();
+        @endauth
+    </script>
 
     @stack('scripts')
 </body>

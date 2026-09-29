@@ -12,10 +12,17 @@ function initializeEcho() {
             return;
         }
 
-        const reverbKey = '32d226a6168ea850466a7dca5de615ed';
-        const reverbHost = '127.0.0.1';
-        const reverbPort = 8080;
-        const reverbScheme = 'http';
+        const realtime = window.SkillHubRealtime || {};
+        const isLocalPage = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+        const reverbKey = realtime.key;
+        const reverbHost = isLocalPage ? '127.0.0.1' : (realtime.host || '127.0.0.1');
+        const reverbPort = isLocalPage ? 8080 : Number(realtime.port || 8080);
+        const reverbScheme = isLocalPage ? 'http' : (realtime.scheme || 'http');
+
+        if (!reverbKey) {
+            console.error('[Echo] Reverb public key is not configured.');
+            return;
+        }
 
         window.Pusher = Pusher;
         
@@ -26,7 +33,7 @@ function initializeEcho() {
             wsPort: reverbPort,
             wssPort: reverbPort,
             forceTLS: reverbScheme === 'https',
-            enabledTransports: ['ws', 'wss'],
+            enabledTransports: reverbScheme === 'https' ? ['wss'] : ['ws'],
             auth: { headers: { 'X-CSRF-TOKEN': csrfToken } },
         });
         
@@ -37,6 +44,14 @@ function initializeEcho() {
 
             window.Echo.connector.pusher.connection.bind('error', (err) => {
                 console.error('[Echo] Connection error:', err);
+            });
+
+            window.Echo.connector.pusher.connection.bind('connected', () => {
+                console.info('[Echo] WebSocket connected');
+            });
+
+            window.Echo.connector.pusher.connection.bind('disconnected', () => {
+                console.warn('[Echo] WebSocket disconnected');
             });
 
             window.Echo.connector.pusher.config.enableStats = false;

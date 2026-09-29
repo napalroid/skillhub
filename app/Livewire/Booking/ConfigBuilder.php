@@ -12,6 +12,7 @@ class ConfigBuilder extends Component
     public array $fields = [];
     public array $templates = [];
     public bool $showTemplateModal = false;
+    public $timeSlotsEnabled = false;
 
     public $newField = [
         'name' => '',
@@ -37,6 +38,17 @@ class ConfigBuilder extends Component
         $this->service = $service;
         $this->fields = $service->booking_config['fields'] ?? [];
         $this->templates = config('booking.templates', []);
+        
+        $rawValue = $service->time_slots_enabled;
+        $this->timeSlotsEnabled = $rawValue ? 1 : 0;
+        
+        \Log::info('ConfigBuilder mount', [
+            'service_id' => $service->id,
+            'time_slots_enabled_raw' => $rawValue,
+            'time_slots_enabled_type' => gettype($rawValue),
+            'timeSlotsEnabled_prop' => $this->timeSlotsEnabled,
+            'timeSlotsEnabled_type' => gettype($this->timeSlotsEnabled)
+        ]);
     }
 
     public function render()
@@ -44,15 +56,41 @@ class ConfigBuilder extends Component
         return view('livewire.booking.config-builder');
     }
 
-    public function toggleTimeSlots()
+    public function updated($property)
     {
-        $this->service->time_slots_enabled = !$this->service->time_slots_enabled;
-        $this->service->save();
-        
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Time slots ' . ($this->service->time_slots_enabled ? 'diaktifkan' : 'dinonaktifkan')
-        ]);
+        if ($property === 'timeSlotsEnabled') {
+            $intValue = (int) $this->timeSlotsEnabled;
+            $boolValue = $intValue === 1;
+            
+            \Log::info('Time slots updated', [
+                'service_id' => $this->service->id,
+                'new_value_raw' => $this->timeSlotsEnabled,
+                'new_value_int' => $intValue,
+                'new_value_bool' => $boolValue
+            ]);
+            
+            $updated = $this->service->update(['time_slots_enabled' => $boolValue]);
+            
+            \Log::info('Update result', ['success' => $updated]);
+            
+            $fresh = $this->service->fresh();
+            \Log::info('After save', [
+                'saved_value' => $fresh->time_slots_enabled,
+                'saved_value_raw' => $fresh->getRawOriginal('time_slots_enabled')
+            ]);
+            
+            $this->timeSlotsEnabled = $fresh->time_slots_enabled ? 1 : 0;
+            
+            $this->dispatch('alert', [
+                'type' => 'success',
+                'message' => 'Time slots ' . ($boolValue ? 'diaktifkan' : 'dinonaktifkan')
+            ]);
+        }
+    }
+
+    public function logChange($value)
+    {
+        \Log::info('Dropdown changed', ['value' => $value]);
     }
 
     public function addField()
@@ -159,7 +197,12 @@ class ConfigBuilder extends Component
             'last_booking_config_edit' => now(),
         ]);
 
-        $this->dispatch('alert', ['type' => 'success', 'message' => 'Konfigurasi booking berhasil disimpan']);
+        $message = 'Konfigurasi booking berhasil disimpan';
+
+        $this->dispatch('alert', [
+            'type' => 'success', 
+            'message' => $message
+        ]);
         $this->dispatch('configSaved');
     }
 

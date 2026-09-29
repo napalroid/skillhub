@@ -1,4 +1,4 @@
-<x-layouts.app title="Buat Pesanan — {{ $service->title }}">
+<x-layouts.app title="Buat Pesanan - {{ $service->title }}">
 
     <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
 
@@ -14,7 +14,7 @@
 
         <div class="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
 
-            {{-- Kartu Jasa — Double-Bezel outer shell --}}
+            {{-- Kartu Jasa - Double-Bezel outer shell --}}
             <aside class="lg:sticky lg:top-24 lg:self-start">
                 <div class="rounded-[1.75rem] border border-gray-200/80 bg-gray-50 p-2">
                     <div class="overflow-hidden rounded-[1.4rem] bg-white">
@@ -51,7 +51,7 @@
                 </div>
             </aside>
 
-            {{-- Form Pesanan — Double-Bezel outer shell --}}
+            {{-- Form Pesanan - Double-Bezel outer shell --}}
             <section>
                 <div class="rounded-[1.75rem] border border-gray-200/80 bg-gray-50 p-2">
                     <div class="rounded-[1.4rem] bg-white p-6 sm:p-8">

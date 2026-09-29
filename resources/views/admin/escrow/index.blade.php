@@ -104,7 +104,8 @@
                                 <th class="w-32">Saldo Sesudah</th>
                                 <th>Keterangan</th>
                                 <th class="w-32">Batas Waktu</th>
-                                <th class="w-28">Status</th>
+                                <th class="w-40">Status Escrow</th>
+                                <th class="w-40">Status Pesanan</th>
                                 <th class="w-[200px]">Aksi</th>
                             </tr>
                         </thead>
@@ -139,7 +140,7 @@
                                         <span class="text-xs text-black font-medium">Rp{{ number_format($transaction->balance_after, 0, ',', '.') }}</span>
                                     </td>
                                     <td>
-                                        <p class="text-xs text-[#555555]">{{ $transaction->description ?? '—' }}</p>
+                                        <p class="text-xs text-[#555555]">{{ $transaction->description ?? '-' }}</p>
                                         @if($order)
                                             <p class="text-[10px] text-[#999999] mt-1">
                                                 Order #{{ $order->id }}
@@ -170,7 +171,7 @@
                                                 @endif
                                             @endif
                                         @else
-                                            <span class="text-xs text-[#999999]">—</span>
+                                            <span class="text-xs text-[#999999]">-</span>
                                         @endif
                                     </td>
                                     <td>
@@ -190,6 +191,17 @@
                                         @endif
                                     </td>
                                     <td>
+                                        @if($order)
+                                            @if($order->status === 'selesai')
+                                                <span class="badge badge-success">Selesai</span>
+                                            @else
+                                                <span class="badge" style="background:#3B82F6;color:#fff;border-color:#3B82F6;">Sedang Diproses</span>
+                                            @endif
+                                        @else
+                                            <span class="text-xs text-[#999999]">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
                                         <div class="flex flex-col gap-2">
                                             @if($transaction->isPending())
                                                 <form action="{{ route('admin.escrow.confirm', $transaction) }}" method="POST" onsubmit="return confirm('Konfirmasi bahwa saldo sudah masuk ke rekening?')">
@@ -200,6 +212,16 @@
                                                     @csrf
                                                     <button type="submit" class="w-full btn-danger text-[10px] px-2 py-1.5 justify-center">Tolak</button>
                                                 </form>
+                                            @endif
+                                            @if($order && $order->status === 'selesai' && $order->payment && $order->payment->status === 'verified' && $order->payment->status !== 'released')
+                                                <form action="{{ route('admin.orders.release', $order) }}" method="POST" onsubmit="return confirm('Transfer saldo Rp' + '{{ number_format($order->final_price, 0, ',', '.') }}'.replace(/\./g, ',') + ' ke seller?')">
+                                                    @csrf
+                                                    <button type="submit" class="w-full bg-[#2C9F45] text-white text-[10px] px-4 py-2 justify-center font-bold uppercase tracking-wider border-2 border-[#2C9F45] hover:bg-[#229B3A]">
+                                                        Transfer Saldo
+                                                    </button>
+                                                </form>
+                                            @elseif($order && $order->payment && $order->payment->status === 'released')
+                                                <span class="badge badge-success text-[10px]">Dana Sudah Ditransfer</span>
                                             @endif
                                             @if($order)
                                                 <a href="{{ route('orders.show', $order) }}" class="btn-ghost text-[10px] px-2 py-1.5 justify-center border border-[#DDDDDD]">Lihat Pesanan</a>

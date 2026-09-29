@@ -183,7 +183,7 @@ class AdminController extends Controller
     // ==================== PREVIEW JASA (ADMIN) ====================
     public function previewService(Service $service)
     {
-        $service->load(['seller', 'subcategory.category', 'reviews.order.buyer']);
+        $service->load(['seller', 'subcategory.category', 'reviews.order.buyer', 'addons']);
         $service->loadCount(['orders', 'reviews']);
         $portfolios = collect($service->portfolio_images ?? [])->take(3);
 
@@ -230,7 +230,7 @@ class AdminController extends Controller
 
     // ==================== RELEASE DANA (ESCROW) ====================
     /**
-     * Cairkan manual (override delay 1 jam) — hanya untuk pesanan yang sudah selesai.
+     * Cairkan manual (override delay 1 jam). Hanya untuk pesanan yang sudah selesai.
      * Dana masuk ke saldo dompet seller, anti double-payout via lockForUpdate.
      */
     public function releaseFunds(Order $order)
@@ -486,12 +486,26 @@ class AdminController extends Controller
     }
 
     // ==================== PENDING SERVICES ====================
-    public function pendingServices()
+    public function pendingServices(Request $request)
     {
-        $pendingServices = Service::with(['seller', 'subcategory.category'])
-            ->where('status', 'pending')
-            ->latest()
-            ->paginate(15);
+        $query = Service::with(['seller', 'subcategory.category'])
+            ->where('status', 'pending');
+
+        if ($request->query('buyer_fields') === 'configured') {
+            $query->whereNotNull('booking_config');
+        } elseif ($request->query('buyer_fields') === 'none') {
+            $query->whereNull('booking_config');
+        }
+
+        $sort = $request->query('sort', 'latest');
+        if ($sort === 'oldest') {
+            $query->oldest();
+        } elseif ($sort === 'fields_first') {
+            $query->orderByRaw('CASE WHEN booking_config IS NULL THEN 1 ELSE 0 END')->latest();
+        } else {
+            $query->latest();
+        }
+        $pendingServices = $query->paginate(15)->withQueryString();
 
         return view('admin.services.pending', compact('pendingServices'));
     }

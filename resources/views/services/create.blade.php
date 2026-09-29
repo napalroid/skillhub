@@ -69,6 +69,21 @@
 
                 @csrf
 
+                @if($errors->any())
+                    <div class="border-l-4 border-red-700 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert">
+                        <strong>Pengajuan belum terkirim.</strong> {{ $errors->first() }}
+                    </div>
+                @endif
+
+                {{-- Hidden templates for dynamic fields --}}
+                <template id="joki-ml-template">
+                    @include('partials.service-types.joki-ml-fields')
+                </template>
+
+                <template id="barber-template">
+                    @include('partials.service-types.barber-fields')
+                </template>
+
                 {{-- 01 Kenalin jasamu --}}
                 <section class="grid gap-6 border-t border-border pt-8 lg:grid-cols-[200px_1fr]">
                     <div>
@@ -123,21 +138,27 @@
                     </div>
                 </section>
 
-                {{-- 02 Tentukan nilainya --}}
-                <section class="grid gap-6 border-t border-border pt-8 lg:grid-cols-[200px_1fr]">
-                    <div>
-                        <span class="font-heading text-sm font-extrabold tracking-widest text-[#0051BA]">02</span>
-                        <h3 class="mt-1 font-heading text-lg font-bold tracking-tight text-black">Tentukan nilainya</h3>
-                    </div>
-                    <div>
-                        <label for="price" class="label-field">Harga jasa</label>
-                        <div class="relative">
-                            <span class="pointer-events-none absolute inset-y-0 left-4 flex items-center font-heading text-sm font-bold text-text-secondary">Rp</span>
-                            <input type="number" name="price" id="price" value="{{ old('price') }}" required min="0" inputmode="numeric" placeholder="50000" class="input-field pl-12 tabular-nums @error('price') border-[#0051BA] @enderror">
-                        </div>
-                        @error('price')<p class="mt-2 text-xs font-medium text-[#0051BA]">{{ $message }}</p>@enderror
-                    </div>
-                </section>
+                        {{-- 02 Tentukan nilainya --}}
+                        <section class="grid gap-6 border-t border-border pt-8 lg:grid-cols-[200px_1fr]">
+                            <div>
+                                <span class="font-heading text-sm font-extrabold tracking-widest text-[#0051BA]">02</span>
+                                <h3 class="mt-1 font-heading text-lg font-bold tracking-tight text-black">Tentukan nilainya</h3>
+                            </div>
+                            <div>
+                                {{-- Standard price field --}}
+                                <div id="standard-price-field">
+                                    <label for="price" class="label-field">Harga jasa</label>
+                                    <div class="relative">
+                                        <span class="pointer-events-none absolute inset-y-0 left-4 flex items-center font-heading text-sm font-bold text-text-secondary">Rp</span>
+                                        <input type="number" name="price" id="price" value="{{ old('price') }}" min="0" inputmode="numeric" placeholder="50000" class="input-field pl-12 tabular-nums @error('price') border-[#0051BA] @enderror">
+                                    </div>
+                                    @error('price')<p class="mt-2 text-xs font-medium text-[#0051BA]">{{ $message }}</p>@enderror
+                                </div>
+
+                                {{-- Dynamic service type fields container --}}
+                                <div id="service-type-fields" style="display: none;"></div>
+                            </div>
+                        </section>
 
                 {{-- 03 Ceritakan jasamu --}}
                 <section class="grid gap-6 border-t border-border pt-8 lg:grid-cols-[200px_1fr]">
@@ -152,24 +173,69 @@
                     </div>
                 </section>
 
-                {{-- 04 Tampilkan karyamu --}}
-                <section class="grid gap-6 border-t border-border pt-8 lg:grid-cols-[200px_1fr]">
+                {{-- 04 Data yang diisi buyer --}}
+                <section class="grid gap-6 border-t border-border pt-8 lg:grid-cols-[200px_1fr]" x-data="buyerFieldBuilder()">
                     <div>
                         <span class="font-heading text-sm font-extrabold tracking-widest text-[#0051BA]">04</span>
+                        <h3 class="mt-1 font-heading text-lg font-bold tracking-tight text-black">Data dari buyer</h3>
+                        <p class="mt-2 text-sm leading-6 text-text-secondary">Opsional. Tambahkan hanya informasi yang benar-benar diperlukan untuk mengerjakan jasa.</p>
+                    </div>
+                    <div>
+                        <div class="border border-border bg-white p-5">
+                            <div class="flex items-start justify-between gap-4">
+                                <div><h4 class="font-heading text-sm font-bold text-black">Field pesanan buyer</h4><p class="mt-1 text-xs leading-5 text-text-secondary">Teks, angka, tanggal, atau pilihan. Maksimal 10 field.</p></div>
+                                <button type="button" class="btn-ghost shrink-0 px-3 py-2 text-xs" @click="add()" :disabled="fields.length >= 10">+ Tambah field</button>
+                            </div>
+                            <p class="mt-4 text-sm text-text-secondary" x-show="fields.length === 0">Belum ada field tambahan. Buyer hanya akan melihat catatan umum pesanan.</p>
+                            @if($errors->has('buyer_fields.*'))<p class="mt-3 text-xs font-medium text-red-700">Periksa kembali field buyer yang ditandai, terutama pilihan yang membutuhkan minimal dua opsi.</p>@endif
+                            <div class="mt-4 space-y-4" x-show="fields.length">
+                                <template x-for="(field, index) in fields" :key="field.key">
+                                    <fieldset class="border border-border bg-bg-soft p-4">
+                                        <legend class="sr-only">Field buyer</legend>
+                                        <div class="mb-3 flex items-center justify-between gap-3"><span class="font-heading text-xs font-bold tracking-widest text-[#0051BA]" x-text="String(index + 1).padStart(2, '0')"></span><button type="button" class="text-xs font-bold text-red-700 hover:underline" @click="remove(index)">Hapus</button></div>
+                                        <div class="grid gap-3 sm:grid-cols-2">
+                                            <label class="label-field">Label field<input type="text" class="input-field mt-1" :name="`buyer_fields[${index}][label]`" x-model="field.label" maxlength="80" required placeholder="Contoh: Ukuran desain"></label>
+                                            <label class="label-field">Jenis input<select class="input-field mt-1" :name="`buyer_fields[${index}][type]`" x-model="field.type"><option value="text">Teks singkat</option><option value="textarea">Teks panjang</option><option value="number">Angka</option><option value="date">Tanggal</option><option value="select">Pilihan</option></select></label>
+                                            <label class="label-field sm:col-span-2" x-show="field.type === 'select'">Pilihan <span class="normal-case font-normal text-text-secondary">(pisahkan dengan koma)</span><input type="text" class="input-field mt-1" :name="`buyer_fields[${index}][options]`" x-model="field.options" :required="field.type === 'select'" placeholder="Contoh: Merah, Biru, Hijau"></label>
+                                            <label class="label-field"><span class="block min-h-8">Contoh jawaban <span class="block normal-case font-normal tracking-normal text-text-secondary">(opsional)</span></span><input type="text" class="input-field mt-1" :name="`buyer_fields[${index}][placeholder]`" x-model="field.placeholder" maxlength="150" placeholder="Contoh: Ukuran A4"></label>
+                                            <label class="label-field"><span class="block min-h-8">Petunjuk <span class="block normal-case font-normal tracking-normal text-text-secondary">(opsional)</span></span><input type="text" class="input-field mt-1" :name="`buyer_fields[${index}][help_text]`" x-model="field.help_text" maxlength="255" placeholder="Jelaskan informasi yang dibutuhkan"></label>
+                                        </div>
+                                        <label class="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-black"><input type="hidden" :name="`buyer_fields[${index}][required]`" value="0"><input type="checkbox" :name="`buyer_fields[${index}][required]`" value="1" x-model="field.required" class="h-4 w-4"> Wajib diisi buyer</label>
+                                    </fieldset>
+                                </template>
+                            </div>
+                            <label class="mt-5 flex min-h-11 cursor-pointer items-start gap-3 border-t border-border pt-5 text-sm text-black">
+                                <input type="hidden" name="time_slots_enabled" value="0">
+                                <input type="checkbox" name="time_slots_enabled" value="1" @checked(old('time_slots_enabled')) class="mt-0.5 h-4 w-4">
+                                <span><strong class="block font-heading text-sm">Aktifkan booking slot</strong><span class="mt-1 block text-xs leading-5 text-text-secondary">Buyer wajib memilih tanggal dan waktu tersedia sebelum mengirim pesanan.</span></span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="grid gap-6 border-t border-border pt-8 lg:grid-cols-[200px_1fr]" x-data="addonBuilder()">
+                    <div><span class="font-heading text-sm font-extrabold tracking-widest text-[#0051BA]">05</span><h3 class="mt-1 font-heading text-lg font-bold tracking-tight text-black">Layanan tambahan</h3><p class="mt-2 text-sm leading-6 text-text-secondary">Opsional. Tambahkan opsi berbayar yang buyer dapat pilih.</p></div>
+                    <div class="border border-border bg-white p-5"><div class="flex items-start justify-between gap-4"><div><h4 class="font-heading text-sm font-bold text-black">Opsi add-on</h4><p class="mt-1 text-xs leading-5 text-text-secondary">Maksimal 20 layanan; admin akan meninjau harga dan keterangannya.</p></div><button type="button" class="btn-ghost shrink-0 px-3 py-2 text-xs" @click="add()" :disabled="addons.length >= 20">+ Tambah layanan</button></div><p class="mt-4 text-sm text-text-secondary" x-show="addons.length === 0">Tidak ada layanan tambahan.</p><div class="mt-4 space-y-3" x-show="addons.length"><template x-for="(addon, index) in addons" :key="addon.key"><fieldset class="border border-border bg-bg-soft p-4"><div class="mb-3 flex justify-between"><span class="font-heading text-xs font-bold text-[#0051BA]" x-text="String(index + 1).padStart(2, '0')"></span><button type="button" @click="remove(index)" class="text-xs font-bold text-red-700 hover:underline">Hapus</button></div><div class="grid gap-3 sm:grid-cols-2"><label class="label-field">Nama layanan<input class="input-field mt-1" type="text" :name="`addons[${index}][name]`" x-model="addon.name" required maxlength="100" placeholder="Contoh: Revisi tambahan"></label><label class="label-field">Harga tambahan (Rp)<input class="input-field mt-1" type="number" :name="`addons[${index}][price]`" x-model="addon.price" required min="0" inputmode="numeric" placeholder="15000"></label><label class="label-field sm:col-span-2">Keterangan <span class="normal-case font-normal text-text-secondary">(opsional)</span><input class="input-field mt-1" type="text" :name="`addons[${index}][description]`" x-model="addon.description" maxlength="255" placeholder="Jelaskan manfaat layanan tambahan"></label></div></fieldset></template></div>@error('addons')<p class="mt-3 text-xs font-medium text-red-700">{{ $message }}</p>@enderror</div>
+                </section>
+
+                {{-- 06 Tampilkan karyamu --}}
+                <section class="grid gap-6 border-t border-border pt-8 lg:grid-cols-[200px_1fr]">
+                    <div>
+                        <span class="font-heading text-sm font-extrabold tracking-widest text-[#0051BA]">06</span>
                         <h3 class="mt-1 font-heading text-lg font-bold tracking-tight text-black">Tampilkan karyamu</h3>
                     </div>
                     <div class="space-y-8">
 
                         {{-- Example image --}}
-                        <div x-data="{ img: '' }">
+                        <div x-data="{ img: '', uploadError: '' }">
                             <label for="image" class="label-field">Gambar contoh <span class="font-medium normal-case tracking-normal text-text-secondary">(opsional)</span></label>
                             <label for="image" class="group flex cursor-pointer flex-col items-center justify-center border border-dashed border-border bg-white px-6 py-10 text-center transition duration-200 hover:border-[#0051BA]">
                                 <span class="flex h-12 w-12 items-center justify-center rounded-full border border-border text-2xl leading-none text-black transition duration-200 group-hover:border-[#0051BA] group-hover:text-[#0051BA]" aria-hidden="true">+</span>
                                 <span class="mt-4 font-heading text-sm font-bold uppercase tracking-wide text-black">Tambahkan gambar contoh</span>
-                                <span class="mt-1 text-xs text-text-secondary" x-text="img || 'JPG / PNG · Maks. 2 MB'"></span>
+                                <span class="mt-1 text-xs text-text-secondary" x-text="img || 'JPG / PNG / WEBP · Maks. 2 MB'"></span>
                             </label>
-                            <input id="image" name="image" type="file" accept="image/jpeg,image/png" class="sr-only" @change="img = $event.target.files[0]?.name || ''">
-                            <p class="mt-2 text-xs text-text-secondary">JPG atau PNG, maksimal 2 MB.</p>
+                            <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" @change="const file = $event.target.files[0]; uploadError = file && file.size > 2 * 1024 * 1024 ? 'Ukuran gambar melebihi 2 MB.' : ''; img = uploadError ? '' : (file?.name || ''); if (uploadError) $event.target.value = ''">
+                            <p class="mt-2 text-xs text-text-secondary">JPG, PNG, atau WEBP, maksimal 2 MB.</p><p x-show="uploadError" x-text="uploadError" class="mt-2 text-xs font-medium text-red-700"></p>
                             @error('image')<p class="mt-2 text-xs font-medium text-[#0051BA]">{{ $message }}</p>@enderror
                         </div>
 
@@ -177,10 +243,13 @@
                         <div
                             x-data="{
                                 files: [],
-                                dragActive: false,
+                                dragActive: false, uploadError: '',
                                 setFiles(list) {
                                     this.files.forEach(item => URL.revokeObjectURL(item.preview));
-                                    this.files = Array.from(list).slice(0, 3).map(file => ({ file, preview: URL.createObjectURL(file) }));
+                                    const candidates = Array.from(list);
+                                    const oversized = candidates.find(file => file.size > 2 * 1024 * 1024);
+                                    this.uploadError = oversized ? `“${oversized.name}” melebihi batas 2 MB.` : '';
+                                    this.files = candidates.filter(file => file.size <= 2 * 1024 * 1024).slice(0, 3).map(file => ({ file, preview: URL.createObjectURL(file) }));
                                     const transfer = new DataTransfer();
                                     this.files.forEach(item => transfer.items.add(item.file));
                                     this.$refs.portfolioInput.files = transfer.files;
@@ -217,6 +286,7 @@
                             </div>
                             @error('portfolio_images')<p class="mt-2 text-xs font-medium text-[#0051BA]">{{ $message }}</p>@enderror
                             @error('portfolio_images.*')<p class="mt-2 text-xs font-medium text-[#0051BA]">{{ $message }}</p>@enderror
+                            <p x-show="uploadError" x-text="uploadError" class="mt-2 text-xs font-medium text-red-700"></p>
                         </div>
 
                     </div>
@@ -232,6 +302,70 @@
                 </div>
             </form>
         </section>
+
+        {{-- Service type dynamic data --}}
+        <div x-data="{
+            subcategoryId: null,
+            serviceType: null,
+            loading: false,
+            
+            async loadServiceType(subcategoryId) {
+                if (!subcategoryId) {
+                    this.serviceType = null;
+                    this.hideStandardPriceField = false;
+                    return;
+                }
+                
+                this.loading = true;
+                
+                try {
+                    const response = await fetch(`/api/subcategories/${subcategoryId}/service-type`);
+                    const data = await response.json();
+                    this.serviceType = data.service_type;
+                    
+                    // Hide/show standard price field based on service type
+                    if (this.serviceType?.has_custom_pricing) {
+                        document.getElementById('standard-price-field').style.display = 'none';
+                        // Dynamically load service type specific fields
+                        this.loadServiceTypeFields();
+                    } else {
+                        document.getElementById('standard-price-field').style.display = 'block';
+                        document.getElementById('service-type-fields').innerHTML = '';
+                    }
+                } catch (error) {
+                    console.error('Error loading service type:', error);
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            async loadServiceTypeFields() {
+                if (!this.serviceType) return;
+                
+                const container = document.getElementById('service-type-fields');
+                
+                switch (this.serviceType.code) {
+                    case 'joki_ml':
+                        const jokiResponse = await fetch('/partials/service-types/joki-ml-fields');
+                        container.innerHTML = await jokiResponse.text();
+                        break;
+                    case 'barber':
+                        const barberResponse = await fetch('/partials/service-types/barber-fields');
+                        container.innerHTML = await barberResponse.text();
+                        break;
+                    default:
+                        container.innerHTML = '';
+                }
+            }
+        }" x-init="() => {
+            const subcategorySelect = document.getElementById('subcategory_id');
+            if (subcategorySelect) {
+                subcategorySelect.addEventListener('change', (e) => {
+                    this.subcategoryId = e.target.value;
+                    this.loadServiceType(e.target.value);
+                });
+            }
+        }"></div>
 
         {{-- Modal Request Kategori (Di luar form utama) --}}
         <div x-data="{ showModal: false }" 
@@ -344,6 +478,55 @@
             </div>
         </div>
     </div>
+
+    {{-- Dynamic service type form data (Alpine.js) --}}
+    <div x-data="{
+        subcategoryId: null,
+        serviceType: null,
+        
+        async loadServiceType(subcategoryId) {
+            if (!subcategoryId) {
+                this.serviceType = null;
+                document.getElementById('standard-price-field').style.display = 'block';
+                document.getElementById('service-type-fields').innerHTML = '';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/subcategories/${subcategoryId}/service-type`);
+                const data = await response.json();
+                this.serviceType = data.service_type;
+                
+                if (this.serviceType?.has_custom_pricing) {
+                    document.getElementById('standard-price-field').style.display = 'none';
+                    this.loadServiceTypeFields();
+                } else {
+                    document.getElementById('standard-price-field').style.display = 'block';
+                    document.getElementById('service-type-fields').innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Error loading service type:', error);
+            }
+        },
+        
+        loadServiceTypeFields() {
+            if (!this.serviceType) return;
+            
+            const container = document.getElementById('service-type-fields');
+            
+            switch (this.serviceType.code) {
+                case 'joki_ml':
+                    container.innerHTML = document.querySelector('[data-service-type-joki-ml]')?.outerHTML || '';
+                    break;
+                case 'barber':
+                    container.innerHTML = document.querySelector('[data-service-type-barber]')?.outerHTML || '';
+                    break;
+                default:
+                    container.innerHTML = '';
+            }
+        }
+    </div>
+
 @endsection
 
 @push('scripts')
@@ -352,6 +535,9 @@
             const categorySelect = document.getElementById('category_id');
             const subcategorySelect = document.getElementById('subcategory_id');
             const defaultOption = subcategorySelect.querySelector('option[value=""]');
+            const standardPriceField = document.getElementById('standard-price-field');
+            const serviceTypeFields = document.getElementById('service-type-fields');
+            const priceInput = document.getElementById('price');
 
             const refreshSubcategories = () => {
                 const selectedCategoryId = categorySelect.value;
@@ -366,6 +552,49 @@
 
                 const selectedOption = subcategorySelect.options[subcategorySelect.selectedIndex];
                 if (selectedOption && selectedOption.hidden) subcategorySelect.value = '';
+                
+                // Reset dynamic fields when category changes
+                loadDynamicFields('');
+            };
+
+            const loadDynamicFields = async (subcategoryId) => {
+                if (!subcategoryId) {
+                    serviceTypeFields.innerHTML = '';
+                    serviceTypeFields.style.display = 'none';
+                    standardPriceField.style.display = 'block';
+                    priceInput.required = true;
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/subcategories/${subcategoryId}/service-type`);
+                    const data = await response.json();
+                    const serviceType = data.service_type;
+
+                    const hasTypeFields = ['joki_ml', 'barber'].includes(serviceType?.code);
+                    const customPricing = Boolean(serviceType?.has_custom_pricing);
+                    standardPriceField.style.display = customPricing ? 'none' : 'block';
+                    priceInput.required = !customPricing;
+                    serviceTypeFields.style.display = hasTypeFields ? 'block' : 'none';
+
+                    if (hasTypeFields) {
+                        if (serviceType.code === 'joki_ml') {
+                            const template = document.getElementById('joki-ml-template');
+                            serviceTypeFields.innerHTML = template.innerHTML;
+                        } else if (serviceType.code === 'barber') {
+                            const template = document.getElementById('barber-template');
+                            serviceTypeFields.innerHTML = template.innerHTML;
+                        }
+                    } else {
+                        serviceTypeFields.innerHTML = '';
+                    }
+                } catch (error) {
+                    console.error('Error loading service type:', error);
+                    serviceTypeFields.innerHTML = '';
+                    serviceTypeFields.style.display = 'none';
+                    standardPriceField.style.display = 'block';
+                    priceInput.required = true;
+                }
             };
 
             categorySelect.addEventListener('change', () => {
@@ -373,11 +602,27 @@
                 refreshSubcategories();
             });
 
+            subcategorySelect.addEventListener('change', () => {
+                loadDynamicFields(subcategorySelect.value);
+            });
+
+            // Initialize on page load if category/subcategory already selected
             refreshSubcategories();
+            if (subcategorySelect.value) {
+                loadDynamicFields(subcategorySelect.value);
+            }
         });
+
+        function buyerFieldBuilder() {
+            return {
+                fields: @js(old('buyer_fields', [])).map((field, index) => ({ ...field, key: index, required: Boolean(Number(field.required)) })),
+                nextKey: @js(count(old('buyer_fields', []))),
+                add() { if (this.fields.length < 10) this.fields.push({ key: this.nextKey++, label: '', type: 'text', options: '', placeholder: '', help_text: '', required: false }); },
+                remove(index) { this.fields.splice(index, 1); },
+            };
+        }
+        function addonBuilder() {
+            return { addons: @js(old('addons', [])).map((addon, index) => ({ ...addon, key: index })), nextKey: @js(count(old('addons', []))), add() { if (this.addons.length < 20) this.addons.push({ key: this.nextKey++, name: '', price: '', description: '' }); }, remove(index) { this.addons.splice(index, 1); } };
+        }
     </script>
 @endpush
-
-@section('pageFooter')
-    <x-site-footer />
-@endsection

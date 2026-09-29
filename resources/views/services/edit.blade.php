@@ -1,212 +1,39 @@
 @extends('layouts.app')
-
-@section('title', 'Edit Jasa - SkillHub')
+@section('title', 'Service Settings | SkillHub')
 @section('hideNavigation', true)
-
+@livewireStyles
 @section('content')
-    <section class="relative isolate overflow-hidden bg-gradient-to-br from-sky-50 via-indigo-50 to-amber-50 px-4 py-12 sm:px-6 sm:py-16">
-        <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-            <div class="absolute -left-20 top-12 h-64 w-64 rounded-full bg-blue-300/45 blur-3xl"></div>
-            <div class="absolute -right-20 top-1/4 h-72 w-72 rounded-full bg-violet-300/35 blur-3xl"></div>
-            <div class="absolute bottom-0 left-1/3 h-56 w-56 rounded-full bg-amber-200/50 blur-3xl"></div>
-            <div class="absolute inset-0 opacity-[0.08]" style="background-image: radial-gradient(#2563eb 1px, transparent 1px); background-size: 20px 20px;"></div>
-        </div>
-
-        <div class="mx-auto max-w-5xl">
-            <div class="grid overflow-hidden rounded-[2rem] border border-white/80 bg-white/80 shadow-2xl shadow-blue-950/10 backdrop-blur-sm lg:grid-cols-[0.85fr_1.15fr]">
-                <aside class="relative overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 px-7 py-10 text-white sm:px-10 lg:py-12">
-                    <div class="absolute -right-16 -top-16 h-44 w-44 rounded-full border-[18px] border-white/10"></div>
-                    <div class="absolute -bottom-20 -left-16 h-52 w-52 rounded-full bg-amber-300/20"></div>
-
-                    <div class="relative">
-                        <a href="{{ route('services.my') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-blue-100 transition hover:text-white">
-                            <span aria-hidden="true">←</span> Kembali ke jasa saya
-                        </a>
-
-                        <span class="mt-12 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-blue-50">Edit jasa</span>
-                        <h1 class="mt-5 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">Update jasamu</h1>
-                        <p class="mt-3 text-lg font-medium text-blue-100">Perbarui informasi jasa</p>
-                        <p class="mt-6 max-w-sm text-sm leading-7 text-blue-100/90">Ubah detail jasa sesuai kebutuhan. Jika ada perubahan signifikan, admin mungkin perlu meninjau ulang.</p>
-
-                        <div class="mt-10 space-y-4">
-                            @foreach ([['number' => '01', 'text' => 'Perbarui kategori atau harga'], ['number' => '02', 'text' => 'Edit deskripsi jasa'], ['number' => '03', 'text' => 'Simpan perubahan']] as $step)
-                                <div class="flex items-center gap-3">
-                                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-xs font-extrabold">{{ $step['number'] }}</span>
-                                    <span class="text-sm font-medium text-blue-50">{{ $step['text'] }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </aside>
-
-                <div class="p-6 sm:p-10">
-                    <div class="mb-8">
-                        <p class="text-sm font-bold uppercase tracking-widest text-blue-600">Form edit</p>
-                        <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">Perbarui jasamu</h2>
-                        <p class="mt-2 text-sm leading-6 text-slate-500">Edit detail jasa yang sudah kamu ajukan sebelumnya.</p>
-                    </div>
-
-                     <div class="mb-6 border-b border-slate-200">
-                          <nav class="-mb-px flex gap-6" aria-label="Tabs">
-                              <a href="#informasi" 
-                                 class="tab-link whitespace-nowrap border-b-2 border-blue-600 px-1 py-4 text-sm font-bold text-blue-600"
-                                 data-tab="informasi">
-                                  Informasi Dasar
-                              </a>
-                              <a href="#booking-config" 
-                                 class="tab-link whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700"
-                                 data-tab="booking-config">
-                                  Booking Config
-                              </a>
-                          </nav>
-                     </div>
-
-                    <div id="tab-informasi" class="tab-content">
-
-                    <form method="POST" action="{{ route('services.update', $service->id) }}" enctype="multipart/form-data" class="space-y-5">
-                        @csrf
-                        @method('PUT')
-
-                        <div>
-                            <label for="title" class="mb-2 block text-sm font-bold text-slate-700">Nama jasa</label>
-                            <input type="text" name="title" id="title" value="{{ old('title', $service->title) }}" required maxlength="255" placeholder="Contoh: Desain poster acara sekolah" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100">
-                            @error('title')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                        </div>
-
-                        <div class="grid gap-5 sm:grid-cols-2">
-                            <div>
-                                <label for="category_id" class="mb-2 block text-sm font-bold text-slate-700">Kategori</label>
-                                <select name="category_id" id="category_id" required class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100">
-                                    <option value="">Pilih kategori</option>
-                                    @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}" @selected(old('category_id', $service->subcategory->category_id ?? null) == $category->id)>{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('category_id')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                            </div>
-
-                            <div>
-                                <label for="subcategory_id" class="mb-2 block text-sm font-bold text-slate-700">Subkategori</label>
-                                <select name="subcategory_id" id="subcategory_id" required class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:opacity-60 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100">
-                                    <option value="">Pilih kategori dulu</option>
-                                    @foreach ($subcategories as $subcategory)
-                                        <option value="{{ $subcategory->id }}" data-category-id="{{ $subcategory->category_id }}" @selected(old('subcategory_id', $service->subcategory_id) == $subcategory->id)>{{ $subcategory->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('subcategory_id')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="price" class="mb-2 block text-sm font-bold text-slate-700">Harga jasa</label>
-                            <div class="relative">
-                                <span class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-bold text-slate-400">Rp</span>
-                                <input type="number" name="price" id="price" value="{{ old('price', $service->price) }}" required min="0" inputmode="numeric" placeholder="50000" class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100">
-                            </div>
-                            @error('price')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                        </div>
-
-                        <div>
-                            <label for="description" class="mb-2 block text-sm font-bold text-slate-700">Deskripsi jasa</label>
-                            <textarea name="description" id="description" rows="5" required placeholder="Jelaskan apa yang akan kamu kerjakan, hasil yang didapat, dan ketentuan jasamu..." class="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100">{{ old('description', $service->description) }}</textarea>
-                            @error('description')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                        </div>
-
-                        <div>
-                            <label for="image" class="mb-2 block text-sm font-bold text-slate-700">Gambar contoh <span class="font-medium text-slate-400">(opsional)</span></label>
-                            @if($service->image)
-                                <div class="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                                    <p class="text-xs font-semibold text-slate-600 mb-2">Gambar saat ini:</p>
-                                    <img src="{{ asset('storage/' . $service->image) }}" alt="Current image" class="h-24 w-24 object-cover rounded-lg">
-                                </div>
-                            @endif
-                            <input type="file" name="image" id="image" accept="image/jpeg,image/png" class="block w-full cursor-pointer rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-500 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-100 file:px-3 file:py-2 file:text-xs file:font-bold file:text-blue-700 hover:file:bg-blue-200">
-                            <p class="mt-2 text-xs text-slate-400">JPG atau PNG, maksimal 2 MB. Kosongkan jika tidak ingin mengubah.</p>
-                            @error('image')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                        </div>
-
-                        <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                            <a href="{{ route('services.my') }}" class="rounded-xl px-4 py-3 text-center text-sm font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">Batal</a>
-                            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30">
-                                Simpan perubahan <span aria-hidden="true">→</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <div id="tab-booking-config" class="tab-content hidden">
-                    <div class="mb-6">
-                        <p class="text-sm font-bold uppercase tracking-widest text-emerald-600">Konfigurasi Booking</p>
-                        <h2 class="mt-2 text-xl font-extrabold tracking-tight text-slate-900">Atur Field Booking</h2>
-                        <p class="mt-2 text-sm leading-6 text-slate-500">Tambahkan field yang perlu diisi buyer saat memesan jasa ini.</p>
-                    </div>
-                    
-                     @livewire('booking.config-builder', ['service' => $service])
-                 </div>
-
-
-             </div>
-         </div>
-     </section>
+@php
+    $activeTab = request('tab') === 'addons' || old('return_to_settings') ? 'addons' : 'basic';
+    $addonRows = old('addons', $service->addons->map(fn ($addon) => [
+        'id' => $addon->id,
+        'name' => $addon->name,
+        'description' => $addon->description,
+        'price' => $addon->price,
+        'is_active' => $addon->is_active,
+    ])->values()->all());
+@endphp
+<div class="settings"><div class="settings-shell">
+<header class="settings-head"><a href="{{ route('services.my') }}">← Kembali ke jasa saya</a><div><p>Service settings</p><h1>{{ $service->title }}</h1><span>Atur detail jasa dan informasi yang dibutuhkan buyer saat booking.</span></div></header>
+@if(session('success'))<p class="notice">{{ session('success') }}</p>@endif
+<div class="settings-layout"><nav class="tabs" aria-label="Pengaturan jasa"><button type="button" id="tab-basic" class="tab @if($activeTab === 'basic') active @endif" data-tab="basic" aria-controls="panel-basic" aria-pressed="{{ $activeTab === 'basic' ? 'true' : 'false' }}"><b>01</b><strong>Informasi dasar</strong><small>Detail jasa di marketplace</small></button><button type="button" id="tab-booking" class="tab" data-tab="booking" aria-controls="panel-booking" aria-pressed="false"><b>02</b><strong>Booking config</strong><small>Data yang diisi buyer</small></button><button type="button" id="tab-addons" class="tab @if($activeTab === 'addons') active @endif" data-tab="addons" aria-controls="panel-addons" aria-pressed="{{ $activeTab === 'addons' ? 'true' : 'false' }}"><b>03</b><strong>Layanan tambahan</strong><small>Opsi dan harga untuk buyer</small></button></nav>
+<main><section id="panel-basic" class="panel" aria-labelledby="tab-basic" @if($activeTab !== 'basic') hidden @endif><header><p>01. Informasi dasar</p><h2>Detail yang membentuk halaman jasa.</h2></header><form method="POST" action="{{ route('services.update', $service->id) }}" enctype="multipart/form-data" class="service-form">@csrf @method('PUT')
+<div class="field"><label for="title">Nama jasa</label><input type="text" name="title" id="title" value="{{ old('title', $service->title) }}" required maxlength="255" placeholder="Contoh: Desain poster acara sekolah">@error('title')<em>{{ $message }}</em>@enderror</div>
+<div class="split"><div class="field"><label for="category_id">Kategori</label><select name="category_id" id="category_id" required><option value="">Pilih kategori</option>@foreach($categories as $category)<option value="{{ $category->id }}" @selected(old('category_id',$service->subcategory->category_id ?? null)==$category->id)>{{ $category->name }}</option>@endforeach</select>@error('category_id')<em>{{ $message }}</em>@enderror</div><div class="field"><label for="subcategory_id">Subkategori</label><select name="subcategory_id" id="subcategory_id" required><option value="">Pilih subkategori</option>@foreach($subcategories as $subcategory)<option value="{{ $subcategory->id }}" data-category-id="{{ $subcategory->category_id }}" @selected(old('subcategory_id',$service->subcategory_id)==$subcategory->id)>{{ $subcategory->name }}</option>@endforeach</select>@error('subcategory_id')<em>{{ $message }}</em>@enderror</div></div>
+<div class="field"><label for="price">Harga jasa</label><div class="price"><span>Rp</span><input type="number" name="price" id="price" value="{{ old('price',$service->price) }}" required min="0" inputmode="numeric" placeholder="250000"></div>@error('price')<em>{{ $message }}</em>@enderror</div>
+<div class="field"><label for="description">Deskripsi jasa</label><textarea name="description" id="description" rows="6" required placeholder="Jelaskan pekerjaan, hasil, dan ketentuan jasamu...">{{ old('description',$service->description) }}</textarea>@error('description')<em>{{ $message }}</em>@enderror</div>
+<div class="field" x-data="{ currentImage: @js($service->display_image_url), previewImage: null, uploadError: '', selectImage(event) { const file = event.target.files?.[0]; this.uploadError = ''; if (this.previewImage) URL.revokeObjectURL(this.previewImage); this.previewImage = null; if (!file) return; const supported = ['image/jpeg', 'image/png', 'image/webp']; if (!supported.includes(file.type)) { this.uploadError = 'Pilih gambar JPG, PNG, atau WEBP.'; event.target.value = ''; return; } if (file.size > 2 * 1024 * 1024) { this.uploadError = 'Ukuran gambar maksimal 2 MB.'; event.target.value = ''; return; } this.previewImage = URL.createObjectURL(file); }, clearSelection() { if (this.previewImage) URL.revokeObjectURL(this.previewImage); this.previewImage = null; this.uploadError = ''; this.$refs.imageInput.value = ''; } }"><label for="image">Visual jasa</label><div class="current" x-show="previewImage || currentImage" x-cloak><img :src="previewImage || currentImage" :alt="previewImage ? 'Pratinjau gambar jasa baru' : 'Gambar jasa saat ini'"><span><b x-text="previewImage ? 'Pratinjau gambar baru' : 'Gambar saat ini'"></b><small x-text="previewImage ? 'Gambar ini akan dipakai setelah perubahan disimpan.' : 'Unggah file baru untuk mengganti.'"></small><button type="button" class="image-clear" x-show="previewImage" x-cloak @click="clearSelection()">Batalkan pilihan</button></span></div><label class="upload" for="image"><b>Pilih gambar baru</b><small>JPG, PNG, atau WEBP, maksimum 2 MB</small></label><input class="sr-only" type="file" name="image" id="image" accept="image/jpeg,image/png,image/webp" x-ref="imageInput" @change="selectImage($event)" aria-describedby="image-help image-error"><i id="image-help">Pilih gambar untuk melihat pratinjau sebelum menyimpan perubahan.</i><p id="image-error" class="image-upload-error" x-show="uploadError" x-text="uploadError" aria-live="polite" x-cloak></p>@error('image')<em>{{ $message }}</em>@enderror</div>
+<footer><a href="{{ route('services.my') }}">Batal</a><button type="submit">Simpan perubahan</button></footer></form></section>
+<section id="panel-booking" class="panel" aria-labelledby="tab-booking" @if($activeTab !== 'booking') hidden @endif><header><p>02. Booking config</p><h2>Susun informasi yang buyer perlu berikan.</h2></header>@livewire('booking.config-builder',['service'=>$service])</section>
+<section id="panel-addons" class="panel" aria-labelledby="tab-addons" @if($activeTab !== 'addons') hidden @endif><header><p>03. Layanan tambahan</p><h2>Tambahkan opsi dan harga yang buyer dapat pilih.</h2></header><form method="POST" action="{{ route('services.addons.update', $service) }}" class="addon-inline-form" x-data="{ rows: @js($addonRows).map((addon, index) => ({ ...addon, key: `addon-${addon.id ?? index}-${Date.now()}`, is_active: Boolean(Number(addon.is_active)) })), nextKey: @js(count($addonRows)), addRow() { this.rows.push({ id: '', name: '', description: '', price: '', is_active: true, key: `new-${this.nextKey++}` }); }, removeRow(index) { this.rows.splice(index, 1); } }">@csrf @method('PUT')<input type="hidden" name="return_to_settings" value="1"><div class="addon-inline-intro"><div><h3>Daftar opsi</h3><p>Harga akan otomatis ditambahkan ke total jasa saat buyer memilihnya.</p></div><button type="button" class="addon-add" @click="addRow()">+ Tambah layanan</button></div><p class="addon-empty" x-show="rows.length === 0">Belum ada layanan tambahan. Tambahkan hanya opsi yang benar-benar tersedia.</p><div class="addon-rows"><template x-for="(addon, index) in rows" :key="addon.key"><article class="addon-row"><input type="hidden" :name="`addons[${index}][id]`" x-model="addon.id"><div class="addon-row-head"><span class="addon-number" x-text="String(index + 1).padStart(2, '0')"></span><label class="addon-toggle"><input type="hidden" :name="`addons[${index}][is_active]`" value="0"><input type="checkbox" :name="`addons[${index}][is_active]`" value="1" x-model="addon.is_active"><span>Ditampilkan</span></label><button type="button" class="addon-remove" @click="removeRow(index)" :aria-label="`Hapus ${addon.name || 'layanan tambahan'}`">Hapus</button></div><div class="addon-grid"><label>Nama layanan<input type="text" :name="`addons[${index}][name]`" x-model="addon.name" maxlength="100" required placeholder="Contoh: Creambath"></label><label>Harga tambahan (Rp)<input type="number" :name="`addons[${index}][price]`" x-model="addon.price" min="0" step="1" required placeholder="25000"></label><label class="addon-description">Keterangan <span>opsional</span><input type="text" :name="`addons[${index}][description]`" x-model="addon.description" maxlength="255" placeholder="Contoh: Perawatan rambut dan kulit kepala"></label></div></article></template></div>@error('addons.*.name')<p class="addon-error">{{ $message }}</p>@enderror @error('addons.*.price')<p class="addon-error">{{ $message }}</p>@enderror<footer><a href="{{ route('services.my') }}">Batal</a><button type="submit">Simpan layanan tambahan</button></footer></form></section></main></div></div></div>
+<style>
+[x-cloak]{display:none!important}.image-clear{display:inline-flex;align-items:center;min-height:32px;margin-top:.55rem;padding:0;border:0;background:transparent;color:#155eef;font:700 .74rem inherit;cursor:pointer;text-decoration:underline}.image-clear:hover{color:#1047b7}.image-clear:focus-visible{outline:2px solid #155eef;outline-offset:3px}.image-upload-error{margin:.7rem 0 0;color:#c5221f;font-size:.75rem;font-weight:700}
+.settings{min-height:100vh;background:#f7f8fa;color:#111;font-family:ui-sans-serif,system-ui,sans-serif}.settings-shell{width:min(100% - 2.5rem,1280px);margin:auto;padding:3rem 0 5rem}.settings-head{padding-bottom:2.5rem;border-bottom:1px solid #dfe2e7}.settings-head>a{color:#68707b;font-size:.82rem;text-decoration:none}.settings-head>div{margin-top:2.7rem}.settings-head p,.panel>header p{margin:0 0 .7rem;color:#155eef;font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.settings h1,.settings h2{margin:0;font-family:Georgia,serif;font-weight:400;letter-spacing:-.045em}.settings h1{font-size:clamp(2.7rem,5vw,5rem);line-height:.94}.settings-head span{display:block;max-width:52ch;margin-top:1rem;color:#69717c;line-height:1.6}.notice{padding:1rem;background:#edf4ff;color:#174ea6;font-size:.86rem}.settings-layout{display:grid;grid-template-columns:15rem minmax(0,1fr);gap:5rem;padding-top:3rem}.tabs{position:sticky;top:2rem;height:max-content;border-top:1px solid #111}.tab{display:grid;width:100%;grid-template-columns:2rem 1fr;gap:.25rem .8rem;padding:1.1rem 0;border:0;border-bottom:1px solid #dfe2e7;background:none;color:#747b85;text-align:left;cursor:pointer}.tab b{grid-row:span 2;color:#a2a8b0;font-size:.72rem}.tab strong{font-size:.92rem}.tab small{font-size:.72rem;line-height:1.4}.tab.active,.tab:hover{color:#111}.tab.active b{color:#155eef}.panel{animation:panel-in .2s cubic-bezier(.23,1,.32,1)}.panel>header{padding-bottom:2rem;border-bottom:1px solid #111}.panel h2{max-width:18ch;font-size:clamp(2rem,3.5vw,3.3rem);line-height:.98}.service-form{max-width:48rem}.field{padding:1.8rem 0;border-bottom:1px solid #dfe2e7}.field>label{display:block;margin-bottom:.7rem;font-size:.8rem;font-weight:750}.field input:not(.sr-only),.field select,.field textarea{width:100%;border:0;border-bottom:1px solid #bec5ce;background:transparent;border-radius:0;padding:.8rem 0;color:#111;font:400 1rem inherit;outline:0;transition:border-color .2s,box-shadow .2s}.field textarea{resize:vertical;line-height:1.6}.field input:not(.sr-only):focus,.field select:focus,.field textarea:focus{border-color:#155eef;box-shadow:0 2px 0 #155eef}.split{display:grid;grid-template-columns:1fr 1fr;gap:2rem}.price{display:flex;align-items:center;gap:.7rem;border-bottom:1px solid #bec5ce}.price span{font-weight:700;color:#68707b}.price input{border:0!important}.price:focus-within{border-color:#155eef;box-shadow:0 2px 0 #155eef}.field em{display:block;margin-top:.6rem;color:#c5221f;font-size:.75rem;font-style:normal}.field i{display:block;margin-top:.7rem;color:#747b85;font-size:.74rem;font-style:normal}.current{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;font-size:.82rem}.current img{width:4.5rem;height:4.5rem;object-fit:cover;border:1px solid #dfe2e7}.current b,.current small{display:block}.current small{margin-top:.2rem;color:#747b85}.upload{display:block!important;padding:1rem;border:1px dashed #aeb6c0;cursor:pointer;transition:border-color .2s,background .2s}.upload:hover{border-color:#155eef;background:#f0f5ff}.upload b,.upload small{display:block}.upload small{margin-top:.25rem;color:#747b85;font-size:.75rem;font-weight:400}.service-form footer{display:flex;justify-content:flex-end;gap:1rem;padding-top:2rem}.service-form footer a,.service-form footer button{border:0;padding:.8rem 1rem;font:700 .82rem inherit;text-decoration:none;cursor:pointer}.service-form footer a{color:#626a75}.service-form footer button{background:#155eef;color:#fff;transition:background .2s,transform .16s}.service-form footer button:hover{background:#1047b7;transform:translateY(-1px)}@keyframes panel-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@media(max-width:780px){.settings-shell{width:min(100% - 1.5rem,1280px);padding-top:2rem}.settings-layout{grid-template-columns:1fr;gap:2rem}.tabs{position:static;display:grid;grid-template-columns:1fr 1fr}.tab{padding-right:.7rem}.split{grid-template-columns:1fr;gap:0}}
+</style>
+<style>
+.addon-inline-form{max-width:48rem}.addon-inline-intro{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;padding:1.8rem 0;border-bottom:1px solid #dfe2e7}.addon-inline-intro h3{margin:0;font-size:1rem}.addon-inline-intro p{max-width:42ch;margin:.45rem 0 0;color:#747b85;font-size:.82rem;line-height:1.55}.addon-add,.addon-inline-form footer button{border:0;background:#155eef;color:#fff;padding:.78rem 1rem;font:700 .82rem inherit;white-space:nowrap;cursor:pointer;transition:background .2s,transform .16s}.addon-add:hover,.addon-inline-form footer button:hover{background:#1047b7;transform:translateY(-1px)}.addon-empty{padding:2rem 0;margin:0;color:#747b85;font-size:.9rem}.addon-row{padding:1.35rem 0;border-bottom:1px solid #dfe2e7}.addon-row-head{display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem}.addon-number{color:#155eef;font-size:.72rem;font-weight:800;letter-spacing:.08em}.addon-toggle{display:flex;align-items:center;gap:.45rem;margin-left:auto;color:#626a75;font-size:.76rem;font-weight:700;cursor:pointer}.addon-toggle input[type=checkbox]{accent-color:#155eef}.addon-remove{border:0;background:transparent;color:#a12a27;padding:.3rem;font:700 .76rem inherit;cursor:pointer}.addon-remove:hover{text-decoration:underline}.addon-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(9rem,.8fr);gap:1rem 1.5rem}.addon-grid label{display:block;color:#333b45;font-size:.76rem;font-weight:750}.addon-grid input{width:100%;border:0;border-bottom:1px solid #bec5ce;border-radius:0;background:transparent;padding:.65rem 0;color:#111;font:400 .94rem inherit;outline:0;transition:border-color .2s,box-shadow .2s}.addon-grid input:focus{border-color:#155eef;box-shadow:0 2px 0 #155eef}.addon-description{grid-column:1/-1}.addon-description span{color:#747b85;font-weight:400}.addon-error{margin:.75rem 0 0;color:#c5221f;font-size:.78rem}.addon-inline-form footer{display:flex;justify-content:flex-end;gap:1rem;padding-top:2rem}.addon-inline-form footer a{padding:.8rem 1rem;color:#626a75;font-size:.82rem;font-weight:700;text-decoration:none}@media(max-width:780px){.tabs{grid-template-columns:1fr}.addon-inline-intro{align-items:flex-start;flex-direction:column}.addon-grid{grid-template-columns:1fr}.addon-description{grid-column:auto}.addon-inline-form footer{justify-content:space-between}}
+</style>
+@livewireScripts
+@push('scripts')<script>document.addEventListener('DOMContentLoaded',()=>{const c=document.getElementById('category_id'),s=document.getElementById('subcategory_id'),d=s.querySelector('option[value=""]');const refresh=()=>{const id=c.value;[...s.options].forEach(o=>{if(o.value)o.hidden=o.dataset.categoryId!==id});s.disabled=!id;d.textContent=id?'Pilih subkategori':'Pilih kategori dulu';if(s.options[s.selectedIndex]?.hidden)s.value=''};c.addEventListener('change',()=>{s.value='';refresh()});refresh();const tabs=[...document.querySelectorAll('.tab[data-tab]')],panels=[...document.querySelectorAll('.panel[id^="panel-"]')];tabs.forEach(tab=>tab.addEventListener('click',()=>{const activeTab=tab.dataset.tab;tabs.forEach(item=>{const active=item===tab;item.classList.toggle('active',active);item.setAttribute('aria-pressed',active?'true':'false')});panels.forEach(panel=>{panel.hidden=panel.id!==`panel-${activeTab}`});history.replaceState(null,'',`${window.location.pathname}${activeTab==='addons'?'?tab=addons':''}`)}))});</script>@endpush
 @endsection
-
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const categorySelect = document.getElementById('category_id');
-            const subcategorySelect = document.getElementById('subcategory_id');
-            const defaultOption = subcategorySelect.querySelector('option[value=""]');
-
-            const refreshSubcategories = () => {
-                const selectedCategoryId = categorySelect.value;
-
-                Array.from(subcategorySelect.options).forEach((option) => {
-                    if (!option.value) return;
-                    option.hidden = option.dataset.categoryId !== selectedCategoryId;
-                });
-
-                subcategorySelect.disabled = !selectedCategoryId;
-                defaultOption.textContent = selectedCategoryId ? 'Pilih subkategori' : 'Pilih kategori dulu';
-
-                const selectedOption = subcategorySelect.options[subcategorySelect.selectedIndex];
-                if (selectedOption && selectedOption.hidden) subcategorySelect.value = '';
-            };
-
-            categorySelect.addEventListener('change', () => {
-                subcategorySelect.value = '';
-                refreshSubcategories();
-            });
-
-            refreshSubcategories();
-
-            // Tab switching
-            const tabLinks = document.querySelectorAll('.tab-link');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const targetTab = link.dataset.tab;
-
-                    tabLinks.forEach(l => {
-                        l.classList.remove('border-blue-600', 'text-blue-600', 'font-bold');
-                        l.classList.add('border-transparent', 'text-slate-500', 'font-medium');
-                    });
-
-                    link.classList.remove('border-transparent', 'text-slate-500', 'font-medium');
-                    link.classList.add('border-blue-600', 'text-blue-600', 'font-bold');
-
-                    tabContents.forEach(content => {
-                        content.classList.add('hidden');
-                    });
-
-                    document.getElementById('tab-' + targetTab).classList.remove('hidden');
-                });
-            });
-        });
-    </script>
-@endpush
-
-@section('pageFooter')
-    <x-site-footer />
-@endsection
+@section('pageFooter')<x-site-footer />@endsection

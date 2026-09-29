@@ -3,7 +3,7 @@ import net from 'node:net';
 
 const webPort = Number(process.env.SKILLHUB_WEB_PORT || 8001);
 const reverbPort = Number(process.env.SKILLHUB_REVERB_PORT || 8080);
-const proxyPort = Number(process.env.SKILLHUB_PROXY_PORT || 8002);
+const proxyPort = Number(process.env.SKILLHUB_PROXY_PORT || 8000);
 
 const server = http.createServer((request, response) => {
     const upstream = http.request({

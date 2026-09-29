@@ -23,8 +23,8 @@ function FeatureSection() {
                 .feature-motion-section::before { content:''; position:absolute; width:46rem; height:46rem; border:1px solid rgba(255,255,255,.12); border-radius:999px; right:-26rem; top:-23rem; }
                 .feature-motion-wrap { position:relative; max-width:1200px; margin:0 auto; }
                 .feature-motion-eyebrow { margin:0; font-size:.72rem; letter-spacing:.18em; font-weight:700; text-transform:uppercase; color:#bcbcbc; }
-                .feature-motion-title { max-width:760px; margin:1rem 0 0; font-size:clamp(2.45rem, 6vw, 5.5rem); line-height:.92; letter-spacing:-.075em; font-weight:700; }
-                .feature-motion-title em { font-style:normal; color:#a9a9a9; }
+                .feature-motion-title { max-width:760px; margin:1rem 0 0; color:#fff; font-size:clamp(2.45rem, 6vw, 5.5rem); line-height:.92; letter-spacing:-.075em; font-weight:700; }
+                .feature-motion-title em { font-style:normal; color:#d7d7d2; }
                 .feature-motion-rule { height:1px; margin:clamp(3rem, 7vw, 6rem) 0 1.2rem; background:rgba(255,255,255,.25); }
                 .feature-motion-grid { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:1px; background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.2); }
                 .feature-motion-card { min-height:275px; background:#080808; padding:1.5rem; display:flex; flex-direction:column; transition:background .25s ease,color .25s ease; }

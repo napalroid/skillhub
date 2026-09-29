@@ -1,16 +1,16 @@
-<x-layouts.app title="Kelola Jam Booking — {{ $service->title }}">
+<x-layouts.app title="Kelola Jam Booking - {{ $service->title }}">
     @vite(['resources/js/booking-calendar.jsx'])
 
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
 
         <div class="mb-8">
             <a href="{{ route('services.my') }}"
-               class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 transition hover:text-gray-700">
+               class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-black hover:text-black/70 transition">
                 <span aria-hidden="true">←</span> Kembali ke jasa saya
             </a>
             <div class="mt-6">
-                <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Kelola Booking</h1>
-                <p class="mt-2 text-sm text-gray-400">{{ $service->title }} - Klik tanggal untuk lihat pesanan, klik jam untuk filter</p>
+                <h1 class="text-3xl font-extrabold tracking-tight text-black sm:text-4xl">Kelola Booking</h1>
+                <p class="mt-2 text-sm text-black/60">{{ $service->title }} - Klik tanggal untuk lihat pesanan, klik jam untuk filter</p>
             </div>
         </div>
 

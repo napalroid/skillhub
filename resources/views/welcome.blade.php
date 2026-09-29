@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>SkillHub - Marketplace Jasa Siswa</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -88,7 +87,7 @@
             transform: scale(1.02);
         }
     </style>
-    @vite(['resources/js/app.js', 'resources/js/routes/welcome.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/routes/welcome.js'])
 </head>
 
 <body id="top" class="overflow-x-hidden bg-white text-[#171717]">
@@ -136,14 +135,10 @@
                              class="text-lg font-bold text-black">
                         </div>
                     @else
-                        <span class="inline-flex items-center gap-2 rounded-full border border-black bg-white/90 px-4 py-2 text-xs font-bold text-black">
-                            <span class="h-2 w-2 rounded-full bg-black"></span>
-                            Marketplace jasa khusus siswa
-                        </span>
                     @endauth
 
-                    <h1 class="mt-6 max-w-2xl text-4xl font-bold leading-[.9] tracking-[-.07em] text-black sm:text-5xl lg:text-7xl">
-                        Ubah keahlianmu menjadi <span class="text-black/45">peluang.</span>
+                    <h1 class="mt-6 text-4xl font-bold leading-[.9] tracking-[-.07em] text-black sm:text-5xl lg:text-6xl">
+                        Ubah keahlianmu<br>menjadi <span class="text-black/45">peluang.</span>
                     </h1>
 
                     <p class="mt-6 max-w-xl text-base leading-8 text-black/70 sm:text-lg">

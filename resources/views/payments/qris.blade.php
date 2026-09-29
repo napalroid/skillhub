@@ -78,6 +78,18 @@
                     @endif
                 </div>
 
+                @if(auth()->id() === $order->buyer_id)
+                    <form method="POST" action="{{ route('order-files.store', $order) }}" enctype="multipart/form-data" class="mt-4 border border-gray-200 bg-gray-50 p-4">
+                        @csrf
+                        <input type="hidden" name="file_type" value="kebutuhan">
+                        <label for="active_payment_order_file" class="block text-xs font-bold text-black">File kebutuhan untuk seller <span class="font-normal text-gray-500">(opsional)</span></label>
+                        <input id="active_payment_order_file" type="file" name="file" accept=".pdf,.zip,.png,.jpg,.jpeg,.doc,.docx,.ppt,.pptx" required class="mt-2 w-full text-xs file:mr-3 file:py-2 file:px-4 file:border-0 file:bg-black file:text-white file:font-bold file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gray-800">
+                        @error('file')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
+                        <button type="submit" class="btn-outline mt-3 w-full">Kirim File Kebutuhan ke Seller</button>
+                        <p class="mt-2 text-xs text-gray-500">Format: PDF / ZIP / JPG / PNG / DOC / PPT, maksimal 5MB.</p>
+                    </form>
+                @endif
+
                 @if(! config('midtrans.is_production'))
                     <div class="mt-6 p-4 bg-[#EDE734] border-2 border-black">
                         <h3 class="font-heading text-xs font-black uppercase tracking-wider mb-3">Mode Sandbox Testing</h3>
@@ -137,6 +149,18 @@
                         <button type="submit" class="btn-primary">
                             Buat QRIS Midtrans
                         </button>
+                    </form>
+
+                    <form method="POST" action="{{ route('order-files.store', $order) }}" enctype="multipart/form-data" class="mt-4 text-left border-t border-gray-200 pt-4">
+                        @csrf
+                        <input type="hidden" name="file_type" value="kebutuhan">
+                        <label for="payment_order_file" class="block text-xs font-bold text-black">File kebutuhan untuk seller <span class="font-normal text-gray-500">(opsional)</span></label>
+                        <input id="payment_order_file" type="file" name="file" accept=".pdf,.zip,.png,.jpg,.jpeg,.doc,.docx,.ppt,.pptx" required class="mt-2 w-full text-xs file:mr-3 file:py-2 file:px-4 file:border-0 file:bg-black file:text-white file:font-bold file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:bg-gray-800">
+                        @error('file')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
+                        <button type="submit" class="btn-outline mt-3 w-full">
+                            Kirim File Kebutuhan ke Seller
+                        </button>
+                        <p class="mt-2 text-xs text-gray-500">Format: PDF / ZIP / JPG / PNG / DOC / PPT, maksimal 5MB.</p>
                     </form>
                 </div>
             @endif

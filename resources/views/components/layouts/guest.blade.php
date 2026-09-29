@@ -12,7 +12,7 @@
     ];
 
     $panelDescriptions = [
-        'login' => 'Marketplace jasa untuk siswa — jual keahlianmu atau cari bantuan dari teman sekolah.',
+        'login' => 'Marketplace jasa untuk siswa. Jual keahlianmu atau cari bantuan dari teman sekolah.',
         'register' => 'Satu akun untuk jadi seller dan buyer. Ajukan jasa, pesan jasa, dan kelola transaksi di satu tempat.',
         'forgot' => 'Kami akan kirim link reset password ke email terdaftar. Link berlaku terbatas untuk keamanan akun.',
     ];
@@ -32,7 +32,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $pageTitle }} — SkillHub</title>
+    <title>{{ $pageTitle }} | SkillHub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">

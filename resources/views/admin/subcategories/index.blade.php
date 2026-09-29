@@ -48,7 +48,7 @@
                                     </td>
                                     <td>
                                         <span class="text-xs px-2 py-1 rounded-sm border border-[#DDDDDD] bg-white">
-                                            {{ $sub->category->name ?? '—' }}
+                                            {{ $sub->category->name ?? '-' }}
                                         </span>
                                     </td>
                                     <td>

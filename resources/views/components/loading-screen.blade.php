@@ -104,7 +104,7 @@
         75%  { transform: scaleY(0.8) scaleX(1.2); }
     }
 
-    /* Gentle full-page fade-in on every load — no jarring swap. */
+    /* Gentle full-page fade-in on every load. */
     body:not([data-sh-no-loader]) { animation: sh-page-in .5s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
     @keyframes sh-page-in {

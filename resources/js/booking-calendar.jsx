@@ -11,26 +11,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedSlotInput = document.getElementById('selected_slot_id');
 
     const root = createRoot(container);
+    let currentSelectedSlotId = selectedSlotInput?.value || null;
     
-    root.render(
-      <BookingCalendar
-        serviceId={serviceId}
-        availableSlots={availableSlots}
-        selectedSlotId={selectedSlotInput?.value || null}
-        onSlotSelect={(slotId) => {
-          if (selectedSlotInput) {
-            selectedSlotInput.value = slotId || '';
-            selectedSlotInput.dispatchEvent(new Event('change', { bubbles: true }));
-            selectedSlotInput.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-          
-          if (window.updateSubmitButton) {
-            window.updateSubmitButton(slotId);
-          }
-          
-          console.log('Slot selected:', slotId);
-        }}
-      />
-    );
+    const renderCalendar = () => {
+      root.render(
+        <BookingCalendar
+          serviceId={serviceId}
+          availableSlots={availableSlots}
+          selectedSlotId={currentSelectedSlotId}
+          onSlotSelect={(slotId) => {
+            console.log('onSlotSelect called with:', slotId);
+            currentSelectedSlotId = slotId;
+            
+            if (selectedSlotInput) {
+              selectedSlotInput.value = slotId || '';
+              selectedSlotInput.dispatchEvent(new Event('change', { bubbles: true }));
+              selectedSlotInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            
+            if (window.updateSubmitButton) {
+              window.updateSubmitButton(slotId);
+            }
+            
+            // Re-render dengan selectedSlotId yang baru
+            renderCalendar();
+          }}
+        />
+      );
+    };
+    
+    renderCalendar();
   }
 });

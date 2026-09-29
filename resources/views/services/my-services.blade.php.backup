@@ -1,0 +1,312 @@
+@extends('layouts.app')
+
+@section('title', 'Jasa Saya')
+
+@section('content')
+<style>
+/* === Core Variables === */
+.seller-workspace{--black:#0a0c0f;--ink:#1a1d23;--gray:#4a5568;--muted:#6b7280;--line:#e2e5ea;--surface:#ffffff;--canvas:#fafbfc;--blue:#2563eb;--blue-dark:#1e40af;--emerald:#059669;--amber:#d97706;--rose:#dc2626;font-family:'Inter',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;color:var(--ink);background:var(--canvas);}
+
+/* === Focus Management === */
+.seller-workspace :focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+
+/* === Typography Scale === */
+.workspace-label{font-size:0.6875rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}
+.workspace-meta{font-size:0.8125rem;color:var(--gray);line-height:1.5;}
+.workspace-title{font-size:1rem;font-weight:600;color:var(--ink);line-height:1.4;}
+.workspace-price{font-size:0.9375rem;font-weight:600;color:var(--black);font-variant-numeric:tabular-nums;}
+
+/* === Layout Primitives === */
+.workspace-container{max-width:1360px;margin:0 auto;padding:3.5rem 1.25rem 5rem;}
+.workspace-header{padding-bottom:2.5rem;border-bottom:1px solid var(--line);}
+.workspace-nav{display:inline-flex;align-items:center;gap:0.5rem;font-size:0.875rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color 140ms ease;}
+.workspace-nav:hover{color:var(--ink);}
+.workspace-nav svg{width:0.875rem;height:0.875rem;transition:transform 140ms ease;}
+.workspace-nav:hover svg{transform:translateX(-2px);}
+
+.workspace-heading-group{margin-top:2rem;}
+.workspace-eyebrow{font-size:0.8125rem;font-weight:600;color:var(--blue);letter-spacing:0.02em;}
+.workspace-h1{margin-top:0.75rem;font-size:clamp(2.25rem,4vw,3rem);font-weight:700;line-height:1.05;letter-spacing:-0.02em;color:var(--black);}
+.workspace-description{margin-top:1rem;max-width:38rem;font-size:0.9375rem;line-height:1.6;color:var(--gray);}
+
+/* === Actions === */
+.action-primary{display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;min-height:2.75rem;padding:0 1.25rem;font-size:0.875rem;font-weight:600;color:white;background:var(--black);border:1px solid var(--black);border-radius:0.5rem;text-decoration:none;transition:background 140ms ease,transform 140ms ease;}
+.action-primary:hover{background:#000;}
+.action-primary:active{transform:scale(0.98);}
+.action-primary svg{width:1rem;height:1rem;stroke-width:2;}
+
+.action-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;padding:0 1rem;font-size:0.875rem;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:0.5rem;text-decoration:none;transition:border-color 140ms ease,background 140ms ease;}
+.action-secondary:hover{border-color:#c1c7d0;background:#f7f8fa;}
+.action-secondary:active{transform:scale(0.98);}
+
+.action-link{display:inline-flex;align-items:center;font-size:0.875rem;font-weight:600;color:var(--blue);text-decoration:none;transition:color 140ms ease;}
+.action-link:hover{color:var(--blue-dark);}
+
+/* === Filter Section === */
+.workspace-filter-area{margin-top:2.5rem;padding-bottom:2.5rem;border-bottom:1px solid var(--line);}
+.filter-grid{display:grid;gap:1rem;}
+@media(min-width:768px){.filter-grid{grid-template-columns:1fr 1fr auto;align-items:end;}}
+.filter-label{display:block;}
+.filter-label-text{display:block;margin-bottom:0.5rem;font-size:0.8125rem;font-weight:600;color:var(--ink);}
+.filter-select{display:block;width:100%;min-height:2.75rem;padding:0 0.75rem;font-size:0.875rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:0.5rem;transition:border-color 140ms ease;}
+.filter-select:hover{border-color:#c1c7d0;}
+.filter-select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
+.filter-actions{display:flex;gap:0.5rem;}
+
+/* === Service List === */
+.service-list-header{margin-top:2.5rem;display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.service-list-title{font-size:1.125rem;font-weight:700;color:var(--black);letter-spacing:-0.01em;}
+.service-list-count{margin-top:0.25rem;font-size:0.8125rem;color:var(--muted);font-variant-numeric:tabular-nums;}
+
+.service-list{margin-top:1.5rem;background:var(--surface);border:1px solid var(--line);border-radius:0.75rem;overflow:hidden;}
+
+.service-list-table-header{display:none;}
+@media(min-width:1024px){.service-list-table-header{display:grid;grid-template-columns:80px 1.5fr 1fr auto;gap:2rem;padding:0.875rem 1.5rem;background:#fafbfc;border-bottom:1px solid var(--line);}.service-list-table-header span{font-size:0.6875rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}}
+
+.service-item{display:grid;gap:1.25rem;padding:1.5rem 1.25rem;border-bottom:1px solid var(--line);transition:background 140ms ease;animation:service-enter 200ms ease both;}
+.service-item:last-child{border-bottom:none;}
+.service-item:hover{background:#fafbfc;}
+@media(min-width:1024px){.service-item{grid-template-columns:80px 1.5fr 1fr auto;align-items:center;gap:2rem;padding:1.5rem;}}
+@keyframes service-enter{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+/* === Service Item Parts === */
+.service-visual{display:flex;align-items:center;gap:0.75rem;}
+@media(min-width:1024px){.service-visual{display:block;}}
+.service-index{font-size:0.75rem;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;}
+.service-thumb{margin-top:0.75rem;width:4.5rem;height:4.5rem;overflow:hidden;border-radius:0.5rem;background:#f1f3f5;}
+@media(min-width:1024px){.service-thumb{margin-top:0.75rem;}}
+.service-thumb img{width:100%;height:100%;object-fit:cover;transition:transform 160ms ease;}
+.service-item:hover .service-thumb img{transform:scale(1.03);}
+.service-thumb-empty{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--muted);}
+.service-thumb-empty svg{width:1.25rem;height:1.25rem;stroke-width:1.5;}
+
+.service-details{min-width:0;}
+.service-taxonomy{display:flex;flex-wrap:wrap;align-items:center;gap:0.375rem;font-size:0.75rem;color:var(--muted);}
+.service-taxonomy span:not([aria-hidden]){display:inline;}
+.service-taxonomy [aria-hidden]{color:#c1c7d0;}
+.service-name{margin-top:0.5rem;font-size:1rem;font-weight:600;color:var(--black);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.service-meta-row{margin-top:0.625rem;display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem;}
+
+/* === Status Badge === */
+.status-badge{display:inline-flex;align-items:center;padding:0.25rem 0.625rem;font-size:0.75rem;font-weight:600;border:1px solid;border-radius:0.375rem;}
+.status-approved{color:#065f46;background:#d1fae5;border-color:#a7f3d0;}
+.status-pending{color:#92400e;background:#fef3c7;border-color:#fde68a;}
+.status-rejected{color:#991b1b;background:#fee2e2;border-color:#fecaca;}
+.status-draft{color:#475569;background:#f1f5f9;border-color:#e2e8f0;}
+
+/* === Booking Section === */
+.service-booking{padding-top:1rem;border-top:1px solid var(--line);}
+@media(min-width:1024px){.service-booking{padding-top:0;border-top:none;}}
+.booking-label{font-size:0.6875rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}
+.booking-inactive{margin-top:0.625rem;font-size:0.875rem;color:var(--gray);}
+.booking-slots{margin-top:0.625rem;display:flex;flex-wrap:wrap;gap:0.5rem;}
+.slot-badge{display:inline-flex;align-items:center;padding:0.25rem 0.625rem;font-size:0.75rem;font-weight:600;color:#1e40af;background:#dbeafe;border-radius:0.375rem;}
+.booking-action{margin-top:0.75rem;}
+
+/* === Actions Column === */
+.service-actions{display:flex;flex-wrap:wrap;gap:0.5rem;padding-top:1rem;border-top:1px solid var(--line);}
+@media(min-width:1024px){.service-actions{justify-content:flex-end;padding-top:0;border-top:none;}}
+.action-view{min-height:2.5rem;padding:0 0.875rem;font-size:0.875rem;}
+.action-edit{min-height:2.5rem;padding:0 0.875rem;font-size:0.875rem;background:var(--blue);border-color:var(--blue);}
+.action-edit:hover{background:var(--blue-dark);}
+
+/* === Empty State === */
+.workspace-empty{margin-top:3rem;padding:4rem 1.5rem;text-align:center;background:var(--surface);border:1px dashed var(--line);border-radius:0.75rem;}
+.workspace-empty .empty-eyebrow{font-size:0.8125rem;font-weight:600;color:var(--blue);}
+.workspace-empty .empty-title{margin-top:0.875rem;font-size:1.875rem;font-weight:700;line-height:1.2;color:var(--black);}
+.workspace-empty .empty-description{margin:0.875rem auto 0;max-width:32rem;font-size:0.9375rem;line-height:1.6;color:var(--gray);}
+.workspace-empty .empty-action{margin-top:2rem;}
+
+/* === Pagination === */
+.workspace-pagination{margin-top:2.5rem;padding-top:2.5rem;border-top:1px solid var(--line);}
+
+/* === Responsive === */
+@media(min-width:640px){.workspace-container{padding:4rem 2rem 6rem;}}
+@media(min-width:1024px){.workspace-container{padding:4.5rem 2.5rem 6rem;}.workspace-heading-group{margin-top:2.5rem;display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;}.workspace-heading-content{max-width:42rem;}}
+
+/* === Motion === */
+@media(prefers-reduced-motion:reduce){.service-item{animation:none;}.workspace-nav svg,.service-thumb img,.action-primary,.action-secondary,.action-link,.filter-select{transition:none;}}
+</style>
+
+<div class="seller-workspace">
+    <div class="workspace-container">
+        <header class="workspace-header">
+            <a href="{{ route('dashboard') }}" class="workspace-nav">
+                <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                Dashboard
+            </a>
+            <div class="workspace-heading-group">
+                <div class="workspace-heading-content">
+                    <p class="workspace-eyebrow">Seller workspace</p>
+                    <h1 class="workspace-h1">Jasa Saya</h1>
+                    <p class="workspace-description">Kelola jasa yang kamu tawarkan di SkillHub. Atur jadwal booking, perbarui detail, atau ajukan jasa baru.</p>
+                </div>
+                <a href="{{ route('services.create') }}" class="action-primary">
+                    <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    Ajukan Jasa
+                </a>
+            </div>
+        </header>
+
+        <form method="GET" action="{{ route('services.my') }}" class="workspace-filter-area">
+            <div class="filter-grid">
+                <label class="filter-label">
+                    <span class="filter-label-text">Kategori</span>
+                    <select name="category" id="filterCategory" class="filter-select">
+                        <option value="">Semua kategori</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="filter-label">
+                    <span class="filter-label-text">Subkategori</span>
+                    <select name="subcategory" id="filterSubcategory" class="filter-select">
+                        <option value="">Semua subkategori</option>
+                        @foreach($subcategories as $sub)
+                            <option value="{{ $sub->id }}" data-category="{{ $sub->category_id }}" {{ request('subcategory') == $sub->id ? 'selected' : '' }}>{{ $sub->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <div class="filter-actions">
+                    <button type="submit" class="action-primary">Terapkan</button>
+                    <a href="{{ route('services.my') }}" class="action-secondary">Reset</a>
+                </div>
+            </div>
+        </form>
+
+        @if($services->count() > 0)
+            <div class="service-list-header">
+                <div>
+                    <h2 class="service-list-title">Jasa yang Kamu Kelola</h2>
+                    <p class="service-list-count">{{ $services->total() }} jasa</p>
+                </div>
+            </div>
+
+            <div class="service-list">
+                <div class="service-list-table-header">
+                    <span>Jasa</span>
+                    <span>Detail</span>
+                    <span>Booking</span>
+                    <span style="text-align:right;">Aksi</span>
+                </div>
+
+                @foreach($services as $index => $service)
+                    @php
+                        $status = strtolower((string) $service->status);
+                        $statusClass = match($status) {
+                            'approved' => 'status-approved',
+                            'pending' => 'status-pending',
+                            'rejected' => 'status-rejected',
+                            default => 'status-draft'
+                        };
+                        $statusLabel = match($status) {
+                            'approved' => 'Disetujui',
+                            'pending' => 'Menunggu review',
+                            'rejected' => 'Perlu diperbaiki',
+                            default => 'Draft'
+                        };
+                        $upcomingSlots = $service->time_slots_enabled 
+                            ? $service->timeSlots()->whereDate('date', '>=', now()->toDateString())->orderBy('date')->orderBy('time_start')->take(3)->get() 
+                            : collect();
+                    @endphp
+                    
+                    <article class="service-item" style="animation-delay:{{ min($index, 6) * 40 }}ms;">
+                        <div class="service-visual">
+                            <span class="service-index">{{ str_pad($services->firstItem() + $index, 2, '0', STR_PAD_LEFT) }}</span>
+                            <div class="service-thumb">
+                                @if($service->image)
+                                    <img src="{{ asset('storage/'.$service->image) }}" alt="{{ $service->title }}" loading="lazy">
+                                @else
+                                    <div class="service-thumb-empty">
+                                        <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="service-details">
+                            <div class="service-taxonomy">
+                                <span>{{ $service->subcategory->category->name ?? 'Tanpa kategori' }}</span>
+                                <span aria-hidden="true">/</span>
+                                <span>{{ $service->subcategory->name ?? 'Tanpa subkategori' }}</span>
+                            </div>
+                            <h3 class="service-name">{{ $service->title }}</h3>
+                            <div class="service-meta-row">
+                                <span class="workspace-price">Rp{{ number_format($service->price, 0, ',', '.') }}</span>
+                                <span class="status-badge {{ $statusClass }}">{{ $statusLabel }}</span>
+                            </div>
+                        </div>
+
+                        <div class="service-booking">
+                            <p class="booking-label">Booking</p>
+                            @if(!$service->time_slots_enabled)
+                                <p class="booking-inactive">Jadwal tidak aktif</p>
+                            @elseif($upcomingSlots->isEmpty())
+                                <p class="booking-inactive">Belum ada slot mendatang</p>
+                            @else
+                                <div class="booking-slots">
+                                    @foreach($upcomingSlots as $slot)
+                                        <span class="slot-badge">
+                                            {{ $slot->date->translatedFormat('d M') }} · {{ \Carbon\Carbon::parse($slot->time_start)->format('H:i') }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
+                            <div class="booking-action">
+                                <a href="{{ route('services.slots.manage', $service) }}" class="action-link">Edit Jam</a>
+                            </div>
+                        </div>
+
+                        <div class="service-actions">
+                            <a href="{{ route('services.show', $service->id) }}" class="action-secondary action-view">Lihat</a>
+                            <a href="{{ route('services.edit', $service->id) }}" class="action-primary action-edit">Edit</a>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+
+            <div class="workspace-pagination">
+                {{ $services->appends(request()->query())->links() }}
+            </div>
+        @else
+            <div class="workspace-empty">
+                <p class="empty-eyebrow">Belum ada jasa</p>
+                <h2 class="empty-title">Mulai tawarkan keahlianmu di SkillHub</h2>
+                <p class="empty-description">Tambahkan jasa untuk menjangkau buyer, mengatur detail penawaran, dan membuka jadwal booking.</p>
+                <div class="empty-action">
+                    <a href="{{ route('services.create') }}" class="action-primary">
+                        <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                        Ajukan Jasa Pertama
+                    </a>
+                </div>
+            </div>
+        @endif
+    </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    const cat=document.getElementById('filterCategory');
+    const sub=document.getElementById('filterSubcategory');
+    if(!cat||!sub)return;
+    const opts=sub.querySelectorAll('option');
+    function sync(){
+        const val=cat.value;
+        const cur=sub.value;
+        let clr=true;
+        opts.forEach(o=>{
+            if(!o.value)return;
+            const match=!val||o.dataset.category===val;
+            o.hidden=!match;
+            if(match&&o.value===cur)clr=false;
+        });
+        if(clr&&val)sub.value='';
+    }
+    cat.addEventListener('change',sync);
+    sync();
+});
+</script>
+@endpush
+@endsection

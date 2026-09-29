@@ -108,6 +108,24 @@ class NotificationController extends Controller
         ]);
     }
 
+    public function readMultiple(Request $request)
+    {
+        $request->validate([
+            'notification_ids' => 'required|array',
+            'notification_ids.*' => 'exists:user_notifications,id'
+        ]);
+
+        // Hanya update notifikasi yang dimiliki user ini
+        auth()->user()->notifications()
+            ->whereIn('id', $request->notification_ids)
+            ->update(['is_read' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notifikasi berhasil ditandai sebagai dibaca',
+        ]);
+    }
+
     public function pending(Request $request)
     {
         if (!auth()->check()) {

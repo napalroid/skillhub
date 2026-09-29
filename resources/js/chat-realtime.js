@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function initializeChatRealtime() {
     const chatRoot = document.getElementById('skillhub-chat');
     
     if (!chatRoot) {
@@ -53,7 +53,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.Echo && window.Echo.private) {
         try {
             const channel = window.Echo.private(`conversation.${chatRoot.dataset.conversationId}`);
-            
+
+            channel.subscribed(() => {
+                console.info('[Chat] Private conversation channel subscribed');
+            });
+
+            channel.error((error) => {
+                console.error('[Chat] Private channel subscription failed:', error);
+            });
+
             channel.listen('.message.sent', (event) => append(event.message));
             
             channel.listen('.price-offer.created', (event) => {
@@ -236,4 +244,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
+}
+
+// This module is imported dynamically after Echo. Dynamic imports may resolve
+// after DOMContentLoaded, so registering only an event listener would skip chat
+// subscription entirely on a fast page load.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeChatRealtime, { once: true });
+} else {
+    initializeChatRealtime();
+}

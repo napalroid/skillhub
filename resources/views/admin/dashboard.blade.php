@@ -123,7 +123,7 @@
                             </a>
                         </div>
                         <div class="flex-1 rounded-full border border-[#DDDDDD] bg-white px-3 py-2 text-center order-1 sm:order-2">
-                            <p class="text-[10px] font-heading font-bold uppercase tracking-wide text-black">{{ $chartStart->translatedFormat('d M Y') }} — {{ $chartEnd->translatedFormat('d M Y') }}</p>
+                            <p class="text-[10px] font-heading font-bold uppercase tracking-wide text-black">{{ $chartStart->translatedFormat('d M Y') }} - {{ $chartEnd->translatedFormat('d M Y') }}</p>
                         </div>
                     </div>
                 </div>

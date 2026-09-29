@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }} - SkillHub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -19,7 +18,8 @@
         .chat-message p { margin: .3rem 0; font-size: .88rem; line-height: 1.5; white-space: pre-wrap; }
         [x-cloak] { display: none !important; }
     </style>
-    @vite('resources/js/app.js')
+    @include('partials.realtime-config')
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="">
     <div id="skillhub-staggered-menu"
@@ -43,7 +43,7 @@
           data-is-admin="{{ auth()->check() && auth()->user()->isAdmin() ? 'true' : 'false' }}"
           data-admin-dashboard="{{ auth()->check() && auth()->user()->isAdmin() ? route('admin.dashboard') : '' }}"></div>
     <script id="skillhub-account-notifications-data" type="application/json">@json($accountNotifications ?? collect(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)</script>
-    <main x-data="{ offerModal: false, mobileView: '{{ $conversation ? 'chat' : 'list' }}' }" class="flex min-h-screen flex-col bg-white">
+    <main x-data="{ offerModal: false, mobileView: '{{ $conversation ? 'chat' : 'list' }}' }" class="flex h-dvh min-h-0 flex-col overflow-hidden bg-white">
         <div class="grid min-h-0 flex-1 lg:grid-cols-[360px_1fr]">
             <aside class="min-h-0 border-b border-[#e5e5e5] lg:border-b-0 lg:border-r"
                    :class="mobileView === 'chat' ? 'hidden lg:flex' : 'flex'">
@@ -56,7 +56,5 @@
             </div>
         </div>
     </main>
-    
-    <x-site-footer />
 </body>
 </html>

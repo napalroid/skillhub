@@ -24,7 +24,7 @@
                     'service_disabled' => ['text' => 'Dinonaktifkan', 'class' => 'bg-gray-100 text-gray-700 border-gray-200', 'dot' => 'bg-gray-500'],
                     'message'  => ['text' => 'Pesan Masuk', 'class' => 'bg-blue-50 text-blue-700 border-blue-200', 'dot' => 'bg-blue-500'],
                     'payment_paid' => ['text' => 'Jasa Terbayarkan', 'class' => 'bg-black text-white border-black', 'dot' => 'bg-white'],
-                    'escrow_ready' => ['text' => 'Saldo Masuk — Kerjakan', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500'],
+                    'escrow_ready' => ['text' => 'Saldo Masuk - Kerjakan', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500'],
                     'order_confirmed' => ['text' => 'Pesanan Dikonfirmasi', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500'],
                     'order_escrow' => ['text' => 'Konfirmasi Admin', 'class' => 'bg-[#E4002B]/10 text-[#E4002B] border-[#E4002B]/20', 'dot' => 'bg-[#E4002B]'],
                     'new_review' => ['text' => 'Review Baru', 'class' => 'bg-yellow-50 text-yellow-700 border-yellow-200', 'dot' => 'bg-yellow-500'],

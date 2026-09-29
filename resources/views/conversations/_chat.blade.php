@@ -13,7 +13,7 @@
              data-user-id="{{ auth()->id() }}"
              data-is-seller="{{ $isSeller ? '1' : '0' }}"
              class="flex min-h-0 flex-1 flex-col bg-white">
-        <header class="flex items-center justify-between gap-4 border-b border-[#e5e5e5] px-5 py-4 sm:px-8 pt-20">
+        <header class="flex shrink-0 items-center justify-between gap-4 border-b border-[#e5e5e5] px-5 py-4 pt-20 sm:px-8">
             <div class="min-w-0">
                 <button type="button" @click="mobileView = 'list'" class="mb-1 text-[11px] font-bold uppercase tracking-[.06em] text-black/50 hover:text-black lg:hidden">&larr; Daftar</button>
                 <h1 class="truncate text-lg font-extrabold uppercase tracking-[-.02em]">{{ $partner->name }}</h1>
@@ -27,7 +27,7 @@
             </div>
         </header>
 
-        <div data-message-list class="flex min-h-[40vh] flex-1 flex-col gap-3 overflow-y-auto px-5 py-6 sm:px-8">
+        <div data-message-list class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-5 py-6 sm:px-8">
             @foreach ($timeline as $timelineItem)
                 @if ($timelineItem->type === 'message')
                     @php($message = $timelineItem->item)
@@ -59,12 +59,12 @@
             @endforeach
         </div>
 
-        <form data-chat-form action="{{ route('conversations.store', $conversation) }}" method="POST" class="border-t border-[#e5e5e5] p-3 sm:grid-cols-[1fr_auto] sm:p-4 grid gap-2 bg-white">
+        <form data-chat-form action="{{ route('conversations.store', $conversation) }}" method="POST" class="grid shrink-0 gap-2 border-t border-[#e5e5e5] bg-white p-3 sm:grid-cols-[1fr_auto] sm:p-4">
             @csrf
             <textarea data-chat-input name="message" maxlength="1500" required placeholder="Tulis pesan..." class="min-h-12 resize-none border border-[#e5e5e5] bg-white p-3 text-sm text-black outline-none focus:border-black"></textarea>
             <button data-chat-submit type="submit" class="bg-black px-6 py-3 text-[11px] font-bold uppercase tracking-[.08em] text-white transition hover:bg-black/80 disabled:opacity-60 sm:px-8">Kirim</button>
         </form>
-        <p data-chat-error class="px-4 pb-3 text-xs font-bold text-red-600"></p>
+        <p data-chat-error class="shrink-0 px-4 pb-3 text-xs font-bold text-red-600"></p>
     </section>
 
     @if ($isSeller)

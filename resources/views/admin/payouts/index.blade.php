@@ -32,7 +32,7 @@
             <div class="max-w-[62ch]">
                 <h1 class="font-heading font-bold text-2xl text-black uppercase tracking-tight">Pencairan Dana</h1>
                 <p class="text-sm text-[#555555] mt-2 leading-relaxed">
-                    Seller menarik saldo dompet secara <span class="font-bold text-black">mandiri & otomatis</span> ke e-wallet/rekening mereka — tidak perlu persetujuan admin.
+                    Seller menarik saldo dompet secara <span class="font-bold text-black">mandiri & otomatis</span> ke e-wallet/rekening mereka. Tidak perlu persetujuan admin.
                     Halaman ini menampilkan riwayat seluruh pencairan. Pencairan yang masih <span class="font-bold text-black">tertunda</span> (mis. dari data lama) masih bisa diproses manual di sini.
                 </p>
                 <div class="mt-4 flex flex-wrap gap-3">
@@ -112,17 +112,17 @@
                                     <td>
                                         <div class="flex flex-col gap-2">
                                             @if ($payout->status === 'pending' && ! $payout->auto_processed)
-                                                <form action="{{ route('admin.payouts.process', $payout) }}" method="POST" onsubmit="return confirm('Tandai pencairan Rp{{ number_format($payout->amount, 0, ',', '.') }} ke {{ $payout->methodLabel() }} sebagai selesai?')">
+                                                <form action="{{ route('admin.payout.process', $payout) }}" method="POST" onsubmit="return confirm('Tandai pencairan Rp{{ number_format($payout->amount, 0, ',', '.') }} ke {{ $payout->methodLabel() }} sebagai selesai?')">
                                                     @csrf
                                                     <button type="submit" class="w-full btn-primary text-[10px] px-4 py-2 justify-center">Proses</button>
                                                 </form>
-                                                <form action="{{ route('admin.payouts.reject', $payout) }}" method="POST" onsubmit="return confirm('Tolak pencairan ini? Saldo akan dikembalikan ke seller.')">
+                                                <form action="{{ route('admin.payout.reject', $payout) }}" method="POST" onsubmit="return confirm('Tolak pencairan ini? Saldo akan dikembalikan ke seller.')">
                                                     @csrf
                                                     <input type="hidden" name="admin_note" value="Data tujuan tidak valid">
                                                     <button type="submit" class="w-full btn-danger text-[10px] px-2 py-1.5 justify-center">Tolak</button>
                                                 </form>
                                             @elseif ($payout->status === 'failed')
-                                                <form action="{{ route('admin.payouts.retry', $payout) }}" method="POST" onsubmit="return confirm('Ulangi pencairan ini? Saldo akan dikurangi lagi dan ditransfer ke user.')">
+                                                <form action="{{ route('admin.payout.retry', $payout) }}" method="POST" onsubmit="return confirm('Ulangi pencairan ini? Saldo akan dikurangi lagi dan ditransfer ke user.')">
                                                     @csrf
                                                     <button type="submit" class="w-full btn-outline text-[10px] px-4 py-2 justify-center border-[#999999] text-[#999999] hover:bg-[#999999] hover:text-white">Coba Lagi</button>
                                                 </form>

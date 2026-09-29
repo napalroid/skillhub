@@ -22,7 +22,9 @@
                         ? route('notifications.open', $notification)
                         : route('notifications.index');
                 @endphp
-                <a href="{{ $bellLink }}" class="nf-bell-item {{ $notification->isUnread() ? 'nf-bell-item--unread' : '' }}">
+                <a href="{{ $bellLink }}" 
+                   class="nf-bell-item {{ $notification->isUnread() ? 'nf-bell-item--unread' : '' }}"
+                   data-notification-id="{{ $notification->id }}">
                     <span class="nf-dot {{ $notification->type === 'approved' ? 'nf-dot--green' : ($notification->type === 'rejected' ? 'nf-dot--red' : ($notification->type === 'message' ? 'nf-dot--blue' : 'nf-dot--yellow')) }}"></span>
                     <span class="nf-bell-item-body">
                         <span class="nf-bell-item-title">{{ $notification->title }}</span>
@@ -155,11 +157,75 @@
             e.stopPropagation();
             bell.classList.toggle('nf-open');
         });
+        // Fungsi untuk menandai notifikasi sebagai dibaca saat dropdown ditutup
+        function markNotificationsAsReadOnClose() {
+            // Ambil semua ID notifikasi yang belum dibaca dalam dropdown
+            var unreadItems = panel.querySelectorAll('.nf-bell-item--unread');
+            var notificationIds = [];
+            
+            unreadItems.forEach(function(item) {
+                var notificationId = item.getAttribute('data-notification-id');
+                if (notificationId) {
+                    notificationIds.push(notificationId);
+                }
+            });
+            
+            // Jika ada notifikasi yang belum dibaca, kirim ke server
+            if (notificationIds.length > 0) {
+                fetch('{{ route('notifications.read-multiple') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ notification_ids: notificationIds })
+                }).then(function() {
+                    // Update UI lokal
+                    unreadItems.forEach(function(el) { 
+                        el.classList.remove('nf-bell-item--unread');
+                    });
+                    
+                    // Update badge
+                    var badge = document.getElementById('nf-bell-badge');
+                    if (badge) {
+                        var currentCount = parseInt(badge.textContent) || 0;
+                        var newCount = Math.max(0, currentCount - notificationIds.length);
+                        if (newCount > 0) {
+                            badge.textContent = Math.min(newCount, 9) + (newCount > 9 ? '+' : '');
+                        } else {
+                            badge.classList.add('nf-hidden');
+                        }
+                    }
+                });
+            }
+        }
+
+        // Event listener untuk click di luar dropdown
         document.addEventListener('click', function (e) {
-            if (!bell.contains(e.target)) bell.classList.remove('nf-open');
+            var wasOpen = bell.classList.contains('nf-open');
+            if (!bell.contains(e.target)) {
+                // Tutup dropdown
+                bell.classList.remove('nf-open');
+                
+                // Jika dropdown tadinya terbuka dan sekarang ditutup, tandai notifikasi sebagai dibaca
+                if (wasOpen) {
+                    markNotificationsAsReadOnClose();
+                }
+            }
         });
+        
+        // Event listener untuk tombol Escape
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') bell.classList.remove('nf-open');
+            if (e.key === 'Escape') {
+                var wasOpen = bell.classList.contains('nf-open');
+                bell.classList.remove('nf-open');
+                
+                // Jika dropdown tadinya terbuka dan sekarang ditutup, tandai notifikasi sebagai dibaca
+                if (wasOpen) {
+                    setTimeout(markNotificationsAsReadOnClose, 100);
+                }
+            }
         });
 
         window.nfMarkAllRead = function () {
@@ -176,6 +242,29 @@
                 items.forEach(function (el) { el.classList.remove('nf-bell-item--unread'); });
             });
         };
+
+        window.updateNotificationBadge = function () {
+            fetch('{{ route('notifications.unread-count') }}', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                var badge = document.getElementById('nf-bell-badge');
+                if (data.count > 0) {
+                    badge.textContent = Math.min(data.count, 9) + (data.count > 9 ? '+' : '');
+                    badge.classList.remove('nf-hidden');
+                } else {
+                    badge.classList.add('nf-hidden');
+                }
+            });
+        };
+
+        document.addEventListener('notificationCreated', function () {
+            updateNotificationBadge();
+        });
     })();
 </script>
 @endauth

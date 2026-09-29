@@ -10,7 +10,7 @@
     $skillhubscarfaceUrl = asset('storage/marketplace-image/skillhubscarfaceasli.webp');
 @endphp
 
-<footer class="site-footer">
+<footer class="site-footer" style="background:#000 !important;color:#fff !important">
     <style>
         .site-footer {
             --sf-black: #000000;
@@ -20,6 +20,8 @@
             --sf-gray-3: #999999;
             --sf-white: #ffffff;
             --sf-dur: 240ms;
+            background: var(--sf-black);
+            color: var(--sf-white);
         }
         
         .site-footer * { box-sizing: border-box; }
@@ -324,13 +326,13 @@
         }
     </style>
 
-    <div class="sf-wrapper">
+    <div class="sf-wrapper" style="background:#000 !important;color:#fff !important">
         <div class="sf-container">
             <!-- HERO SECTION -->
             <section class="sf-hero" aria-label="Footer header">
                 <div class="sf-hero-content">
                     <h1>SkillHub</h1>
-                    <p>Marketplace jasa untuk lingkungan sekolah. Tawarkan keahlian atau temukan bantuan — dengan sistem escrow yang aman.</p>
+                    <p>Marketplace jasa untuk lingkungan sekolah. Tawarkan keahlian atau temukan bantuan dengan sistem escrow yang aman.</p>
                     <a href="{{ route('services.index') }}" class="sf-hero-cta">
                         Jelajahi Jasa
                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -422,3 +424,66 @@
         </div>
     </section>
 </footer>
+
+<style>
+    /* Keep the complete footer dark even when page-level styles load after its
+       component styles. The scarface section was already black; this restores
+       the same surface for the header and navigation sections above it. */
+    footer.site-footer,
+    footer.site-footer .sf-wrapper,
+    footer.site-footer .sf-container,
+    footer.site-footer .sf-hero,
+    footer.site-footer .sf-nav-grid {
+        background-color: #000 !important;
+        color: #fff !important;
+    }
+
+    footer.site-footer .sf-hero-content h1,
+    footer.site-footer .sf-nav-col h3,
+    footer.site-footer .sf-nav-col p,
+    footer.site-footer .sf-newsletter-label {
+        color: #fff !important;
+    }
+
+    footer.site-footer .sf-hero-cta {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: .75rem !important;
+        margin-top: 2.25rem !important;
+        padding: 1rem 2rem !important;
+        border: 2px solid #fff !important;
+        background: #fff !important;
+        color: #000 !important;
+        font-size: .75rem !important;
+        font-weight: 900 !important;
+        letter-spacing: .2em !important;
+        text-decoration: none !important;
+    }
+
+    footer.site-footer .sf-newsletter-form {
+        display: flex !important;
+        height: 3.5rem !important;
+        border: 2px solid #fff !important;
+    }
+
+    footer.site-footer .sf-newsletter-input,
+    footer.site-footer .sf-newsletter-btn {
+        border: 0 !important;
+        background: #000 !important;
+        color: #fff !important;
+    }
+
+    footer.site-footer .sf-newsletter-input { flex: 1 !important; padding: 0 1.5rem !important; }
+    footer.site-footer .sf-newsletter-btn { min-width: 4.5rem !important; }
+
+    footer.site-footer .sf-social-link {
+        display: flex !important;
+        width: 3rem !important;
+        height: 3rem !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border: 2px solid #fff !important;
+        background: #000 !important;
+        color: #fff !important;
+    }
+</style>
