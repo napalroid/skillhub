@@ -30,6 +30,7 @@ class Service extends Model
         'last_booking_config_edit' => 'datetime',
         'booking_enabled' => 'boolean',
         'time_slots_enabled' => 'boolean',
+        'is_paused' => 'boolean',
     ];
 
     protected static function booted()
@@ -181,6 +182,6 @@ class Service extends Model
 
     public function scopeApproved($query)
     {
-        return $query->where('status', 'approved');
+        return $query->where('status', 'approved')->where('is_paused', false);
     }
 }

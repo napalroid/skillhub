@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Service;
+use App\Models\Order;
 use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\JokiMlService;
@@ -437,6 +438,37 @@ class ServiceController extends Controller
 
         $service->update($data);
         return redirect()->route('services.my')->with('success', 'Jasa diperbarui.');
+    }
+
+    public function updateAvailability($id)
+    {
+        $service = Service::where('user_id', auth()->id())->findOrFail($id);
+
+        if ($service->is_paused) {
+            $service->update(['is_paused' => false]);
+
+            return back()->with('success', 'Jasa diaktifkan kembali dan tersedia di marketplace.');
+        }
+
+        $hasActiveOrders = DB::transaction(function () use ($service) {
+            $lockedService = Service::query()->lockForUpdate()->findOrFail($service->id);
+
+            $hasActiveOrders = $lockedService->orders()
+                ->whereNotIn('status', [Order::STATUS_SELESAI, Order::STATUS_DIBATALKAN])
+                ->exists();
+
+            if (! $hasActiveOrders) {
+                $lockedService->update(['is_paused' => true]);
+            }
+
+            return $hasActiveOrders;
+        });
+
+        if ($hasActiveOrders) {
+            return back()->with('error', 'Jasa belum dapat dinonaktifkan karena masih memiliki pesanan yang sedang berjalan. Selesaikan atau batalkan pesanan tersebut terlebih dahulu.');
+        }
+
+        return back()->with('success', 'Jasa dinonaktifkan sementara. Kamu dapat mengaktifkannya kembali kapan saja.');
     }
 
     public function updateBookingConfig(Request $request, $id)
