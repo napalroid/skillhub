@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function initializeNotificationListener() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     
     console.log('[Notif] DOMContentLoaded fired');
@@ -243,7 +243,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     syncPendingNotifications();
-});
+}
+
+// This module is dynamically imported after Echo. If the import resolves after
+// DOMContentLoaded, registering only a listener would leave notifications idle.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeNotificationListener, { once: true });
+} else {
+    initializeNotificationListener();
+}
 
 function updateNotificationUI(data) {
     const menuRoot = document.getElementById('skillhub-staggered-menu');

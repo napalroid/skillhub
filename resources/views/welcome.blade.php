@@ -87,6 +87,7 @@
             transform: scale(1.02);
         }
     </style>
+    @include('partials.realtime-config')
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/routes/welcome.js'])
 </head>
 

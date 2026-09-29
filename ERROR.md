@@ -735,3 +735,34 @@ Slot hanya disiapkan untuk form standar, seller di order diidentifikasi dengan k
 ### Verification
 
 * PHP lint dan cache Blade dijalankan setelah perubahan.
+
+---
+
+## BUG-016 — Notifikasi Tidak Konsisten Real-Time di Halaman Home
+
+### Severity
+
+HIGH
+
+### Status
+
+FIXED
+
+### Symptom
+
+Notifikasi tidak terhubung secara real-time di home; console menampilkan `Reverb public key is not configured`. Listener notifikasi juga dapat tidak berjalan ketika dimuat melalui dynamic import setelah DOM siap.
+
+### Root Cause
+
+`welcome.blade.php` tidak memuat konfigurasi runtime Reverb. Selain itu, `notification-listener.js` hanya memasang callback `DOMContentLoaded`, sedangkan modul tersebut dimuat dinamis setelah Echo. Event notifikasi memakai queue database sehingga delivery real-time ikut bergantung pada queue worker.
+
+### Fix Applied
+
+* Home kini memuat partial konfigurasi realtime yang sama seperti layout dan chat.
+* Listener notifikasi langsung diinisialisasi jika DOM sudah siap.
+* `NotificationCreated` memakai `ShouldBroadcastNow`, sehingga broadcast notifikasi tidak menunggu queue worker.
+
+### Verification
+
+* PHP lint untuk event berhasil.
+* `npm run build` berhasil.
