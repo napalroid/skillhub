@@ -444,6 +444,10 @@ class ServiceController extends Controller
     {
         $service = Service::where('user_id', auth()->id())->findOrFail($id);
 
+        if ($service->status !== 'approved') {
+            return back()->with('error', 'Jasa ini tidak dapat diaktifkan atau diubah ketersediaannya karena dinonaktifkan atau belum disetujui oleh admin.');
+        }
+
         if ($service->is_paused) {
             $service->update(['is_paused' => false]);
 

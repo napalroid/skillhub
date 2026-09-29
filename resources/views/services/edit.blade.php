@@ -5,6 +5,7 @@
 @section('content')
 @php
     $activeTab = request('tab') === 'addons' || old('return_to_settings') ? 'addons' : (request('tab') === 'availability' ? 'availability' : 'basic');
+    $canSellerToggleAvailability = $service->status === 'approved';
     $addonRows = old('addons', $service->addons->map(fn ($addon) => [
         'id' => $addon->id,
         'name' => $addon->name,
@@ -29,19 +30,22 @@
 <section id="panel-addons" class="panel" aria-labelledby="tab-addons" @if($activeTab !== 'addons') hidden @endif><header><p>03. Layanan tambahan</p><h2>Tambahkan opsi dan harga yang buyer dapat pilih.</h2></header><form method="POST" action="{{ route('services.addons.update', $service) }}" class="addon-inline-form" x-data="{ rows: @js($addonRows).map((addon, index) => ({ ...addon, key: `addon-${addon.id ?? index}-${Date.now()}`, is_active: Boolean(Number(addon.is_active)) })), nextKey: @js(count($addonRows)), addRow() { this.rows.push({ id: '', name: '', description: '', price: '', is_active: true, key: `new-${this.nextKey++}` }); }, removeRow(index) { this.rows.splice(index, 1); } }">@csrf @method('PUT')<input type="hidden" name="return_to_settings" value="1"><div class="addon-inline-intro"><div><h3>Daftar opsi</h3><p>Harga akan otomatis ditambahkan ke total jasa saat buyer memilihnya.</p></div><button type="button" class="addon-add" @click="addRow()">+ Tambah layanan</button></div><p class="addon-empty" x-show="rows.length === 0">Belum ada layanan tambahan. Tambahkan hanya opsi yang benar-benar tersedia.</p><div class="addon-rows"><template x-for="(addon, index) in rows" :key="addon.key"><article class="addon-row"><input type="hidden" :name="`addons[${index}][id]`" x-model="addon.id"><div class="addon-row-head"><span class="addon-number" x-text="String(index + 1).padStart(2, '0')"></span><label class="addon-toggle"><input type="hidden" :name="`addons[${index}][is_active]`" value="0"><input type="checkbox" :name="`addons[${index}][is_active]`" value="1" x-model="addon.is_active"><span>Ditampilkan</span></label><button type="button" class="addon-remove" @click="removeRow(index)" :aria-label="`Hapus ${addon.name || 'layanan tambahan'}`">Hapus</button></div><div class="addon-grid"><label>Nama layanan<input type="text" :name="`addons[${index}][name]`" x-model="addon.name" maxlength="100" required placeholder="Contoh: Creambath"></label><label>Harga tambahan (Rp)<input type="number" :name="`addons[${index}][price]`" x-model="addon.price" min="0" step="1" required placeholder="25000"></label><label class="addon-description">Keterangan <span>opsional</span><input type="text" :name="`addons[${index}][description]`" x-model="addon.description" maxlength="255" placeholder="Contoh: Perawatan rambut dan kulit kepala"></label></div></article></template></div>@error('addons.*.name')<p class="addon-error">{{ $message }}</p>@enderror @error('addons.*.price')<p class="addon-error">{{ $message }}</p>@enderror<footer><a href="{{ route('services.my') }}">Batal</a><button type="submit">Simpan layanan tambahan</button></footer></form></section></main></div></div></div>
 <section class="availability-card" aria-labelledby="availability-title">
     <p class="availability-card__eyebrow">Ketersediaan jasa</p>
-    <h2 id="availability-title">{{ $service->is_paused ? 'Jasa sedang dinonaktifkan' : 'Jasa sedang aktif' }}</h2>
-    @if($service->is_paused)
+    <h2 id="availability-title">{{ ! $canSellerToggleAvailability ? 'Jasa tidak tersedia' : ($service->is_paused ? 'Jasa sedang dinonaktifkan' : 'Jasa sedang aktif') }}</h2>
+    @if(! $canSellerToggleAvailability)
+        <p>Jasa ini belum disetujui, ditolak, atau dinonaktifkan oleh admin. Hanya admin yang dapat mengubah status tersebut.</p>
+    @elseif($service->is_paused)
         <p>Jasa tidak tampil di marketplace dan buyer tidak dapat membuat pesanan baru. Aktifkan kembali kapan saja tanpa persetujuan ulang.</p>
     @else
         <p>Menonaktifkan jasa akan menyembunyikannya dari marketplace. Aksi ini hanya tersedia bila tidak ada pesanan yang masih berjalan.</p>
     @endif
-    <form method="POST" action="{{ route('services.availability.update', $service) }}">
+    @if($canSellerToggleAvailability)<form method="POST" action="{{ route('services.availability.update', $service) }}">
         @csrf
         @method('PATCH')
         <button type="submit" class="availability-card__button {{ $service->is_paused ? '' : 'availability-card__button--danger' }}">
             {{ $service->is_paused ? 'Aktifkan kembali jasa' : 'Nonaktifkan sementara' }}
         </button>
     </form>
+    @endif
 </section>
 <style>
 .availability-card{width:min(100% - 2.5rem,48rem);margin:0 auto 5rem;padding:1.6rem;border:1px solid #dfe2e7;background:#fff;color:#111}.availability-card__eyebrow{margin:0 0 .6rem;color:#155eef;font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.availability-card h2{margin:0;font:400 1.8rem Georgia,serif;letter-spacing:-.035em}.availability-card p:not(.availability-card__eyebrow){max-width:58ch;margin:1rem 0 1.35rem;color:#626a75;font-size:.86rem;line-height:1.6}.availability-card__button{border:0;background:#155eef;color:#fff;padding:.8rem 1rem;font:700 .82rem inherit;cursor:pointer}.availability-card__button--danger{background:#a12a27}.availability-card__button:hover{filter:brightness(.9)}.notice--error{background:#fff0ef;color:#a12a27}
