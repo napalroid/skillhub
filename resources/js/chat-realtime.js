@@ -36,16 +36,39 @@ function initializeChatRealtime() {
     console.log('[Chat] Chat initialized for conversation:', chatRoot.dataset.conversationId);
     
     const scrollToLatest = () => { list.scrollTop = list.scrollHeight; };
-    const append = (message) => {
+    const append = (message, { pending = false } = {}) => {
         if (list.querySelector(`[data-message-id="${message.id}"]`)) return;
         const own = Number(message.sender_id) === currentUserId;
         const article = document.createElement('article');
         article.dataset.messageId = message.id;
-        article.className = `chat-message ${own ? 'chat-message-own' : 'chat-message-other'}`;
+        article.className = `chat-message ${own ? 'chat-message-own' : 'chat-message-other'}${pending ? ' chat-message-pending' : ''}`;
+        if (pending) article.dataset.messagePending = 'true';
         const name = document.createElement('span'); name.className = 'chat-message-name'; name.textContent = own ? 'Kamu' : message.sender_name;
         const body = document.createElement('p'); body.textContent = message.message;
         const time = document.createElement('time'); time.textContent = message.created_at;
         article.append(name, body, time); list.append(article); scrollToLatest();
+        return article;
+    };
+
+    const confirmOptimisticMessage = (article, message) => {
+        const confirmedMessage = list.querySelector(`[data-message-id="${message.id}"]`);
+
+        if (confirmedMessage && confirmedMessage !== article) {
+            article.remove();
+            return;
+        }
+
+        article.dataset.messageId = message.id;
+        delete article.dataset.messagePending;
+        article.classList.remove('chat-message-pending', 'chat-message-failed');
+        article.querySelector('time').textContent = message.created_at;
+    };
+
+    const failOptimisticMessage = (article) => {
+        delete article.dataset.messagePending;
+        article.classList.remove('chat-message-pending');
+        article.classList.add('chat-message-failed');
+        article.querySelector('time').textContent = 'Gagal dikirim';
     };
 
     scrollToLatest();
@@ -107,16 +130,29 @@ function initializeChatRealtime() {
 
     // Handle form kirim pesan saja
     if (messageForm && submit) {
-        console.log('[Chat] Attaching click listener to submit button');
+        console.log('[Chat] Attaching submit listener');
+        let isSending = false;
         
         const sendMessage = async () => {
             console.log('[Chat] Send message triggered');
             const message = input.value.trim();
-            if (!message) return;
+            if (!message || isSending) return;
+
+            isSending = true;
             submit.disabled = true;
             
             const errorEl = chatRoot.querySelector('[data-chat-error]');
             if (errorEl) errorEl.textContent = '';
+
+            const optimisticMessage = {
+                id: `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+                sender_id: currentUserId,
+                sender_name: 'Kamu',
+                message,
+                created_at: 'Mengirim...',
+            };
+            const optimisticArticle = append(optimisticMessage, { pending: true });
+            input.value = '';
             
             try {
                 const socketId = (window.Echo && typeof window.Echo.socketId === 'function') 
@@ -141,19 +177,27 @@ function initializeChatRealtime() {
                 
                 const payload = await response.json();
                 console.log('[Chat] Server response:', payload);
-                append(payload.message);
-                input.value = '';
+                confirmOptimisticMessage(optimisticArticle, payload.message);
                 input.focus();
                 console.log('[Chat] Message sent successfully');
             } catch (error) {
                 console.error('[Chat] Error:', error);
+                failOptimisticMessage(optimisticArticle);
+                if (!input.value.trim()) {
+                    input.value = message;
+                    input.focus();
+                }
                 if (errorEl) errorEl.textContent = error.message || 'Pesan tidak dapat dikirim.';
             } finally {
+                isSending = false;
                 submit.disabled = false;
             }
         };
         
-        submit.addEventListener('click', sendMessage);
+        messageForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            sendMessage();
+        });
         
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {

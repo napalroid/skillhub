@@ -14,6 +14,8 @@
         .chat-message { max-width: 76%; padding: .8rem 1rem; border: 1px solid var(--adidas-line); }
         .chat-message-own { margin-left: auto; background: #080808; color: #fff; border-color: #080808; }
         .chat-message-other { background: #fff; color: #080808; }
+        .chat-message-pending { opacity: .68; }
+        .chat-message-failed { border-color: #dc2626; color: #dc2626; }
         .chat-message-name, .chat-message time { display: block; font-size: .68rem; font-weight: 700; letter-spacing: .04em; opacity: .6; text-transform: uppercase; }
         .chat-message p { margin: .3rem 0; font-size: .88rem; line-height: 1.5; white-space: pre-wrap; }
         [x-cloak] { display: none !important; }

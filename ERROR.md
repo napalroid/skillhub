@@ -766,3 +766,27 @@ Notifikasi tidak terhubung secara real-time di home; console menampilkan `Reverb
 
 * PHP lint untuk event berhasil.
 * `npm run build` berhasil.
+
+---
+
+## BUG-017 — Pesan Chat Menunggu Respons Server Sebelum Tampil
+
+### Severity
+
+MID
+
+### Status
+
+FIXED
+
+### Root Cause
+
+Pesan hanya ditambahkan setelah respons HTTP diterima. Handler juga dipasang pada `click` tombol, sehingga submit HTML bawaan dapat berjalan paralel.
+
+### Fix Applied
+
+Pesan kini ditampilkan segera sebagai `Mengirim...`, lalu direkonsiliasi dengan respons server atau ditandai gagal sambil mengembalikan teks ke input. Pengiriman dipusatkan pada event `submit` dan mencegah submit ganda.
+
+### Verification
+
+* Build frontend dijalankan setelah perubahan.
