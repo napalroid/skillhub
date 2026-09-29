@@ -30,18 +30,35 @@ if (menuRoot) {
     const menuPromise = import('./components/StaggeredMenu.jsx')
         .then(() => console.log('✅ Staggered menu loaded successfully'));
 
-    const echoPromise = import('./echo');
-    const realtimePromise = echoPromise
-        .then(() => {
-            const modules = [import('./notification-listener')];
+    const realtimePromise = new Promise((resolve, reject) => {
+        const startRealtime = () => {
+            import('./echo')
+                .then(() => {
+                    const modules = [import('./notification-listener')];
 
-            if (document.getElementById('skillhub-chat')) {
-                modules.push(import('./chat-realtime'));
+                    if (document.getElementById('skillhub-chat')) {
+                        modules.push(import('./chat-realtime'));
+                    }
+
+                    return Promise.all(modules);
+                })
+                .then(() => {
+                    console.log('✅ Realtime modules loaded successfully');
+                    resolve();
+                })
+                .catch(reject);
+        };
+
+        // Let the browser render the page and navigation before opening a
+        // WebSocket and downloading realtime dependencies.
+        requestAnimationFrame(() => {
+            if ('requestIdleCallback' in window) {
+                window.requestIdleCallback(startRealtime, { timeout: 1200 });
+            } else {
+                window.setTimeout(startRealtime, 250);
             }
-
-            return Promise.all(modules);
-        })
-        .then(() => console.log('✅ Realtime modules loaded successfully'));
+        });
+    });
 
     Promise.all([menuPromise, realtimePromise])
         .then(() => console.log('✅ Navigation & realtime modules loaded successfully'))

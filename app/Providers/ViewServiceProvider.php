@@ -22,23 +22,30 @@ class ViewServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('*', function ($view) {
-            if (auth()->check()) {
-                $view->with('accountNotifications', UserNotification::query()
-                    ->where('user_id', auth()->id())
-                    ->latest()
-                    ->take(5)
-                    ->get()
-                    ->map(fn ($notification) => [
-                        'id' => $notification->id,
-                        'title' => $notification->title,
-                        'message' => $notification->message,
-                        'is_read' => $notification->is_read,
-                        'date' => $notification->created_at?->format('d M Y'),
-                        'read_url' => route('notifications.read', $notification),
-                    ])->values());
-            } else {
-                $view->with('accountNotifications', collect());
+            $request = request();
+            $cacheKey = 'skillhub.account_notifications';
+
+            if (! $request->attributes->has($cacheKey)) {
+                $notifications = auth()->check()
+                    ? UserNotification::query()
+                        ->where('user_id', auth()->id())
+                        ->latest()
+                        ->take(5)
+                        ->get()
+                        ->map(fn ($notification) => [
+                            'id' => $notification->id,
+                            'title' => $notification->title,
+                            'message' => $notification->message,
+                            'is_read' => $notification->is_read,
+                            'date' => $notification->created_at?->format('d M Y'),
+                            'read_url' => route('notifications.read', $notification),
+                        ])->values()
+                    : collect();
+
+                $request->attributes->set($cacheKey, $notifications);
             }
+
+            $view->with('accountNotifications', $request->attributes->get($cacheKey));
         });
     }
 }
