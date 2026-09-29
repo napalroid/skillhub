@@ -40,7 +40,6 @@
     @endif
     @if($canSellerToggleAvailability)<form method="POST" action="{{ route('services.availability.update', $service) }}">
         @csrf
-        @method('PATCH')
         <button type="submit" class="availability-card__button {{ $service->is_paused ? '' : 'availability-card__button--danger' }}">
             {{ $service->is_paused ? 'Aktifkan kembali jasa' : 'Nonaktifkan sementara' }}
         </button>

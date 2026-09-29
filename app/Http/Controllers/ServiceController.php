@@ -445,13 +445,13 @@ class ServiceController extends Controller
         $service = Service::where('user_id', auth()->id())->findOrFail($id);
 
         if ($service->status !== 'approved') {
-            return back()->with('error', 'Jasa ini tidak dapat diaktifkan atau diubah ketersediaannya karena dinonaktifkan atau belum disetujui oleh admin.');
+            return redirect()->route('services.edit', $service)->with('error', 'Jasa ini tidak dapat diaktifkan atau diubah ketersediaannya karena dinonaktifkan atau belum disetujui oleh admin.');
         }
 
         if ($service->is_paused) {
             $service->update(['is_paused' => false]);
 
-            return back()->with('success', 'Jasa diaktifkan kembali dan tersedia di marketplace.');
+            return redirect()->route('services.edit', $service)->with('success', 'Jasa diaktifkan kembali dan tersedia di marketplace.');
         }
 
         $hasActiveOrders = DB::transaction(function () use ($service) {
@@ -469,10 +469,10 @@ class ServiceController extends Controller
         });
 
         if ($hasActiveOrders) {
-            return back()->with('error', 'Jasa belum dapat dinonaktifkan karena masih memiliki pesanan yang sedang berjalan. Selesaikan atau batalkan pesanan tersebut terlebih dahulu.');
+            return redirect()->route('services.edit', $service)->with('error', 'Jasa belum dapat dinonaktifkan karena masih memiliki pesanan yang sedang berjalan. Selesaikan atau batalkan pesanan tersebut terlebih dahulu.');
         }
 
-        return back()->with('success', 'Jasa dinonaktifkan sementara. Kamu dapat mengaktifkannya kembali kapan saja.');
+        return redirect()->route('services.edit', $service)->with('success', 'Jasa dinonaktifkan sementara. Kamu dapat mengaktifkannya kembali kapan saja.');
     }
 
     public function updateBookingConfig(Request $request, $id)

@@ -76,7 +76,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/jasa/saya', [ServiceController::class, 'myServices'])->name('services.my');
     Route::get('/jasa/{id}/edit', [ServiceController::class, 'edit'])->name('services.edit');
     Route::put('/jasa/{id}', [ServiceController::class, 'update'])->name('services.update');
-    Route::patch('/jasa/{id}/availability', [ServiceController::class, 'updateAvailability'])->name('services.availability.update');
+    Route::match(['post', 'patch'], '/jasa/{id}/availability', [ServiceController::class, 'updateAvailability'])->name('services.availability.update');
     Route::get('/jasa/{service}/layanan-tambahan', [ServiceAddonController::class, 'edit'])->name('services.addons.edit');
     Route::put('/jasa/{service}/layanan-tambahan', [ServiceAddonController::class, 'update'])->name('services.addons.update');
     
