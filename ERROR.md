@@ -793,6 +793,35 @@ Pesan kini ditampilkan segera sebagai `Mengirim...`, lalu direkonsiliasi dengan 
 
 ---
 
+## BUG-019 — Jeda Jasa Seller Tidak Tersimpan
+
+### Severity
+
+HIGH
+
+### Status
+
+FIXED
+
+### Symptom
+
+Menekan tombol nonaktifkan hanya me-reload halaman; status tetap aktif dan jasa masih tampil di marketplace.
+
+### Root Cause
+
+Kolom `services.is_paused` telah ada dan controller memanggil `update()`, tetapi atribut tersebut tidak masuk `$fillable` pada model `Service`. Laravel mengabaikan mass assignment atribut tersebut tanpa mengubah database.
+
+### Fix Applied
+
+`is_paused` ditambahkan ke `$fillable`. Scope marketplace sudah mengecualikan jasa yang dijeda sehingga perubahan kini langsung menghilangkan jasa dari listing.
+
+### Verification
+
+* PHP lint model berhasil.
+* Cache Blade dan route endpoint ketersediaan berhasil dibuat.
+
+---
+
 ## BUG-018 — Navigasi Staggered Menunggu Modul Realtime
 
 ### Severity

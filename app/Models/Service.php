@@ -16,6 +16,7 @@ class Service extends Model
         'description',
         'price',
         'status',
+        'is_paused',
         'image',
         'portfolio_images',
         'booking_config',
